@@ -14,4 +14,4 @@ Mouse right - Zoom out
 -/+ - Decrease/Increase iterations     
 
 # File Index    
-src/Win.cpp - Window and menu creation and definition
+src/Win.cpp - Window and menu creation and definition [Contains entry point "Main"]
