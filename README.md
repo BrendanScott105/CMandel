@@ -4,6 +4,7 @@ Reworked Mandelbrot explorer
 - Realtime rendering*
 - Updated filters and expanded fractal types
 - Color schemes
+- Lightweight
 
 [Only if system is fast enough to allow it*]
 
