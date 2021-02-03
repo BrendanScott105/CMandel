@@ -46,7 +46,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		case 3:
 			break;
 		case 4: // Help box
-			MessageBox(hWnd, "© 2021 Brendan Scott\n\nWASD : Location\nMouse : Zoom\n+/- : iterations", "CMandel 0.1", MB_OK);
+			MessageBox(hWnd, "Â© 2021 Brendan Scott\n\nWASD : Location\nMouse : Zoom\n+/- : iterations", "CMandel 0.1", MB_OK);
 			break;
 		}
 		break;
