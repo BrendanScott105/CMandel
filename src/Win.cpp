@@ -53,9 +53,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			LocationMenu(hWnd); // Call location menu
 			break;
 		case 4: // Help box
-			CreateWindowW(L"static", L" About CMandel...   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n\n Info bar :\n i - Iters | X - Real | Y - Imaginary | Z - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 95, 300, 310, hWnd, NULL, NULL, NULL);
-			CreateWindowW(L"static", L" ╳", WS_VISIBLE | WS_BORDER | WS_CHILD, 379, 95, 21, 20, hWnd, NULL, NULL, NULL);
-			CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 114, 300, 1, hWnd, NULL, NULL, NULL);
+			CreateWindowW(L"static", L" About CMandel...   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n\n Info bar :\n i - Iters | X - Real | Y - Imaginary | Z - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 85, 300, 330, hWnd, NULL, NULL, NULL);
+			CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 104, 300, 1, hWnd, NULL, NULL, NULL);
 			break;
 		case 5: // exit button
 			exit(0); // exit with code 0
@@ -115,15 +114,21 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void FormulaMenu(HWND hWnd) // Create formula menu
 {
-	HWND Formula = CreateWindowW(L"static", L" Select Formula...", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+	HWND Formula1 = CreateWindowW(L"static", L" Select Formula...\n\n\n\n\n             Mirror screen space\n\n             Julia set variant\n             [Position modifies C]", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+	HWND Formula2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
 }
 
 void ColorMenu(HWND hWnd) // Create color menu
 {
-	HWND Color = CreateWindowW(L"static", L" Choose color preset...", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+	HWND Color1 = CreateWindowW(L"static", L" Choose color preset...\n\n\n\n\n             Smooth coloring\n\n             Color Preview", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+	HWND Color2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
 }
 
 void LocationMenu(HWND hWnd) // Create location menu
 {
-	HWND Location = CreateWindowW(L"static", L" Set location and zoom...", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 175, 200, 150, hWnd, NULL, NULL, NULL);
+	HWND Location1 = CreateWindowW(L"static", L" Set location and zoom...", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 175, 200, 150, hWnd, NULL, NULL, NULL);
+	HWND Location2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 195, 200, 1, hWnd, NULL, NULL, NULL);
+	HWND Location3 = CreateWindowW(L"edit", L"Real position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 205, 180, 20, hWnd, NULL, NULL, NULL);
+	HWND Location4 = CreateWindowW(L"edit", L"Imaginary position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 235, 180, 20, hWnd, NULL, NULL, NULL);
+	HWND Location5 = CreateWindowW(L"edit", L"Zoom level", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 265, 180, 20, hWnd, NULL, NULL, NULL);
 }
