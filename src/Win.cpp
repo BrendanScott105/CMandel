@@ -1,8 +1,9 @@
 #include <windows.h> // Include
+#include <string>
 
-LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM); // Define window procedure function
-
-void WinMenus(HWND); // Define function to add menus
+LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM); // Declare existence
+void WinMenus(HWND); // Declare existence
+void InfoBar(HWND); // Declare existence
 
 HMENU hMenu; // define header menu
 
@@ -19,7 +20,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	if (!RegisterClassW(&win)) // Register win class
 		return -1;
 
-	CreateWindowW(L"MainWin", L"CMandel", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 500, 200, 500, 500, NULL, NULL, NULL, NULL); // Create window with basic params
+	CreateWindowW(L"MainWin", L"CMandel", WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME | WS_VISIBLE, 500, 200, 500+16, 500+76, NULL, NULL, NULL, NULL); // Create window with basic params
 	
 	// TEMPORARY, CALL AND INTERFACE WITH OTHER CPP FILES AND FUNCTIONS HERE
 	MSG defmsg = { 0 }; // define empty message
@@ -55,6 +56,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		break;
 	case WM_CREATE: // when window is created
 		WinMenus(hWnd); // call menu function
+		InfoBar(hWnd); // call info bar function
 		break;
 	case WM_DESTROY: // when close is hit
 		PostQuitMessage(0); // close and send exit code 0
@@ -82,7 +84,6 @@ void WinMenus(HWND hWnd) // window menu code
 	AppendMenu(ConfigMenu, MF_POPUP, 1, "Formula");
 	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Colors");
 	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Location");
-	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Window size");
 	AppendMenu(ConfigMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(ConfigMenu, MF_STRING, 5, "Exit");
 
@@ -94,4 +95,11 @@ void WinMenus(HWND hWnd) // window menu code
 	AppendMenu(FilterMenu, MF_STRING, NULL, "Inverse Grayscale");
 
 	SetMenu(hWnd, hMenu); // Sets hMenu to be added to hWnd
+}
+
+void InfoBar(HWND hWnd) // add current view information bar
+{
+	CreateWindowW(L"static", L"Iterations :", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 500, 150, 19, hWnd, NULL, NULL, NULL);
+	CreateWindowW(L"static", L"Real :", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 500, 175, 19, hWnd, NULL, NULL, NULL);
+	CreateWindowW(L"static", L"Imag :", WS_VISIBLE | WS_BORDER | WS_CHILD, 325, 500, 175, 19, hWnd, NULL, NULL, NULL);
 }
