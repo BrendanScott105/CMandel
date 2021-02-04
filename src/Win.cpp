@@ -4,6 +4,9 @@
 LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM); // Declare existence
 void WinMenus(HWND); // Declare existence
 void InfoBar(HWND); // Declare existence
+void FormulaMenu(HWND); //Declare existence
+void ColorMenu(HWND); //Declare existence
+void LocationMenu(HWND); //Declare existence
 
 HMENU hMenu; // define header menu
 
@@ -41,13 +44,16 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		switch (wp) // chooses code based on which menu is clicked
 		{
 		case 1:
+			FormulaMenu(hWnd); // Call formula menu
 			break;
 		case 2:
+			ColorMenu(hWnd); // Call color menu
 			break;
 		case 3:
+			LocationMenu(hWnd); // Call location menu
 			break;
 		case 4: // Help box
-			MessageBox(hWnd, "© 2021 Brendan Scott\n\nWASD : Location\nMouse 1/2 : Zoom\n+/- : iterations", "CMandel 0.1", MB_OK);
+			CreateWindowW(L"static", L" About CMandel...\n\n © 2021, Brendan Scott\n\n This is an open source program :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 150, 300, 200, hWnd, NULL, NULL, NULL);
 			break;
 		case 5: // exit button
 			exit(0); // exit with code 0
@@ -82,8 +88,8 @@ void WinMenus(HWND hWnd) // window menu code
 
 	// Appends items to Configure menu
 	AppendMenu(ConfigMenu, MF_POPUP, 1, "Formula");
-	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Colors");
-	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Location");
+	AppendMenu(ConfigMenu, MF_POPUP, 2, "Colors");
+	AppendMenu(ConfigMenu, MF_POPUP, 3, "Location");
 	AppendMenu(ConfigMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(ConfigMenu, MF_STRING, 5, "Exit");
 
@@ -102,4 +108,19 @@ void InfoBar(HWND hWnd) // add current view information bar
 	CreateWindowW(L"static", L"Iterations :", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 500, 150, 19, hWnd, NULL, NULL, NULL);
 	CreateWindowW(L"static", L"Real :", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 500, 175, 19, hWnd, NULL, NULL, NULL);
 	CreateWindowW(L"static", L"Imag :", WS_VISIBLE | WS_BORDER | WS_CHILD, 325, 500, 175, 19, hWnd, NULL, NULL, NULL);
+}
+
+void FormulaMenu(HWND hWnd) // Create formula menu
+{
+	CreateWindowW(L"static", L" Select Formula...", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+}
+
+void ColorMenu(HWND hWnd) // Create color menu
+{
+	CreateWindowW(L"static", L" Choose color preset...", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+}
+
+void LocationMenu(HWND hWnd) // Create location menu
+{
+	CreateWindowW(L"static", L" Set location and zoom...", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 175, 200, 150, hWnd, NULL, NULL, NULL);
 }
