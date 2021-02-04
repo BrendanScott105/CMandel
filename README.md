@@ -1,18 +1,10 @@
 # CMandel
 Reworked Mandelbrot explorer
 - Minimalist GUI
-- Realtime rendering*
+- Realtime exploring
 - Updated filters and expanded fractal types
 - Color schemes
-- Lightweight
-
-[Only if system is fast enough to allow it*]
-
-# Controls
-W/A/S/D - Up/Left/Down/Right     
-Mouse left - Zoom in     
-Mouse right - Zoom out     
--/+ - Decrease/Increase iterations     
+- Lightweight  
 
 # File Index    
 src/Win.cpp - Window and menu creation and definition [Contains WINAPI entry point]
