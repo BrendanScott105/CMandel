@@ -46,7 +46,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		case 3:
 			break;
 		case 4: // Help box
-			MessageBox(hWnd, "© 2021 Brendan Scott\n\nWASD : Location\nMouse : Zoom\n+/- : iterations", "CMandel 0.1", MB_OK);
+			MessageBox(hWnd, "© 2021 Brendan Scott\n\nWASD : Location\nMouse 1/2 : Zoom\n+/- : iterations", "CMandel 0.1", MB_OK);
 			break;
 		}
 		break;
@@ -72,50 +72,23 @@ void WinMenus(HWND hWnd) // window menu code
 
 	// Appends items to top level menu
 	AppendMenu(hMenu, MF_POPUP, (UINT_PTR)ConfigMenu, "Configure");
+	AppendMenu(hMenu, MF_POPUP, (UINT_PTR)FilterMenu, "Filters");
 	AppendMenu(hMenu, MF_RIGHTJUSTIFY | MF_STRING, 4, "?");
 
 	// Appends items to Configure menu
-	AppendMenu(ConfigMenu, MF_POPUP, (UINT_PTR)FractMenu, "Fractal type");
-	AppendMenu(ConfigMenu, MF_POPUP, (UINT_PTR)FilterMenu, "Filters");
-	AppendMenu(ConfigMenu, MF_POPUP, (UINT_PTR)RenderMenu, "Render options");
-	AppendMenu(ConfigMenu, MF_POPUP, (UINT_PTR)ColorMenu, "Color presets");
+	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Formula");
+	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Colors");
+	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Location");
+	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Window size");
 	AppendMenu(ConfigMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(ConfigMenu, MF_STRING, NULL, "Exit");
 
-	// Creates FractMenu submenu
-	AppendMenu(FractMenu, MF_STRING, NULL, "Mandelbrot");
-	AppendMenu(FractMenu, MF_STRING, NULL, "Burning Ship");
-	AppendMenu(FractMenu, MF_STRING, NULL, "Tricorn");
-	AppendMenu(FractMenu, MF_STRING, NULL, "Lambda");
-	AppendMenu(FractMenu, MF_STRING, NULL, "Perpendicular Mandelbrot");
-	AppendMenu(FractMenu, MF_STRING, NULL, "Newtonian apple");
-	AppendMenu(FractMenu, MF_SEPARATOR, NULL, NULL);
-	AppendMenu(FractMenu, MF_STRING, NULL, "Toggle julia set");
-
 	//Creates FilterMenu submenu
 	AppendMenu(FilterMenu, MF_STRING, NULL, "Decolorize");
-	AppendMenu(FilterMenu, MF_STRING, NULL, "Horizontal Edge detect");
+	AppendMenu(FilterMenu, MF_STRING, NULL, "Edge detect");
 	AppendMenu(FilterMenu, MF_STRING, NULL, "Inverse edge");
 	AppendMenu(FilterMenu, MF_STRING, NULL, "Grayscale");
 	AppendMenu(FilterMenu, MF_STRING, NULL, "Inverse Grayscale");
-
-	//Creates RenderMenu submenu
-	AppendMenu(RenderMenu, MF_STRING, NULL, "Location");
-	AppendMenu(RenderMenu, MF_STRING, NULL, "Zoom level");
-	AppendMenu(RenderMenu, MF_SEPARATOR, NULL, NULL);
-	AppendMenu(RenderMenu, MF_STRING, NULL, "X Axis mirror");
-	AppendMenu(RenderMenu, MF_SEPARATOR, NULL, NULL);
-	AppendMenu(RenderMenu, MF_STRING, NULL, "Set dimensions");
-	AppendMenu(RenderMenu, MF_STRING, NULL, "Save to .png");
-
-	//Creates ColorMenu submenu
-	AppendMenu(ColorMenu, MF_STRING, NULL, "Default");
-	AppendMenu(ColorMenu, MF_SEPARATOR, NULL, NULL);
-	AppendMenu(ColorMenu, MF_STRING, NULL, "Preset 1");
-	AppendMenu(ColorMenu, MF_STRING, NULL, "Preset 2");
-	AppendMenu(ColorMenu, MF_STRING, NULL, "Preset 3");
-	AppendMenu(ColorMenu, MF_STRING, NULL, "Preset 4");
-	AppendMenu(ColorMenu, MF_STRING, NULL, "Preset 5");
 
 	SetMenu(hWnd, hMenu); // Sets hMenu to be added to hWnd
 }
