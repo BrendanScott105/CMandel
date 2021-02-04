@@ -48,6 +48,9 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		case 4: // Help box
 			MessageBox(hWnd, "© 2021 Brendan Scott\n\nWASD : Location\nMouse 1/2 : Zoom\n+/- : iterations", "CMandel 0.1", MB_OK);
 			break;
+		case 5: // exit button
+			exit(0); // exit with code 0
+			break;
 		}
 		break;
 	case WM_CREATE: // when window is created
@@ -76,14 +79,14 @@ void WinMenus(HWND hWnd) // window menu code
 	AppendMenu(hMenu, MF_RIGHTJUSTIFY | MF_STRING, 4, "?");
 
 	// Appends items to Configure menu
-	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Formula");
+	AppendMenu(ConfigMenu, MF_POPUP, 1, "Formula");
 	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Colors");
 	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Location");
 	AppendMenu(ConfigMenu, MF_POPUP, NULL, "Window size");
 	AppendMenu(ConfigMenu, MF_SEPARATOR, NULL, NULL);
-	AppendMenu(ConfigMenu, MF_STRING, NULL, "Exit");
+	AppendMenu(ConfigMenu, MF_STRING, 5, "Exit");
 
-	//Creates FilterMenu submenu
+	// Appends items to Filter menu
 	AppendMenu(FilterMenu, MF_STRING, NULL, "Decolorize");
 	AppendMenu(FilterMenu, MF_STRING, NULL, "Edge detect");
 	AppendMenu(FilterMenu, MF_STRING, NULL, "Inverse edge");
