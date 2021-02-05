@@ -1,14 +1,29 @@
 #include <windows.h> // Include
 #include <string>
 
+/*Window variables start*/
 LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM); // Declare existence
+std::wstring s2ws(const std::string& s);
 void WinMenus(HWND); // Declare existence
 void InfoBar(HWND); // Declare existence
 void FormulaMenu(HWND); //Declare existence
 void ColorMenu(HWND); //Declare existence
 void LocationMenu(HWND); //Declare existence
+void HelpMenu(HWND); //Decleare existence
 
 HMENU hMenu; // define header menu
+HWND Location3;
+HWND Location4;
+HWND Location5;
+
+HWND Info1;
+/*Window variables end*/
+
+int Iters = 200; // define iterations
+
+/*######################################################
+THIS IS WHERE THE WINDOW CREATION AND INTERFACING STARTS
+######################################################*/
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) // Enter
 {
@@ -53,8 +68,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			LocationMenu(hWnd); // Call location menu
 			break;
 		case 4: // Help box
-			CreateWindowW(L"static", L" About CMandel...   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n\n Info bar :\n i - Iters | X - Real | Y - Imaginary | Z - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 85, 300, 330, hWnd, NULL, NULL, NULL);
-			CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 104, 300, 1, hWnd, NULL, NULL, NULL);
+			HelpMenu(hWnd); // Call help menu
 			break;
 		case 5: // exit button
 			exit(0); // exit with code 0
@@ -68,6 +82,43 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 	case WM_DESTROY: // when close is hit
 		PostQuitMessage(0); // close and send exit code 0
 		break;
+	case WM_KEYDOWN:
+		if (wp == VK_OEM_PLUS and Iters < 999999) // when "+" is hit
+		{
+			if (GetAsyncKeyState(VK_TAB) and wp == VK_OEM_PLUS) {
+				Iters = Iters + 10; // increment by 10
+			}
+			else if (GetAsyncKeyState(VK_SHIFT) and wp == VK_OEM_PLUS) {
+				Iters = Iters + 100; // by 100
+			}
+			else if (GetAsyncKeyState(VK_CONTROL) and wp == VK_OEM_PLUS) {
+				Iters = Iters + 1000; // by 1000
+			}
+			else {
+				Iters++; // by 1
+			}
+			if (Iters > 999999) { Iters = 999999; }
+			std::wstring stemp = s2ws(std::to_string(Iters)); // to LPCWSTR
+			HWND Info1 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 500, 59, 19, hWnd, NULL, NULL, NULL); // Change displayed value
+		}
+		if (wp == VK_OEM_MINUS and Iters > 0) // when "-" is hit
+		{
+			if (GetAsyncKeyState(VK_TAB) and wp == VK_OEM_MINUS) {
+				Iters = Iters - 10; // decrement by 10
+			}
+			else if (GetAsyncKeyState(VK_SHIFT) and wp == VK_OEM_MINUS) {
+				Iters = Iters - 100; // by 100
+			}
+			else if (GetAsyncKeyState(VK_CONTROL) and wp == VK_OEM_MINUS) {
+				Iters = Iters - 1000; // by 1000
+			}
+			else {
+				Iters--; // by 1
+			}
+			if (Iters < 0) { Iters = 0; }
+			std::wstring stemp = s2ws(std::to_string(Iters)); // to LPCWSTR
+			HWND Info1 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 500, 59, 19, hWnd, NULL, NULL, NULL); // Change displayed value
+		}
 	default: // default case for all others
 		return DefWindowProcW(hWnd, defmsg, wp, lp); // return
 	}
@@ -106,10 +157,10 @@ void WinMenus(HWND hWnd) // window menu code
 
 void InfoBar(HWND hWnd) // add current view information bar
 {
-	CreateWindowW(L"static", L"i:200", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 500, 59, 19, hWnd, NULL, NULL, NULL);
-	CreateWindowW(L"static", L"X:0.0000000000000", WS_VISIBLE | WS_BORDER | WS_CHILD, 57, 500, 132, 19, hWnd, NULL, NULL, NULL);
-	CreateWindowW(L"static", L"Y:0.0000000000000", WS_VISIBLE | WS_BORDER | WS_CHILD, 188, 500, 133, 19, hWnd, NULL, NULL, NULL);
-	CreateWindowW(L"static", L"Z:4", WS_VISIBLE | WS_BORDER | WS_CHILD, 320, 500, 181, 19, hWnd, NULL, NULL, NULL);
+	HWND Info1 = CreateWindowW(L"static", L"200", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 500, 59, 19, hWnd, NULL, NULL, NULL); // Display initially
+	HWND Info2 = CreateWindowW(L"static", L"0.00000000000000", WS_VISIBLE | WS_BORDER | WS_CHILD, 57, 500, 132, 19, hWnd, NULL, NULL, NULL);
+	HWND Info3 = CreateWindowW(L"static", L"0.00000000000000", WS_VISIBLE | WS_BORDER | WS_CHILD, 188, 500, 133, 19, hWnd, NULL, NULL, NULL);
+	HWND Info4 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_BORDER | WS_CHILD, 320, 500, 181, 19, hWnd, NULL, NULL, NULL);
 }
 
 void FormulaMenu(HWND hWnd) // Create formula menu
@@ -124,11 +175,33 @@ void ColorMenu(HWND hWnd) // Create color menu
 	HWND Color2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
 }
 
-void LocationMenu(HWND hWnd) // Create location menu
+void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 {
 	HWND Location1 = CreateWindowW(L"static", L" Set location and zoom...", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 175, 200, 150, hWnd, NULL, NULL, NULL);
 	HWND Location2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 195, 200, 1, hWnd, NULL, NULL, NULL);
-	HWND Location3 = CreateWindowW(L"edit", L"Real position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 205, 180, 20, hWnd, NULL, NULL, NULL);
-	HWND Location4 = CreateWindowW(L"edit", L"Imaginary position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 235, 180, 20, hWnd, NULL, NULL, NULL);
-	HWND Location5 = CreateWindowW(L"edit", L"Zoom level", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 265, 180, 20, hWnd, NULL, NULL, NULL);
+	Location3 = CreateWindowW(L"edit", L"Real position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 205, 180, 20, hWnd, NULL, NULL, NULL);
+	Location4 = CreateWindowW(L"edit", L"Imaginary position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 235, 180, 20, hWnd, NULL, NULL, NULL);
+	Location5 = CreateWindowW(L"edit", L"Zoom level", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 265, 180, 20, hWnd, NULL, NULL, NULL);
+}
+
+void HelpMenu(HWND hWnd)
+{
+	HWND HelpMenu1 = CreateWindowW(L"static", L" About CMandel...   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n\n Info bar :\n 1 - Iters | 2 - Real | 3 - Imaginary | 4 - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 80, 300, 340, hWnd, NULL, NULL, NULL);
+	HWND HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 99, 300, 1, hWnd, NULL, NULL, NULL);
+}
+
+/*####################################################
+THIS IS WHERE THE WINDOW CREATION AND INTERFACING ENDS
+####################################################*/
+
+std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+	std::wstring r(buf);
+	delete[] buf;
+	return r;
 }
