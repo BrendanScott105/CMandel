@@ -40,7 +40,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
 	CreateWindowW(L"MainWin", L"CMandel", WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME | WS_VISIBLE, 500, 200, 500+16, 500+76, NULL, NULL, NULL, NULL); // Create window with basic params
 	
-	// TEMPORARY, CALL AND INTERFACE WITH OTHER CPP FILES AND FUNCTIONS HERE
 	MSG defmsg = { 0 }; // define empty message
 	while (GetMessage(&defmsg, NULL, NULL, NULL)) // keep window open
 	{
@@ -158,8 +157,8 @@ void WinMenus(HWND hWnd) // window menu code
 void InfoBar(HWND hWnd) // add current view information bar
 {
 	HWND Info1 = CreateWindowW(L"static", L"200", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 500, 59, 19, hWnd, NULL, NULL, NULL); // Display initially
-	HWND Info2 = CreateWindowW(L"static", L"0.00000000000000", WS_VISIBLE | WS_BORDER | WS_CHILD, 57, 500, 132, 19, hWnd, NULL, NULL, NULL);
-	HWND Info3 = CreateWindowW(L"static", L"0.00000000000000", WS_VISIBLE | WS_BORDER | WS_CHILD, 188, 500, 133, 19, hWnd, NULL, NULL, NULL);
+	HWND Info2 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_BORDER | WS_CHILD, 57, 500, 132, 19, hWnd, NULL, NULL, NULL);
+	HWND Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_BORDER | WS_CHILD, 188, 500, 133, 19, hWnd, NULL, NULL, NULL);
 	HWND Info4 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_BORDER | WS_CHILD, 320, 500, 181, 19, hWnd, NULL, NULL, NULL);
 }
 
@@ -167,12 +166,26 @@ void FormulaMenu(HWND hWnd) // Create formula menu
 {
 	HWND Formula1 = CreateWindowW(L"static", L" Select Formula...\n\n\n\n\n             Mirror screen space\n\n             Julia set variant\n             [Position modifies C]", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
 	HWND Formula2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
+	HWND Formula3 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 190, 140, 20, hWnd, NULL, NULL, NULL);
+	HWND Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 190, 20, 20, hWnd, NULL, NULL, NULL);
+	HWND Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 234, 10, 10, hWnd, NULL, NULL, NULL);
+	HWND Formula6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 266, 10, 10, hWnd, NULL, NULL, NULL);
+	HWND Formula7 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 320, 80, 20, hWnd, NULL, NULL, NULL);
+	HWND Formula8 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 320, 80, 20, hWnd, NULL, NULL, NULL);
+	HWND Formula9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 152, 17, 17, hWnd, NULL, NULL, NULL);
 }
 
 void ColorMenu(HWND hWnd) // Create color menu
 {
 	HWND Color1 = CreateWindowW(L"static", L" Choose color preset...\n\n\n\n\n             Smooth coloring\n\n             Color Preview", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
 	HWND Color2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
+	HWND Color3 = CreateWindowW(L"static", L"Default colors", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 190, 140, 20, hWnd, NULL, NULL, NULL);
+	HWND Color4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 190, 20, 20, hWnd, NULL, NULL, NULL);
+	HWND Color5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 234, 10, 10, hWnd, NULL, NULL, NULL);
+	HWND Color6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 320, 80, 20, hWnd, NULL, NULL, NULL);
+	HWND Color7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 320, 80, 20, hWnd, NULL, NULL, NULL);
+	HWND Color8 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 285, 180, 20, hWnd, NULL, NULL, NULL);
+	HWND Color9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 152, 17, 17, hWnd, NULL, NULL, NULL);
 }
 
 void LocationMenu(HWND hWnd) // Create location menu and create textboxes
@@ -182,12 +195,17 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 	Location3 = CreateWindowW(L"edit", L"Real position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 205, 180, 20, hWnd, NULL, NULL, NULL);
 	Location4 = CreateWindowW(L"edit", L"Imaginary position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 235, 180, 20, hWnd, NULL, NULL, NULL);
 	Location5 = CreateWindowW(L"edit", L"Zoom level", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 265, 180, 20, hWnd, NULL, NULL, NULL);
+	HWND Location6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 295, 80, 20, hWnd, NULL, NULL, NULL);
+	HWND Location7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 295, 80, 20, hWnd, NULL, NULL, NULL);
+	HWND Location8 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 177, 17, 17, hWnd, NULL, NULL, NULL);
 }
 
-void HelpMenu(HWND hWnd)
+void HelpMenu(HWND hWnd) // Create help menu
 {
-	HWND HelpMenu1 = CreateWindowW(L"static", L" About CMandel...   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n\n Info bar :\n 1 - Iters | 2 - Real | 3 - Imaginary | 4 - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 80, 300, 340, hWnd, NULL, NULL, NULL);
-	HWND HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 99, 300, 1, hWnd, NULL, NULL, NULL);
+	HWND HelpMenu1 = CreateWindowW(L"static", L" About CMandel...    © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n\n Info bar :\n 1 - Iters | 2 - Real | 3 - Imaginary | 4 - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 80, 300, 340, hWnd, NULL, NULL, NULL);
+	HWND HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 1, hWnd, NULL, NULL, NULL);
+	HWND Location8 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 381, 82, 17, 17, hWnd, NULL, NULL, NULL);
+	HWND Location6 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 315, 395, 80, 20, hWnd, NULL, NULL, NULL);
 }
 
 /*####################################################
