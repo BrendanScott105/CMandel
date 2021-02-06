@@ -55,7 +55,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	if (!RegisterClassW(&win)) // Register win class
 		return -1;
 
-	CreateWindowW(L"MainWin", L"CMandel", WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME | WS_VISIBLE, 500, 200, 500+16, 500+76, NULL, NULL, NULL, NULL); // Create window with basic params
+	CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME)&~WS_MAXIMIZEBOX | WS_VISIBLE, 500, 200, 500+16, 500+76, NULL, NULL, NULL, NULL); // Create window with basic params
 	
 	MSG defmsg = { 0 }; // define empty message
 	while (GetMessage(&defmsg, NULL, NULL, NULL)) // keep window open
@@ -74,25 +74,25 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 	case WM_COMMAND: // selected when any menu item is clicked
 		switch (wp) // chooses code based on which menu is clicked
 		{
-		case 1:
+		case 1: // Destroy other menus and create formula menu
 			DestroyHelpMenu();
 			DestroyLocationMenu();
 			DestroyColorMenu();
-			FormulaMenu(hWnd); // Call formula menu
+			FormulaMenu(hWnd);
 			break;
-		case 2:
+		case 2: // Destroy other menus and create color menu
 			DestroyHelpMenu();
 			DestroyLocationMenu();
 			DestroyFormulaMenu();
 			ColorMenu(hWnd); // Call color menu
 			break;
-		case 3:
+		case 3: // Destroy other menus and create location menu
 			DestroyHelpMenu();
 			DestroyColorMenu();
 			DestroyFormulaMenu();
 			LocationMenu(hWnd); // Call location menu
 			break;
-		case 4: // Help box
+		case 4: // Destroy other menus and create help menu
 			DestroyLocationMenu();
 			DestroyColorMenu();
 			DestroyFormulaMenu();
