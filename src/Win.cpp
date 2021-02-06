@@ -10,6 +10,7 @@ void FormulaMenu(HWND); //Declare existence
 void ColorMenu(HWND); //Declare existence
 void LocationMenu(HWND); //Declare existence
 void HelpMenu(HWND); //Decleare existence
+void MouseLoc(HWND); //Decleare existence
 
 HMENU hMenu; // define header menu
 HWND Location3;
@@ -118,6 +119,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			std::wstring stemp = s2ws(std::to_string(Iters)); // to LPCWSTR
 			HWND Info1 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 500, 59, 19, hWnd, NULL, NULL, NULL); // Change displayed value
 		}
+	case WM_MOUSEHOVER:
 	default: // default case for all others
 		return DefWindowProcW(hWnd, defmsg, wp, lp); // return
 	}
@@ -208,10 +210,6 @@ void HelpMenu(HWND hWnd) // Create help menu
 	HWND Location6 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 315, 395, 80, 20, hWnd, NULL, NULL, NULL);
 }
 
-/*####################################################
-THIS IS WHERE THE WINDOW CREATION AND INTERFACING ENDS
-####################################################*/
-
 std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
 {
 	int len;
@@ -222,4 +220,14 @@ std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
 	std::wstring r(buf);
 	delete[] buf;
 	return r;
+}
+
+void MouseLoc(HWND hwnd) // Track mouse cursor
+{
+	TRACKMOUSEEVENT tme;
+	tme.cbSize = sizeof(TRACKMOUSEEVENT);
+	tme.dwFlags = TME_HOVER | TME_LEAVE; // Sets to track entering and leaving elements
+	tme.dwHoverTime = 1; // Immediate detect when enter
+	tme.hwndTrack = hwnd; // HWND identifier
+	TrackMouseEvent(&tme);
 }
