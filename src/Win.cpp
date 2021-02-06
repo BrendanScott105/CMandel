@@ -11,11 +11,27 @@ void ColorMenu(HWND); //Declare existence
 void LocationMenu(HWND); //Declare existence
 void HelpMenu(HWND); //Decleare existence
 void MouseLoc(HWND); //Decleare existence
+void DestroyFormulaMenu(); //Decleare existence
+void DestroyColorMenu(); //Decleare existence
+void DestroyLocationMenu(); //Decleare existence
+void DestroyHelpMenu(); //Decleare existence
 
 HMENU hMenu; // define header menu
-HWND Location3;
-HWND Location4;
-HWND Location5;
+
+HWND Formula1, Formula2, Formula3, Formula4, Formula5, Formula6, Formula7, Formula8, Formula9; // Declare formula menu elements globally
+
+HWND Location1, Location2, Location3, Location4, Location5, Location6, Location7, Location8; // Declare Location menu elements globally
+
+HWND Color1, Color2, Color3, Color4, Color5, Color6, Color7, Color8, Color9; // Declare color menu elements globally
+
+HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4; // Declare help menu elements globally
+
+BOOL FormulaOpen;
+BOOL ColorOpen;
+BOOL LocationOpen;
+BOOL HelpOpen;
+
+POINT Cursor;
 
 HWND Info1;
 /*Window variables end*/
@@ -59,15 +75,27 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		switch (wp) // chooses code based on which menu is clicked
 		{
 		case 1:
+			DestroyHelpMenu();
+			DestroyLocationMenu();
+			DestroyColorMenu();
 			FormulaMenu(hWnd); // Call formula menu
 			break;
 		case 2:
+			DestroyHelpMenu();
+			DestroyLocationMenu();
+			DestroyFormulaMenu();
 			ColorMenu(hWnd); // Call color menu
 			break;
 		case 3:
+			DestroyHelpMenu();
+			DestroyColorMenu();
+			DestroyFormulaMenu();
 			LocationMenu(hWnd); // Call location menu
 			break;
 		case 4: // Help box
+			DestroyLocationMenu();
+			DestroyColorMenu();
+			DestroyFormulaMenu();
 			HelpMenu(hWnd); // Call help menu
 			break;
 		case 5: // exit button
@@ -119,7 +147,18 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			std::wstring stemp = s2ws(std::to_string(Iters)); // to LPCWSTR
 			HWND Info1 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 500, 59, 19, hWnd, NULL, NULL, NULL); // Change displayed value
 		}
-	case WM_MOUSEHOVER:
+	case WM_LBUTTONDOWN: // Left mouse button is clicked
+	{
+		RECT WinRect = { NULL };
+		GetWindowRect(hWnd, &WinRect); // Get window position
+		GetCursorPos(&Cursor); // Get cursor position
+		int XWindowPosition = Cursor.x - WinRect.left - 7; // Calculate X position of cursor in the window
+		int YWindowPosition = Cursor.y - WinRect.top - 50; // Calculate Y position of cursor in the window
+		if (FormulaOpen == true) {  }
+		if (ColorOpen == true) {  }
+		if (LocationOpen == true) {  }
+		if (HelpOpen == true) {  }
+	}
 	default: // default case for all others
 		return DefWindowProcW(hWnd, defmsg, wp, lp); // return
 	}
@@ -166,48 +205,52 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void FormulaMenu(HWND hWnd) // Create formula menu
 {
-	HWND Formula1 = CreateWindowW(L"static", L" Select Formula...\n\n\n\n\n             Mirror screen space\n\n             Julia set variant\n             [Position modifies C]", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
-	HWND Formula2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
-	HWND Formula3 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 190, 140, 20, hWnd, NULL, NULL, NULL);
-	HWND Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 190, 20, 20, hWnd, NULL, NULL, NULL);
-	HWND Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 234, 10, 10, hWnd, NULL, NULL, NULL);
-	HWND Formula6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 266, 10, 10, hWnd, NULL, NULL, NULL);
-	HWND Formula7 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 320, 80, 20, hWnd, NULL, NULL, NULL);
-	HWND Formula8 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 320, 80, 20, hWnd, NULL, NULL, NULL);
-	HWND Formula9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 152, 17, 17, hWnd, NULL, NULL, NULL);
+	Formula1 = CreateWindowW(L"static", L" Select Formula...\n\n\n\n\n             Mirror screen space\n\n             Julia set variant\n             [Position modifies C]", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+	Formula2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
+	Formula3 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 190, 140, 20, hWnd, NULL, NULL, NULL);
+	Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 190, 20, 20, hWnd, NULL, NULL, NULL);
+	Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 234, 10, 10, hWnd, NULL, NULL, NULL);
+	Formula6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 266, 10, 10, hWnd, NULL, NULL, NULL);
+	Formula7 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 320, 80, 20, hWnd, NULL, NULL, NULL);
+	Formula8 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 320, 80, 20, hWnd, NULL, NULL, NULL);
+	Formula9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 152, 17, 17, hWnd, NULL, NULL, NULL);
+	FormulaOpen = true;
 }
 
 void ColorMenu(HWND hWnd) // Create color menu
 {
-	HWND Color1 = CreateWindowW(L"static", L" Choose color preset...\n\n\n\n\n             Smooth coloring\n\n             Color Preview", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
-	HWND Color2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
-	HWND Color3 = CreateWindowW(L"static", L"Default colors", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 190, 140, 20, hWnd, NULL, NULL, NULL);
-	HWND Color4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 190, 20, 20, hWnd, NULL, NULL, NULL);
-	HWND Color5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 234, 10, 10, hWnd, NULL, NULL, NULL);
-	HWND Color6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 320, 80, 20, hWnd, NULL, NULL, NULL);
-	HWND Color7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 320, 80, 20, hWnd, NULL, NULL, NULL);
-	HWND Color8 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 285, 180, 20, hWnd, NULL, NULL, NULL);
-	HWND Color9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 152, 17, 17, hWnd, NULL, NULL, NULL);
+	Color1 = CreateWindowW(L"static", L" Choose color preset...\n\n\n\n\n             Smooth coloring\n\n             Color Preview", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+	Color2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 1, hWnd, NULL, NULL, NULL);
+	Color3 = CreateWindowW(L"static", L"Default colors", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 190, 140, 20, hWnd, NULL, NULL, NULL);
+	Color4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 190, 20, 20, hWnd, NULL, NULL, NULL);
+	Color5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 234, 10, 10, hWnd, NULL, NULL, NULL);
+	Color6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 320, 80, 20, hWnd, NULL, NULL, NULL);
+	Color7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 320, 80, 20, hWnd, NULL, NULL, NULL);
+	Color8 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 285, 180, 20, hWnd, NULL, NULL, NULL);
+	Color9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 152, 17, 17, hWnd, NULL, NULL, NULL);
+	ColorOpen = true;
 }
 
 void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 {
-	HWND Location1 = CreateWindowW(L"static", L" Set location and zoom...", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 175, 200, 150, hWnd, NULL, NULL, NULL);
-	HWND Location2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 195, 200, 1, hWnd, NULL, NULL, NULL);
+	Location1 = CreateWindowW(L"static", L" Set location and zoom...", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 175, 200, 150, hWnd, NULL, NULL, NULL);
+	Location2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 195, 200, 1, hWnd, NULL, NULL, NULL);
 	Location3 = CreateWindowW(L"edit", L"Real position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 205, 180, 20, hWnd, NULL, NULL, NULL);
 	Location4 = CreateWindowW(L"edit", L"Imaginary position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 235, 180, 20, hWnd, NULL, NULL, NULL);
 	Location5 = CreateWindowW(L"edit", L"Zoom level", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 265, 180, 20, hWnd, NULL, NULL, NULL);
-	HWND Location6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 295, 80, 20, hWnd, NULL, NULL, NULL);
-	HWND Location7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 295, 80, 20, hWnd, NULL, NULL, NULL);
-	HWND Location8 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 177, 17, 17, hWnd, NULL, NULL, NULL);
+	Location6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 295, 80, 20, hWnd, NULL, NULL, NULL);
+	Location7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 295, 80, 20, hWnd, NULL, NULL, NULL);
+	Location8 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 177, 17, 17, hWnd, NULL, NULL, NULL);
+	LocationOpen = true;
 }
 
 void HelpMenu(HWND hWnd) // Create help menu
 {
-	HWND HelpMenu1 = CreateWindowW(L"static", L" About CMandel...    © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n\n Info bar :\n 1 - Iters | 2 - Real | 3 - Imaginary | 4 - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 80, 300, 340, hWnd, NULL, NULL, NULL);
-	HWND HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 1, hWnd, NULL, NULL, NULL);
-	HWND Location8 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 381, 82, 17, 17, hWnd, NULL, NULL, NULL);
-	HWND Location6 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 315, 395, 80, 20, hWnd, NULL, NULL, NULL);
+	HelpMenu1 = CreateWindowW(L"static", L" About CMandel...    © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n\n Info bar :\n 1 - Iters | 2 - Real | 3 - Imaginary | 4 - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 80, 300, 340, hWnd, NULL, NULL, NULL);
+	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 1, hWnd, NULL, NULL, NULL);
+	HelpMenu3 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 381, 82, 17, 17, hWnd, NULL, NULL, NULL);
+	HelpMenu4 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 315, 395, 80, 20, hWnd, NULL, NULL, NULL);
+	HelpOpen = true;
 }
 
 std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
@@ -222,12 +265,52 @@ std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
 	return r;
 }
 
-void MouseLoc(HWND hwnd) // Track mouse cursor
+void DestroyFormulaMenu()
 {
-	TRACKMOUSEEVENT tme;
-	tme.cbSize = sizeof(TRACKMOUSEEVENT);
-	tme.dwFlags = TME_HOVER | TME_LEAVE; // Sets to track entering and leaving elements
-	tme.dwHoverTime = 1; // Immediate detect when enter
-	tme.hwndTrack = hwnd; // HWND identifier
-	TrackMouseEvent(&tme);
+	DestroyWindow(Formula1);
+	DestroyWindow(Formula2);
+	DestroyWindow(Formula3);
+	DestroyWindow(Formula4);
+	DestroyWindow(Formula5);
+	DestroyWindow(Formula6);
+	DestroyWindow(Formula7);
+	DestroyWindow(Formula8);
+	DestroyWindow(Formula9);
+	FormulaOpen = false;
+}
+
+void DestroyColorMenu()
+{
+	DestroyWindow(Color1);
+	DestroyWindow(Color2);
+	DestroyWindow(Color3);
+	DestroyWindow(Color4);
+	DestroyWindow(Color5);
+	DestroyWindow(Color6);
+	DestroyWindow(Color7);
+	DestroyWindow(Color8);
+	DestroyWindow(Color9);
+	ColorOpen = false;
+}
+
+void DestroyLocationMenu()
+{
+	DestroyWindow(Location1);
+	DestroyWindow(Location2);
+	DestroyWindow(Location3);
+	DestroyWindow(Location4);
+	DestroyWindow(Location5);
+	DestroyWindow(Location6);
+	DestroyWindow(Location7);
+	DestroyWindow(Location8);
+	LocationOpen = false;
+}
+
+void DestroyHelpMenu()
+{
+	DestroyWindow(HelpMenu1);
+	DestroyWindow(HelpMenu2);
+	DestroyWindow(HelpMenu3);
+	DestroyWindow(HelpMenu4);
+	HelpOpen = false;
 }
