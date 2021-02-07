@@ -1,9 +1,10 @@
 # CMandel
 Reworked Mandelbrot explorer
-- Minimalist GUI
+- Full custom GUI 
 - Realtime exploring
+- View Rotation
 - Updated filters and expanded fractal types
-- Color schemes
+- Color schemes and smooth coloring [hopefully]
 - Lightweight  
 
 # File Index    
