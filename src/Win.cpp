@@ -147,44 +147,46 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		std::wstring stemp2 = s2ws(std::to_string(YWindowPosition)); // to LPCWSTR
 		HWND Info2 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, 57, 520, 132, 19, hWnd, NULL, NULL, NULL);
 		HWND Info3 = CreateWindowW(L"static", stemp2.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, 188, 520, 133, 19, hWnd, NULL, NULL, NULL);
-		if (((XWindowPosition > 155) and (XWindowPosition < 447)) and ((YWindowPosition > -19) and (YWindowPosition < -2))) // Enable window dragging
+		if (((XWindowPosition > 155) and (XWindowPosition < 448)) and ((YWindowPosition > -19) and (YWindowPosition < -3))) // Enable window dragging
 		{
 			while (DragDetect(hWnd, Cursor)) {
 				GetCursorPos(&Cursor); // Get cursor position
 				MoveWindow(hWnd, Cursor.x - XWindowPosition, Cursor.y - YWindowPosition - 20, 502, 540, TRUE);
 			}
 		}
-		if (FiltersDrop == TRUE) {
-			if (((XWindowPosition > 138) and (XWindowPosition < 152)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyFiltersDrop(hWnd); break; } // Destroy filters dropdown
+		if (FiltersDrop == TRUE) { // When filters menu is open
+			if (((XWindowPosition > 139) and (XWindowPosition < 153)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); break; } // Destroy filters dropdown
 		}
 		if (FiltersDrop == FALSE) {
-			if (((XWindowPosition > 138) and (XWindowPosition < 152)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyConfigDrop(hWnd); FilterDrop(hWnd); break; } // Trigger open filter dropdown
+			if (((XWindowPosition > 139) and (XWindowPosition < 153)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyConfigDrop(hWnd); FilterDrop(hWnd); break; } // Trigger open filter dropdown
 		}
-		if (ConfigureDrop == TRUE) {
-			if (((XWindowPosition > 72) and (XWindowPosition < 85)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyConfigDrop(hWnd); break; } // Destroy configure dropdown menu
+		if (ConfigureDrop == TRUE) { // When configure menu is open
+			if (((XWindowPosition > 73) and (XWindowPosition < 86)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyConfigDrop(hWnd); break; } // Destroy configure dropdown menu
+			if (((XWindowPosition > 0) and (XWindowPosition < 89)) and ((YWindowPosition > -1) and (YWindowPosition < 19))) { DestroyAll(hWnd); FormulaMenu(hWnd); } // Destroy other menus and open formula menu
+			if (((XWindowPosition > 0) and (XWindowPosition < 89)) and ((YWindowPosition > 19) and (YWindowPosition < 38))) { DestroyAll(hWnd); ColorMenu(hWnd); } // Destroy other menus and open color menu
+			if (((XWindowPosition > 0) and (XWindowPosition < 89)) and ((YWindowPosition > 38) and (YWindowPosition < 55))) { DestroyAll(hWnd); LocationMenu(hWnd); } // Destroy other menus and open location menu
+			if (((XWindowPosition > 0) and (XWindowPosition < 89)) and ((YWindowPosition > 57) and (YWindowPosition < 75))) { DestroyAll(hWnd); exit(0); } // Destroy other menus and exit
 		}
 		if (ConfigureDrop == FALSE) {
-			if (((XWindowPosition > 72) and (XWindowPosition < 85)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyFiltersDrop(hWnd); ConfigDrop(hWnd); break; } // Trigger open configure dropdown
+			if (((XWindowPosition > 71) and (XWindowPosition < 86)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); ConfigDrop(hWnd); break; } // Trigger open configure dropdown
 		}
 		if (FormulaOpen == TRUE) {  }
 		if (ColorOpen == TRUE) {  }
 		if (LocationOpen == TRUE) {  }
 		if (HelpOpen == TRUE) {
-			if (((XWindowPosition > 358) and (XWindowPosition < 375) and ((YWindowPosition > 130) and (YWindowPosition < 145)))) { ShellExecute(NULL, NULL, "https://github.com/BrendanScott105/CMandel", NULL, NULL, SW_SHOWNORMAL); LinkBox(hWnd); } // Open URL in browser
-			if (((XWindowPosition > 318) and (XWindowPosition < 396) and ((YWindowPosition > 397) and (YWindowPosition < 415)))) { DestroyAll(hWnd); } // Destroy help menu from OK
-			if (((XWindowPosition > 383) and (XWindowPosition < 398) and ((YWindowPosition > 83) and (YWindowPosition < 98)))) { DestroyAll(hWnd); } // Destroy help menu from X
-			break;
+			if (((XWindowPosition > 357) and (XWindowPosition < 376) and ((YWindowPosition > 129) and (YWindowPosition < 146)))) { ShellExecute(NULL, NULL, "https://github.com/BrendanScott105/CMandel", NULL, NULL, SW_SHOWNORMAL); LinkBox(hWnd); } // Open URL in browser
+			if (((XWindowPosition > 317) and (XWindowPosition < 397) and ((YWindowPosition > 396) and (YWindowPosition < 416)))) { DestroyAll(hWnd); } // Destroy help menu from OK
+			if (((XWindowPosition > 382) and (XWindowPosition < 399) and ((YWindowPosition > 82) and (YWindowPosition < 99)))) { DestroyAll(hWnd); } // Destroy help menu from X
 		}
 		if (LinkNotif == TRUE) {
-			if (((XWindowPosition > 152) and (XWindowPosition < 166) and ((YWindowPosition > 453) and (YWindowPosition < 467)))) { DestroyLinkNotif(); break; }
+			if (((XWindowPosition > 152) and (XWindowPosition < 166) and ((YWindowPosition > 453) and (YWindowPosition < 467)))) { DestroyLinkNotif(); }
 		}
-		if (((XWindowPosition > 484) and (XWindowPosition < 499)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { exit(0); break; } // Close application button
-		if (((XWindowPosition > 467) and (XWindowPosition < 482)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { ShowWindow(hWnd, SW_MINIMIZE); break; } // Minimize window button
-		if (((XWindowPosition > 450) and (XWindowPosition < 466)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) // Help button
+		if (((XWindowPosition > 483) and (XWindowPosition < 500)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { exit(0); } // Close application button
+		if (((XWindowPosition > 466) and (XWindowPosition < 483)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { ShowWindow(hWnd, SW_MINIMIZE); } // Minimize window button
+		if (((XWindowPosition > 449) and (XWindowPosition < 467)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) // Help button
 		{
 			DestroyAll(hWnd);
 			HelpMenu(hWnd); // Call help menu
-			break;
 		}
 	}
 	default: // default case for all others
@@ -201,7 +203,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.22", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.24", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
@@ -215,21 +217,21 @@ void TitleBar(HWND hWnd) // Create title bar
 
 void FormulaMenu(HWND hWnd) // Create formula menu
 {
-	Formula1 = CreateWindowW(L"static", L" Select Formula...\n\n\n\n\n             Mirror screen space\n\n             Julia set variant\n             [Position modifies C]", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
-	Formula2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 190, 200, 1, Formula1, NULL, NULL, NULL);
-	Formula3 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 140, 20, Formula1, NULL, NULL, NULL);
-	Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, Formula1, NULL, NULL, NULL);
-	Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 254, 10, 10, Formula1, NULL, NULL, NULL);
-	Formula6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 286, 10, 10, Formula1, NULL, NULL, NULL);
-	Formula7 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 340, 80, 20, Formula1, NULL, NULL, NULL);
-	Formula8 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 340, 80, 20, Formula1, NULL, NULL, NULL);
-	Formula9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 172, 17, 17, Formula1, NULL, NULL, NULL);
+	Formula1 = CreateWindowW(L"static", L" Select Formula...\n\n\n\n\n             Mirror screen space\n\n             Julia set variant\n             [Position modifies C]", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 170, 200, 200, hWnd, NULL, NULL, NULL);
+	Formula2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 190, 200, 1, hWnd, NULL, NULL, NULL);
+	Formula3 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 140, 20, hWnd, NULL, NULL, NULL);
+	Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
+	Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 254, 10, 10, hWnd, NULL, NULL, NULL);
+	Formula6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 286, 10, 10, hWnd, NULL, NULL, NULL);
+	Formula7 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 340, 80, 20, hWnd, NULL, NULL, NULL);
+	Formula8 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 340, 80, 20, hWnd, NULL, NULL, NULL);
+	Formula9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 172, 17, 17, hWnd, NULL, NULL, NULL);
 	FormulaOpen = TRUE;
 }
 
 void ColorMenu(HWND hWnd) // Create color menu
 {
-	Color1 = CreateWindowW(L"static", L" Choose color preset...\n\n\n\n\n             Smooth coloring\n\n             Color Preview", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 150, 200, 200, hWnd, NULL, NULL, NULL);
+	Color1 = CreateWindowW(L"static", L" Choose color preset...\n\n\n\n\n             Smooth coloring\n\n             Color Preview", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 170, 200, 200, hWnd, NULL, NULL, NULL);
 	Color2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 190, 200, 1, hWnd, NULL, NULL, NULL);
 	Color3 = CreateWindowW(L"static", L"Default colors", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 140, 20, hWnd, NULL, NULL, NULL);
 	Color4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
@@ -425,4 +427,5 @@ void DestroyAll(HWND hWnd) // Destroy all menus
 	DestroyHelpMenu();
 	DestroyLinkNotif();
 	DestroyConfigDrop(hWnd);
+	DestroyFiltersDrop(hWnd);
 }
