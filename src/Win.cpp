@@ -50,6 +50,8 @@ BOOL LinkNotif;
 BOOL ConfigureDrop;
 BOOL FiltersDrop;
 
+BOOL Filters [5] = {FALSE,FALSE,FALSE,FALSE,FALSE}; // Decolorize, Edge detect, Inverse edge, Grayscale, Inverse Grayscale
+
 POINT Cursor;
 
 /*Window variables end*/
@@ -156,6 +158,51 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		}
 		if (FiltersDrop == TRUE) { // When filters menu is open
 			if (((XWindowPosition > 139) and (XWindowPosition < 153)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); break; } // Destroy filters dropdown
+			if (((XWindowPosition > 5) and (XWindowPosition < 16)) and ((YWindowPosition > 3) and (YWindowPosition < 14))) { // If decolorize option is selected
+				if (Filters[0] == FALSE) { // if decolorize is false
+					Filters[0] = TRUE; // make true
+					Filters[1] = FALSE; Filters[2] = FALSE; Filters[3] = FALSE; Filters[4] = FALSE; // make others false
+					DestroyFiltersDrop(hWnd);
+					FilterDrop(hWnd); // rerender
+				}
+				else { Filters[0] = FALSE; DestroyFiltersDrop(hWnd); FilterDrop(hWnd); } // if true, make false, and rerender
+			}
+			if (((XWindowPosition > 5) and (XWindowPosition < 16)) and ((YWindowPosition > 22) and (YWindowPosition < 33))) { // If edge detect option is selected
+				if (Filters[1] == FALSE) { // if edge detection is false
+					Filters[1] = TRUE; // make true
+					Filters[0] = FALSE; Filters[2] = FALSE; Filters[3] = FALSE; Filters[4] = FALSE; // make others false
+					DestroyFiltersDrop(hWnd);
+					FilterDrop(hWnd); // rerender
+				}
+				else{ Filters[1] = FALSE; DestroyFiltersDrop(hWnd); FilterDrop(hWnd); } // if true, make false, and rerender
+			}
+			if (((XWindowPosition > 5) and (XWindowPosition < 16)) and ((YWindowPosition > 41) and (YWindowPosition < 52))) { // If inverse edge detect option is selected
+				if (Filters[2] == FALSE) { // if inverse edge detection is false
+					Filters[2] = TRUE; // make true
+					Filters[0] = FALSE; Filters[1] = FALSE; Filters[3] = FALSE; Filters[4] = FALSE; // make others false
+					DestroyFiltersDrop(hWnd);
+					FilterDrop(hWnd); // rerender
+				}
+				else { Filters[2] = FALSE; DestroyFiltersDrop(hWnd); FilterDrop(hWnd); } // if true, make false, and rerender
+			}
+			if (((XWindowPosition > 5) and (XWindowPosition < 16)) and ((YWindowPosition > 60) and (YWindowPosition < 71))) { // If grayscale option is selected
+				if (Filters[3] == FALSE) { // if grayscale is false
+					Filters[3] = TRUE; // make true
+					Filters[0] = FALSE; Filters[1] = FALSE; Filters[2] = FALSE; Filters[4] = FALSE; // make others false
+					DestroyFiltersDrop(hWnd);
+					FilterDrop(hWnd); // rerender
+				}
+				else { Filters[3] = FALSE; DestroyFiltersDrop(hWnd); FilterDrop(hWnd); } // if true, make false, and rerender
+			}
+			if (((XWindowPosition > 5) and (XWindowPosition < 16)) and ((YWindowPosition > 79) and (YWindowPosition < 90))) { // If inverse grayscale option is selected
+				if (Filters[4] == FALSE) { // if inverse grayscale is false
+					Filters[4] = TRUE; // make true
+					Filters[0] = FALSE; Filters[1] = FALSE; Filters[2] = FALSE; Filters[3] = FALSE; // make others false
+					DestroyFiltersDrop(hWnd);
+					FilterDrop(hWnd); // rerender
+				}
+				else { Filters[4] = FALSE; DestroyFiltersDrop(hWnd); FilterDrop(hWnd); } // if true, make false, and rerender
+			}
 		}
 		if (FiltersDrop == FALSE) {
 			if (((XWindowPosition > 139) and (XWindowPosition < 153)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyConfigDrop(hWnd); FilterDrop(hWnd); break; } // Trigger open filter dropdown
@@ -203,7 +250,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.24", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.25", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
@@ -290,8 +337,9 @@ void ConfigDrop(HWND hWnd) // Create configure dropdown
 	ConfigureDrop = TRUE;
 }
 
-void FilterDrop(HWND hWnd) // Create filter dropdown
+void FilterDrop(HWND hWnd) // Create filter dropdown and handle element filling
 {
+	long L01, L02, L03, L04, L05;
 	DestroyWindow(Top5);
 	Top1b = CreateWindowW(L"static", L"▲", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 136, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top2b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 18, 174, 96, hWnd, NULL, NULL, NULL);
@@ -300,11 +348,16 @@ void FilterDrop(HWND hWnd) // Create filter dropdown
 	Top5b = CreateWindowW(L"static", L"     Inverse edge detection", WS_VISIBLE | WS_CHILD, 0, 58, 172, 20, hWnd, NULL, NULL, NULL);
 	Top6b = CreateWindowW(L"static", L"     Grayscale", WS_VISIBLE | WS_CHILD, 0, 77, 172, 20, hWnd, NULL, NULL, NULL);
 	Top7b = CreateWindowW(L"static", L"     Inverse Grayscale", WS_VISIBLE | WS_CHILD, 0, 96, 172, 17, hWnd, NULL, NULL, NULL);
-	Top8b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 98, 12, 12, hWnd, NULL, NULL, NULL);
-	Top9b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 79, 12, 12, hWnd, NULL, NULL, NULL);
-	Top0b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 60, 12, 12, hWnd, NULL, NULL, NULL);
-	TopAb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 41, 12, 12, hWnd, NULL, NULL, NULL);
-	TopBb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 22, 12, 12, hWnd, NULL, NULL, NULL);
+	if (Filters[4] == TRUE) { L05 = SS_BLACKRECT; } else { L05 = SS_LEFT; }
+	Top8b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | L05, 4, 98, 12, 12, hWnd, NULL, NULL, NULL);
+	if (Filters[3] == TRUE) { L04 = SS_BLACKRECT; } else { L04 = SS_LEFT; }
+	Top9b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | L04, 4, 79, 12, 12, hWnd, NULL, NULL, NULL);
+	if (Filters[2] == TRUE) { L03 = SS_BLACKRECT; } else { L03 = SS_LEFT; }
+	Top0b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | L03, 4, 60, 12, 12, hWnd, NULL, NULL, NULL);
+	if (Filters[1] == TRUE) { L02 = SS_BLACKRECT; } else { L02 = SS_LEFT; }
+	TopAb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | L02, 4, 41, 12, 12, hWnd, NULL, NULL, NULL);
+	if (Filters[0] == TRUE) { L01 = SS_BLACKRECT; } else { L01 = SS_LEFT; }
+	TopBb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | L01, 4, 22, 12, 12, hWnd, NULL, NULL, NULL);
 	TopCb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 37, 164, 1, hWnd, NULL, NULL, NULL);
 	TopDb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 56, 164, 1, hWnd, NULL, NULL, NULL);
 	TopEb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 75, 164, 1, hWnd, NULL, NULL, NULL);
