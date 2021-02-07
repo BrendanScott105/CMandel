@@ -13,6 +13,7 @@ void LocationMenu(HWND); //Declare existence
 void HelpMenu(HWND); //Decleare existence
 void MouseLoc(HWND); //Decleare existence
 void LinkBox(HWND); // Declare existence
+void FilterDrop(HWND); //Declare existence
 void ConfigDrop(HWND); // Declare existence
 void DestroyFormulaMenu(); //Decleare existence
 void DestroyColorMenu(); //Decleare existence
@@ -20,6 +21,7 @@ void DestroyLocationMenu(); //Decleare existence
 void DestroyHelpMenu(); //Decleare existence
 void DestroyLinkNotif(); //Declare existence
 void DestroyConfigDrop(HWND); //Declare existence
+void DestroyFiltersDrop(HWND); //Declare existence
 void DestroyAll(HWND); //Declare existence
 
 //HMENU hMenu; // define header menu
@@ -34,6 +36,7 @@ HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4, HelpMenu5, HelpMenu6; // Declar
 
 HWND Top1, Top2, Top3, Top4, Top5, Top6, Top7, Top8, Top9, Top0; // Declare top level menu elements globally
 HWND Top1a, Top2a, Top3a, Top4a, Top5a, Top6a, Top7a, Top8a, Top9a;
+HWND Top1b, Top2b, Top3b, Top4b, Top5b, Top6b, Top7b, Top8b, Top9b, Top0b, TopAb, TopBb, TopCb, TopDb, TopEb, TopFb;
 
 HWND Info1, Info2, Info3, Info4; // Declare info elements globally
 
@@ -45,6 +48,7 @@ BOOL LocationOpen;
 BOOL HelpOpen;
 BOOL LinkNotif;
 BOOL ConfigureDrop;
+BOOL FiltersDrop;
 
 POINT Cursor;
 
@@ -150,11 +154,17 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				MoveWindow(hWnd, Cursor.x - XWindowPosition, Cursor.y - YWindowPosition - 20, 502, 540, TRUE);
 			}
 		}
+		if (FiltersDrop == TRUE) {
+			if (((XWindowPosition > 138) and (XWindowPosition < 152)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyFiltersDrop(hWnd); break; } // Destroy filters dropdown
+		}
+		if (FiltersDrop == FALSE) {
+			if (((XWindowPosition > 138) and (XWindowPosition < 152)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyConfigDrop(hWnd); FilterDrop(hWnd); break; } // Trigger open filter dropdown
+		}
 		if (ConfigureDrop == TRUE) {
 			if (((XWindowPosition > 72) and (XWindowPosition < 85)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyConfigDrop(hWnd); break; } // Destroy configure dropdown menu
 		}
 		if (ConfigureDrop == FALSE) {
-			if (((XWindowPosition > 72) and (XWindowPosition < 85)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { ConfigDrop(hWnd); break; } // Trigger open configure dropdown
+			if (((XWindowPosition > 72) and (XWindowPosition < 85)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyFiltersDrop(hWnd); ConfigDrop(hWnd); break; } // Trigger open configure dropdown
 		}
 		if (FormulaOpen == TRUE) {  }
 		if (ColorOpen == TRUE) {  }
@@ -272,10 +282,32 @@ void ConfigDrop(HWND hWnd) // Create configure dropdown
 	Top4a = CreateWindowW(L"static", L" Colors", WS_VISIBLE | WS_CHILD, -1, 38, 88, 20, hWnd, NULL, NULL, NULL);
 	Top5a = CreateWindowW(L"static", L" Location", WS_VISIBLE | WS_CHILD, -1, 57, 88, 20, hWnd, NULL, NULL, NULL);
 	Top6a = CreateWindowW(L"static", L" Exit", WS_VISIBLE | WS_CHILD, -1, 77, 88, 17, hWnd, NULL, NULL, NULL);
-	Top7a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 1, 38, 84, 1, hWnd, NULL, NULL, NULL);
-	Top8a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 1, 57, 84, 1, hWnd, NULL, NULL, NULL);
+	Top7a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 3, 38, 81, 1, hWnd, NULL, NULL, NULL);
+	Top8a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 3, 57, 81, 1, hWnd, NULL, NULL, NULL);
 	Top9a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, -1, 74, 88, 3, hWnd, NULL, NULL, NULL);
 	ConfigureDrop = TRUE;
+}
+
+void FilterDrop(HWND hWnd) // Create filter dropdown
+{
+	DestroyWindow(Top5);
+	Top1b = CreateWindowW(L"static", L"▲", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 136, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top2b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 18, 174, 96, hWnd, NULL, NULL, NULL);
+	Top3b = CreateWindowW(L"static", L"     Decolorize", WS_VISIBLE | WS_CHILD , 0, 20, 172, 20, hWnd, NULL, NULL, NULL);
+	Top4b = CreateWindowW(L"static", L"     Edge detection", WS_VISIBLE | WS_CHILD, 0, 39, 172, 20, hWnd, NULL, NULL, NULL);
+	Top5b = CreateWindowW(L"static", L"     Inverse edge detection", WS_VISIBLE | WS_CHILD, 0, 58, 172, 20, hWnd, NULL, NULL, NULL);
+	Top6b = CreateWindowW(L"static", L"     Grayscale", WS_VISIBLE | WS_CHILD, 0, 77, 172, 20, hWnd, NULL, NULL, NULL);
+	Top7b = CreateWindowW(L"static", L"     Inverse Grayscale", WS_VISIBLE | WS_CHILD, 0, 96, 172, 17, hWnd, NULL, NULL, NULL);
+	Top8b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 98, 12, 12, hWnd, NULL, NULL, NULL);
+	Top9b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 79, 12, 12, hWnd, NULL, NULL, NULL);
+	Top0b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 60, 12, 12, hWnd, NULL, NULL, NULL);
+	TopAb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 41, 12, 12, hWnd, NULL, NULL, NULL);
+	TopBb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 22, 12, 12, hWnd, NULL, NULL, NULL);
+	TopCb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 37, 164, 1, hWnd, NULL, NULL, NULL);
+	TopDb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 56, 164, 1, hWnd, NULL, NULL, NULL);
+	TopEb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 75, 164, 1, hWnd, NULL, NULL, NULL);
+	TopFb = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 4, 94, 164, 1, hWnd, NULL, NULL, NULL);
+	FiltersDrop = TRUE;
 }
 
 std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
@@ -361,6 +393,28 @@ void DestroyConfigDrop(HWND hWnd) // Destroy configuration dropdown menu
 	DestroyWindow(Top9a);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	ConfigureDrop = FALSE;
+}
+
+void DestroyFiltersDrop(HWND hWnd) // Destroy filters dropdown menu
+{
+	DestroyWindow(Top1b);
+	DestroyWindow(Top2b);
+	DestroyWindow(Top3b);
+	DestroyWindow(Top4b);
+	DestroyWindow(Top5b);
+	DestroyWindow(Top6b);
+	DestroyWindow(Top7b);
+	DestroyWindow(Top8b);
+	DestroyWindow(Top9b);
+	DestroyWindow(Top0b);
+	DestroyWindow(TopAb);
+	DestroyWindow(TopBb);
+	DestroyWindow(TopCb);
+	DestroyWindow(TopDb);
+	DestroyWindow(TopEb);
+	DestroyWindow(TopFb);
+	Top5 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 136, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	FiltersDrop = FALSE;
 }
 
 void DestroyAll(HWND hWnd) // Destroy all menus
