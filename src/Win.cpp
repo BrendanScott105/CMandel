@@ -12,10 +12,15 @@ void ColorMenu(HWND); //Declare existence
 void LocationMenu(HWND); //Declare existence
 void HelpMenu(HWND); //Decleare existence
 void MouseLoc(HWND); //Decleare existence
+void LinkBox(HWND); // Declare existence
+void ConfigDrop(HWND); // Declare existence
 void DestroyFormulaMenu(); //Decleare existence
 void DestroyColorMenu(); //Decleare existence
 void DestroyLocationMenu(); //Decleare existence
 void DestroyHelpMenu(); //Decleare existence
+void DestroyLinkNotif(); //Declare existence
+void DestroyConfigDrop(HWND); //Declare existence
+void DestroyAll(HWND); //Declare existence
 
 //HMENU hMenu; // define header menu
 
@@ -28,13 +33,18 @@ HWND Color1, Color2, Color3, Color4, Color5, Color6, Color7, Color8, Color9; // 
 HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4, HelpMenu5, HelpMenu6; // Declare help menu elements globally
 
 HWND Top1, Top2, Top3, Top4, Top5, Top6, Top7, Top8, Top9, Top0; // Declare top level menu elements globally
+HWND Top1a, Top2a, Top3a, Top4a, Top5a, Top6a, Top7a, Top8a, Top9a;
 
 HWND Info1, Info2, Info3, Info4; // Declare info elements globally
+
+HWND Link1, Link2, Link3; // Declare link notif elements globally
 
 BOOL FormulaOpen;
 BOOL ColorOpen;
 BOOL LocationOpen;
 BOOL HelpOpen;
+BOOL LinkNotif;
+BOOL ConfigureDrop;
 
 POINT Cursor;
 
@@ -75,38 +85,6 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 {
 	switch (defmsg)
 	{
-	case WM_COMMAND: // selected when any menu item is clicked
-		switch (wp) // chooses code based on which menu is clicked
-		{
-		case 1: // Destroy other menus and create formula menu
-			DestroyHelpMenu();
-			DestroyLocationMenu();
-			DestroyColorMenu();
-			FormulaMenu(hWnd);
-			break;
-		case 2: // Destroy other menus and create color menu
-			DestroyHelpMenu();
-			DestroyLocationMenu();
-			DestroyFormulaMenu();
-			ColorMenu(hWnd); // Call color menu
-			break;
-		case 3: // Destroy other menus and create location menu
-			DestroyHelpMenu();
-			DestroyColorMenu();
-			DestroyFormulaMenu();
-			LocationMenu(hWnd); // Call location menu
-			break;
-		case 4: // Destroy other menus and create help menu
-			DestroyLocationMenu();
-			DestroyColorMenu();
-			DestroyFormulaMenu();
-			HelpMenu(hWnd); // Call help menu
-			break;
-		case 5: // exit button
-			exit(0); // exit with code 0
-			break;
-		}
-		break;
 	case WM_CREATE: // when window is created
 		//WinMenus(hWnd); // call menu function
 		InfoBar(hWnd); // call info bar function
@@ -172,23 +150,31 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				MoveWindow(hWnd, Cursor.x - XWindowPosition, Cursor.y - YWindowPosition - 20, 502, 540, TRUE);
 			}
 		}
-		if (FormulaOpen == true) {  }
-		if (ColorOpen == true) {  }
-		if (LocationOpen == true) {  }
-		if (HelpOpen == true) {
-			if (((XWindowPosition > 358) and (XWindowPosition < 375) and ((YWindowPosition > 130) and (YWindowPosition < 145)))) { ShellExecute(NULL, NULL, "https://github.com/BrendanScott105/CMandel", NULL, NULL, SW_SHOWNORMAL); } // Open URL in browser
-			if (((XWindowPosition > 318) and (XWindowPosition < 396) and ((YWindowPosition > 397) and (YWindowPosition < 415)))) { DestroyHelpMenu(); } // Destroy help menu from OK
-			if (((XWindowPosition > 383) and (XWindowPosition < 398) and ((YWindowPosition > 83) and (YWindowPosition < 98)))) { DestroyHelpMenu(); } // Destroy help menu from X
+		if (ConfigureDrop == TRUE) {
+			if (((XWindowPosition > 72) and (XWindowPosition < 85)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { DestroyConfigDrop(hWnd); break; } // Destroy configure dropdown menu
 		}
-		if (((XWindowPosition > 484) and (XWindowPosition < 499)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) {exit(0);} // Close application button
-		if (((XWindowPosition > 467) and (XWindowPosition < 482)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { ShowWindow(hWnd, SW_MINIMIZE); } // Minimize window button
+		if (ConfigureDrop == FALSE) {
+			if (((XWindowPosition > 72) and (XWindowPosition < 85)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { ConfigDrop(hWnd); break; } // Trigger open configure dropdown
+		}
+		if (FormulaOpen == TRUE) {  }
+		if (ColorOpen == TRUE) {  }
+		if (LocationOpen == TRUE) {  }
+		if (HelpOpen == TRUE) {
+			if (((XWindowPosition > 358) and (XWindowPosition < 375) and ((YWindowPosition > 130) and (YWindowPosition < 145)))) { ShellExecute(NULL, NULL, "https://github.com/BrendanScott105/CMandel", NULL, NULL, SW_SHOWNORMAL); LinkBox(hWnd); } // Open URL in browser
+			if (((XWindowPosition > 318) and (XWindowPosition < 396) and ((YWindowPosition > 397) and (YWindowPosition < 415)))) { DestroyAll(hWnd); } // Destroy help menu from OK
+			if (((XWindowPosition > 383) and (XWindowPosition < 398) and ((YWindowPosition > 83) and (YWindowPosition < 98)))) { DestroyAll(hWnd); } // Destroy help menu from X
+			break;
+		}
+		if (LinkNotif == TRUE) {
+			if (((XWindowPosition > 152) and (XWindowPosition < 166) and ((YWindowPosition > 453) and (YWindowPosition < 467)))) { DestroyLinkNotif(); break; }
+		}
+		if (((XWindowPosition > 484) and (XWindowPosition < 499)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { exit(0); break; } // Close application button
+		if (((XWindowPosition > 467) and (XWindowPosition < 482)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { ShowWindow(hWnd, SW_MINIMIZE); break; } // Minimize window button
 		if (((XWindowPosition > 450) and (XWindowPosition < 466)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) // Help button
 		{
-			DestroyLocationMenu();
-			DestroyColorMenu();
-			DestroyFormulaMenu();
-			DestroyHelpMenu();
+			DestroyAll(hWnd);
 			HelpMenu(hWnd); // Call help menu
+			break;
 		}
 	}
 	default: // default case for all others
@@ -205,7 +191,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.21", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.22", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
@@ -269,6 +255,29 @@ void HelpMenu(HWND hWnd) // Create help menu
 	HelpOpen = TRUE;
 }
 
+void LinkBox(HWND hWnd) // Create link notif box
+{
+	Link1 = CreateWindowW(L"static", L"Link opened in browser tab ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_RIGHT, 148, 470, 204, 20, hWnd, NULL, NULL, NULL);
+	Link2 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 150, 472, 16, 16, hWnd, NULL, NULL, NULL);
+	Link3 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 167, 470, 1, 20, hWnd, NULL, NULL, NULL);
+	LinkNotif = TRUE;
+}
+
+void ConfigDrop(HWND hWnd) // Create configure dropdown
+{
+	DestroyWindow(Top3);
+	Top1a = CreateWindowW(L"static", L"▲", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top2a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 18, 89, 77, hWnd, NULL, NULL, NULL);
+	Top3a = CreateWindowW(L"static", L" Formula", WS_VISIBLE | WS_CHILD, -1, 19, 88, 20, hWnd, NULL, NULL, NULL);
+	Top4a = CreateWindowW(L"static", L" Colors", WS_VISIBLE | WS_CHILD, -1, 38, 88, 20, hWnd, NULL, NULL, NULL);
+	Top5a = CreateWindowW(L"static", L" Location", WS_VISIBLE | WS_CHILD, -1, 57, 88, 20, hWnd, NULL, NULL, NULL);
+	Top6a = CreateWindowW(L"static", L" Exit", WS_VISIBLE | WS_CHILD, -1, 77, 88, 17, hWnd, NULL, NULL, NULL);
+	Top7a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 1, 38, 84, 1, hWnd, NULL, NULL, NULL);
+	Top8a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 1, 57, 84, 1, hWnd, NULL, NULL, NULL);
+	Top9a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, -1, 74, 88, 3, hWnd, NULL, NULL, NULL);
+	ConfigureDrop = TRUE;
+}
+
 std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
 {
 	int len;
@@ -292,7 +301,7 @@ void DestroyFormulaMenu() // Destroy formula menu
 	DestroyWindow(Formula7);
 	DestroyWindow(Formula8);
 	DestroyWindow(Formula9);
-	FormulaOpen = false;
+	FormulaOpen = FALSE;
 }
 
 void DestroyColorMenu() // Destroy color menu
@@ -306,7 +315,7 @@ void DestroyColorMenu() // Destroy color menu
 	DestroyWindow(Color7);
 	DestroyWindow(Color8);
 	DestroyWindow(Color9);
-	ColorOpen = false;
+	ColorOpen = FALSE;
 }
 
 void DestroyLocationMenu() // Destroy location menu
@@ -319,7 +328,7 @@ void DestroyLocationMenu() // Destroy location menu
 	DestroyWindow(Location6);
 	DestroyWindow(Location7);
 	DestroyWindow(Location8);
-	LocationOpen = false;
+	LocationOpen = FALSE;
 }
 
 void DestroyHelpMenu() // Destroy help menu
@@ -328,5 +337,38 @@ void DestroyHelpMenu() // Destroy help menu
 	DestroyWindow(HelpMenu2);
 	DestroyWindow(HelpMenu3);
 	DestroyWindow(HelpMenu4);
-	HelpOpen = false;
+	HelpOpen = FALSE;
+}
+
+void DestroyLinkNotif() // Destroy link notif
+{
+	DestroyWindow(Link1);
+	DestroyWindow(Link2);
+	DestroyWindow(Link3);
+	LinkNotif = FALSE;
+}
+
+void DestroyConfigDrop(HWND hWnd) // Destroy configuration dropdown menu
+{
+	DestroyWindow(Top1a);
+	DestroyWindow(Top2a);
+	DestroyWindow(Top3a);
+	DestroyWindow(Top4a);
+	DestroyWindow(Top5a);
+	DestroyWindow(Top6a);
+	DestroyWindow(Top7a);
+	DestroyWindow(Top8a);
+	DestroyWindow(Top9a);
+	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	ConfigureDrop = FALSE;
+}
+
+void DestroyAll(HWND hWnd) // Destroy all menus
+{
+	DestroyFormulaMenu();
+	DestroyColorMenu();
+	DestroyLocationMenu();
+	DestroyHelpMenu();
+	DestroyLinkNotif();
+	DestroyConfigDrop(hWnd);
 }
