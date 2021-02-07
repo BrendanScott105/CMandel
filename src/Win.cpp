@@ -25,7 +25,11 @@ HWND Location1, Location2, Location3, Location4, Location5, Location6, Location7
 
 HWND Color1, Color2, Color3, Color4, Color5, Color6, Color7, Color8, Color9; // Declare color menu elements globally
 
-HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4; // Declare help menu elements globally
+HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4, HelpMenu5, HelpMenu6; // Declare help menu elements globally
+
+HWND Top1, Top2, Top3, Top4, Top5, Top6, Top7, Top8, Top9, Top0; // Declare top level menu elements globally
+
+HWND Info1, Info2, Info3, Info4; // Declare info elements globally
 
 BOOL FormulaOpen;
 BOOL ColorOpen;
@@ -34,7 +38,6 @@ BOOL HelpOpen;
 
 POINT Cursor;
 
-HWND Info1;
 /*Window variables end*/
 
 int Iters = 200; // define iterations
@@ -129,6 +132,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			}
 			if (Iters > 999999) { Iters = 999999; }
 			std::wstring stemp = s2ws(std::to_string(Iters)); // to LPCWSTR
+			DestroyWindow(Info1);
 			HWND Info1 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 520, 59, 19, hWnd, NULL, NULL, NULL); // Change displayed value
 		}
 		if (wp == VK_OEM_MINUS and Iters > 0) // when "-" is hit
@@ -147,6 +151,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			}
 			if (Iters < 0) { Iters = 0; }
 			std::wstring stemp = s2ws(std::to_string(Iters)); // to LPCWSTR
+			DestroyWindow(Info1);
 			HWND Info1 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 520, 59, 19, hWnd, NULL, NULL, NULL); // Change displayed value
 		}
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
@@ -170,7 +175,11 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		if (FormulaOpen == true) {  }
 		if (ColorOpen == true) {  }
 		if (LocationOpen == true) {  }
-		if (HelpOpen == true) {}
+		if (HelpOpen == true) {
+			if (((XWindowPosition > 358) and (XWindowPosition < 375) and ((YWindowPosition > 130) and (YWindowPosition < 145)))) { ShellExecute(NULL, NULL, "https://github.com/BrendanScott105/CMandel", NULL, NULL, SW_SHOWNORMAL); } // Open URL in browser
+			if (((XWindowPosition > 318) and (XWindowPosition < 396) and ((YWindowPosition > 397) and (YWindowPosition < 415)))) { DestroyHelpMenu(); } // Destroy help menu from OK
+			if (((XWindowPosition > 383) and (XWindowPosition < 398) and ((YWindowPosition > 83) and (YWindowPosition < 98)))) { DestroyHelpMenu(); } // Destroy help menu from X
+		}
 		if (((XWindowPosition > 484) and (XWindowPosition < 499)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) {exit(0);} // Close application button
 		if (((XWindowPosition > 467) and (XWindowPosition < 482)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) { ShowWindow(hWnd, SW_MINIMIZE); } // Minimize window button
 		if (((XWindowPosition > 450) and (XWindowPosition < 466)) and ((YWindowPosition > -18) and (YWindowPosition < -3))) // Help button
@@ -178,6 +187,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			DestroyLocationMenu();
 			DestroyColorMenu();
 			DestroyFormulaMenu();
+			DestroyHelpMenu();
 			HelpMenu(hWnd); // Call help menu
 		}
 	}
@@ -185,58 +195,26 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		return DefWindowProcW(hWnd, defmsg, wp, lp); // return
 	}
 }
-/*
-void WinMenus(HWND hWnd) // window menu code
-{
-	hMenu = CreateMenu(); // creates top menu
-	HMENU ConfigMenu = CreateMenu(); // creates menu identifiers
-	HMENU FractMenu = CreateMenu();
-	HMENU FilterMenu = CreateMenu();
-	HMENU RenderMenu = CreateMenu();
-	HMENU ColorMenu = CreateMenu();
-
-	// Appends items to top level menu
-	AppendMenu(hMenu, MF_POPUP, (UINT_PTR)ConfigMenu, "Configure");
-	AppendMenu(hMenu, MF_POPUP, (UINT_PTR)FilterMenu, "Filters");
-	AppendMenu(hMenu, MF_RIGHTJUSTIFY | MF_STRING, 4, "?");
-
-	// Appends items to Configure menu
-	AppendMenu(ConfigMenu, MF_POPUP, 1, "Formula");
-	AppendMenu(ConfigMenu, MF_POPUP, 2, "Colors");
-	AppendMenu(ConfigMenu, MF_POPUP, 3, "Location");
-	AppendMenu(ConfigMenu, MF_SEPARATOR, NULL, NULL);
-	AppendMenu(ConfigMenu, MF_STRING, 5, "Exit");
-
-	// Appends items to Filter menu
-	AppendMenu(FilterMenu, MF_STRING, NULL, "Decolorize");
-	AppendMenu(FilterMenu, MF_STRING, NULL, "Edge detect");
-	AppendMenu(FilterMenu, MF_STRING, NULL, "Inverse edge");
-	AppendMenu(FilterMenu, MF_STRING, NULL, "Grayscale");
-	AppendMenu(FilterMenu, MF_STRING, NULL, "Inverse Grayscale");
-
-	SetMenu(hWnd, hMenu); // Sets hMenu to be added to hWnd
-}
-*/
 void InfoBar(HWND hWnd) // add current view information bar
 {
-	HWND Info1 = CreateWindowW(L"static", L"200", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 520, 59, 19, hWnd, NULL, NULL, NULL); // Display initially
-	HWND Info2 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_BORDER | WS_CHILD, 57, 520, 132, 19, hWnd, NULL, NULL, NULL);
-	HWND Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_BORDER | WS_CHILD, 188, 520, 133, 19, hWnd, NULL, NULL, NULL);
-	HWND Info4 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_BORDER | WS_CHILD, 320, 520, 181, 19, hWnd, NULL, NULL, NULL);
+	Info1 = CreateWindowW(L"static", L"200", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 520, 59, 19, hWnd, NULL, NULL, NULL); // Display initially
+	Info2 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_BORDER | WS_CHILD, 57, 520, 132, 19, hWnd, NULL, NULL, NULL);
+	Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_BORDER | WS_CHILD, 188, 520, 133, 19, hWnd, NULL, NULL, NULL);
+	Info4 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_BORDER | WS_CHILD, 320, 520, 181, 19, hWnd, NULL, NULL, NULL);
 }
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	HWND Top1 = CreateWindowW(L"static", L" CMandel 0.2", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
-	HWND Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
-	HWND Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
-	HWND Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
-	HWND Top5 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 136, 1, 16, 16, hWnd, NULL, NULL, NULL);
-	HWND Top6 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 483, 1, 16, 16, hWnd, NULL, NULL, NULL);
-	HWND Top7 = CreateWindowW(L"static", L"⎽⎽", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 466, 1, 16, 16, hWnd, NULL, NULL, NULL);
-	HWND Top8 = CreateWindowW(L"static", L"?", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 449, 1, 16, 16, hWnd, NULL, NULL, NULL);
-	HWND Top9 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 470, 12, 8, 2, hWnd, NULL, NULL, NULL);
-	HWND Top0 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 447, -1, 1, 20, hWnd, NULL, NULL, NULL);
+	Top1 = CreateWindowW(L"static", L" CMandel 0.21", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
+	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
+	Top5 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 136, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top6 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 483, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top7 = CreateWindowW(L"static", L"⎽⎽", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 466, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top8 = CreateWindowW(L"static", L"?", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 449, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top9 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 470, 12, 8, 2, hWnd, NULL, NULL, NULL);
+	Top0 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 447, -1, 1, 20, hWnd, NULL, NULL, NULL);
 }
 
 void FormulaMenu(HWND hWnd) // Create formula menu
@@ -284,9 +262,10 @@ void HelpMenu(HWND hWnd) // Create help menu
 {
 	HelpMenu1 = CreateWindowW(L"static", L" About CMandel....   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n\n Info bar :\n 1 - Iters | 2 - Real | 3 - Imaginary | 4 - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 2^64\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
 	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 19, 300, 1, HelpMenu1, NULL, NULL, NULL);
-	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
-	HelpMenu3 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
-	HelpMenu4 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 315, 415, 80, 20, HelpMenu1, NULL, NULL, NULL);
+	HelpMenu3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
+	HelpMenu4 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
+	HelpMenu5 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 215, 315, 80, 20, HelpMenu1, NULL, NULL, NULL);
+	HelpMenu6 = CreateWindowW(L"static", L"🡭", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 256, 48, 17, 17, HelpMenu1, NULL, NULL, NULL);
 	HelpOpen = TRUE;
 }
 
