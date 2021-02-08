@@ -1,6 +1,6 @@
 #include <windows.h> // Include
 #include <string>
-#include <stdexcept>
+#include <thread>
 
 /*Window variables start*/
 LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM); // Declare existence
@@ -35,7 +35,7 @@ HWND Location1, Location2, Location3, Location4, Location5, Location6, Location7
 
 HWND Color1, Color2, Color3, Color4, Color5, Color6, Color7, Color8, Color9; // Declare color menu elements globally
 
-HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4, HelpMenu5, HelpMenu6; // Declare help menu elements globally
+HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4, HelpMenu5, HelpMenu6, HelpMenu7; // Declare help menu elements globally
 
 HWND Top1, Top2, Top3, Top4, Top5, Top6, Top7, Top8, Top9, Top0; // Declare top level menu elements globally
 HWND Top1a, Top2a, Top3a, Top4a, Top5a, Top6a, Top7a, Top8a, Top9a;
@@ -57,12 +57,15 @@ BOOL FiltersDrop;
 BOOL IncorrectNumberNotif;
 
 POINT Cursor;
-
 /*Window variables end*/
 
+/*Fractal variable definitions start*/
 int Iters = 200; // define iterations
 BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect, Inverse edge, Grayscale, Inverse Grayscale
 double NewReal = 0; double NewImag = 0; unsigned long long NewZoom = 0;
+BOOL ScreenMirror = FALSE;
+BOOL JuliaMode = FALSE;
+/*Fractal variables end*/
 
 /*######################################################
 THIS IS WHERE THE WINDOW CREATION AND INTERFACING STARTS
@@ -223,7 +226,24 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		if (ConfigureDrop == FALSE) {
 			if (((XWindowPosition > 71) and (XWindowPosition < 86)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); ConfigDrop(hWnd); break; } // Trigger open configure dropdown
 		}
-		if (FormulaOpen == TRUE) {}
+		if (FormulaOpen == TRUE) { // While formula menu open
+			if (((XWindowPosition > 181) and (XWindowPosition < 190)) and ((YWindowPosition > 235) and (YWindowPosition < 244))) { // If inverse grayscale option is selected
+				if (ScreenMirror == FALSE) { // if inverse grayscale is false
+					ScreenMirror = TRUE; // make true
+					DestroyAll(hWnd);
+					FormulaMenu(hWnd); // rerender
+				}
+				else { ScreenMirror = FALSE; DestroyAll(hWnd); FormulaMenu(hWnd); } // if true, make false, and rerender
+			}
+			if (((XWindowPosition > 181) and (XWindowPosition < 190)) and ((YWindowPosition > 267) and (YWindowPosition < 276))) { // If inverse grayscale option is selected
+				if (JuliaMode == FALSE) { // if inverse grayscale is false
+					JuliaMode = TRUE; // make true
+					DestroyAll(hWnd);
+					FormulaMenu(hWnd); // rerender
+				}
+				else { JuliaMode = FALSE; DestroyAll(hWnd); FormulaMenu(hWnd); } // if true, make false, and rerender
+			}
+		}
 		if (ColorOpen == TRUE) {}
 		if (LocationOpen == TRUE) {  // While location menu is open
 			if (((XWindowPosition > 161) and (XWindowPosition < 240) and ((YWindowPosition > 296) and (YWindowPosition < 315)))) { // if Apply is hit
@@ -320,12 +340,15 @@ void TitleBar(HWND hWnd) // Create title bar
 
 void FormulaMenu(HWND hWnd) // Create formula menu
 {
+	long L01, L02;
 	Formula1 = CreateWindowW(L"static", L" Select Formula...\n\n\n\n\n             Mirror screen space\n\n             Julia set variant\n             [Position modifies C]", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 170, 200, 200, hWnd, NULL, NULL, NULL);
 	Formula2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 190, 200, 1, hWnd, NULL, NULL, NULL);
 	Formula3 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 140, 20, hWnd, NULL, NULL, NULL);
 	Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
-	Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 254, 10, 10, hWnd, NULL, NULL, NULL);
-	Formula6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 286, 10, 10, hWnd, NULL, NULL, NULL);
+	if (ScreenMirror == TRUE) { L01 = SS_BLACKRECT; } else { L01 = SS_LEFT; }
+	Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER | L01, 180, 254, 10, 10, hWnd, NULL, NULL, NULL);
+	if (JuliaMode == TRUE) { L02 = SS_BLACKRECT; } else { L02 = SS_LEFT; }
+	Formula6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER | L02, 180, 286, 10, 10, hWnd, NULL, NULL, NULL);
 	Formula7 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 340, 80, 20, hWnd, NULL, NULL, NULL);
 	Formula8 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 340, 80, 20, hWnd, NULL, NULL, NULL);
 	Formula9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 172, 17, 17, hWnd, NULL, NULL, NULL);
@@ -364,12 +387,15 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 
 void HelpMenu(HWND hWnd) // Create help menu
 {
-	HelpMenu1 = CreateWindowW(L"static", L" About CMandel....   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n\n Info bar :\n 1 - Iters | 2 - Real | 3 - Imaginary | 4 - Zoom\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 64 Bits\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
+	HelpMenu1 = CreateWindowW(L"static", L" About CMandel....   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n x86 Build - 64 Bit | Detected threads :\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Rerender entire screen space\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 64 Bits\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
 	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 19, 300, 1, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu4 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu5 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 215, 315, 80, 20, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu6 = CreateWindowW(L"static", L"🡭", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 256, 48, 17, 17, HelpMenu1, NULL, NULL, NULL);
+	int Concurrent = std::thread::hardware_concurrency();
+	std::wstring concurrence = s2ws(std::to_string(Concurrent)); // to LPCWSTR
+	HelpMenu7 = CreateWindowW(L"static", concurrence.c_str(), WS_VISIBLE | WS_CHILD, 249, 80, 51, 17, HelpMenu1, NULL, NULL, NULL);
 	HelpOpen = TRUE;
 }
 
