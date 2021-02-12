@@ -181,10 +181,6 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		GetCursorPos(&Cursor); // Get cursor position
 		int XWindowPosition = Cursor.x - WinRect.left; // Calculate X position of cursor in the window
 		int YWindowPosition = Cursor.y - WinRect.top - 20; // Calculate Y position of cursor in the window
-		std::wstring stemp = s2ws(std::to_string(XWindowPosition)); // to LPCWSTR
-		std::wstring stemp2 = s2ws(std::to_string(YWindowPosition)); // to LPCWSTR
-		HWND Info2 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, 57, 520, 132, 19, hWnd, NULL, NULL, NULL);
-		HWND Info3 = CreateWindowW(L"static", stemp2.c_str(), WS_VISIBLE | WS_BORDER | WS_CHILD, 188, 520, 133, 19, hWnd, NULL, NULL, NULL);
 		if (((XWindowPosition > 155) and (XWindowPosition < 448)) and ((YWindowPosition > -19) and (YWindowPosition < -3))) // Enable window dragging
 		{
 			while (DragDetect(hWnd, Cursor)) {
