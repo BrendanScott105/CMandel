@@ -1,4 +1,5 @@
 #include <windows.h> // Include
+#include <gdiplus.h>
 #include <string>
 #include <thread>
 
@@ -17,6 +18,7 @@ void LinkBox(HWND); // Declare existence
 void FilterDrop(HWND); //Declare existence
 void ConfigDrop(HWND); // Declare existence
 void IncorrectNumBox(HWND); // Declare existence
+void FractDropdown(HWND); // Declare existence
 void DestroyFormulaMenu(); //Decleare existence
 void DestroyColorMenu(); //Decleare existence
 void DestroyLocationMenu(); //Decleare existence
@@ -25,9 +27,10 @@ void DestroyLinkNotif(); //Declare existence
 void DestroyConfigDrop(HWND); //Declare existence
 void DestroyIncorrectNumberNotif(); //Declare existence
 void DestroyFiltersDrop(HWND); //Declare existence
+void DestroyFractDropdown(HWND); // Declare existence
 void DestroyAll(HWND); //Declare existence
 
-//HMENU hMenu; // define header menu
+HMENU hMenu; // define header menu
 
 HWND Formula1, Formula2, Formula3, Formula4, Formula5, Formula6, Formula7, Formula8, Formula9; // Declare formula menu elements globally
 
@@ -47,6 +50,10 @@ HWND Link1, Link2, Link3; // Declare link notif elements globally
 
 HWND IN1, IN2, IN3; // Declare Incorrect Number notif elements globally
 
+HWND FDdrop1, FDdrop2, FDdrop3, FDdrop4, FDdrop5, FDdrop6, FDdrop7, FDdrop8, FDdrop9, FDdropA, FDdropB, FDdropC; // Declare fractal dropdown elements globally
+
+HWND RealWinMain; // Declare main window
+
 BOOL FormulaOpen;
 BOOL ColorOpen;
 BOOL LocationOpen;
@@ -55,16 +62,25 @@ BOOL LinkNotif;
 BOOL ConfigureDrop;
 BOOL FiltersDrop;
 BOOL IncorrectNumberNotif;
+BOOL FractDrop = FALSE;
 
 POINT Cursor;
+
+Gdiplus::GdiplusStartupInput gdiStart;
+ULONG_PTR GdiToken;
+
+BOOL ScreenMirror = FALSE;
+BOOL JuliaMode = FALSE;
+INT FractalType = 0;
 /*Window variables end*/
 
 /*Fractal variable definitions start*/
 int Iters = 200; // define iterations
 BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect, Inverse edge, Grayscale, Inverse Grayscale
 double NewReal = 0; double NewImag = 0; unsigned long long NewZoom = 0;
-BOOL ScreenMirror = FALSE;
-BOOL JuliaMode = FALSE;
+BOOL TrueScreenMirror = FALSE;
+BOOL TrueJuliaMode = FALSE;
+INT RealFractalType = 0;
 /*Fractal variables end*/
 
 /*######################################################
@@ -84,28 +100,35 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	if (!RegisterClassW(&win)) // Register win class
 		return -1;
 
-	CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME)&~WS_MAXIMIZEBOX&~WS_CAPTION | WS_VISIBLE | WS_BORDER | WS_POPUP, 500, 200, 502, 558, NULL, NULL, NULL, NULL); // Create window with basic params
-	
+	RealWinMain = CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME)&~WS_MAXIMIZEBOX&~WS_CAPTION | WS_VISIBLE | WS_BORDER | WS_POPUP, 500, 200, 502, 558, NULL, NULL, NULL, NULL); // Create window with basic params
+
 	MSG defmsg = { 0 }; // define empty message
 	while (GetMessage(&defmsg, NULL, NULL, NULL)) // keep window open
 	{
 		TranslateMessage(&defmsg);
 		DispatchMessage(&defmsg);
 	}
-
 	return 0;
 }
 
 LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window procedure code
 {
+	HDC hdc;
+	PAINTSTRUCT ps;
 	switch (defmsg)
 	{
 	case WM_CREATE: // when window is created
-		//WinMenus(hWnd); // call menu function
 		InfoBar(hWnd); // call info bar function
 		TitleBar(hWnd); // Call title bar function
 		break;
+	case WM_PAINT:
+		Gdiplus::GdiplusStartup(&GdiToken, &gdiStart, nullptr);
+		hdc = BeginPaint(hWnd, &ps);
+		// Call main render function here
+		EndPaint(hWnd, &ps);
+		return 0;
 	case WM_DESTROY: // when close is hit
+		Gdiplus::GdiplusShutdown(GdiToken);
 		PostQuitMessage(0); // close and send exit code 0
 		break;
 	case WM_KEYDOWN:
@@ -227,21 +250,34 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			if (((XWindowPosition > 71) and (XWindowPosition < 86)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); ConfigDrop(hWnd); break; } // Trigger open configure dropdown
 		}
 		if (FormulaOpen == TRUE) { // While formula menu open
-			if (((XWindowPosition > 181) and (XWindowPosition < 190)) and ((YWindowPosition > 235) and (YWindowPosition < 244))) { // If inverse grayscale option is selected
-				if (ScreenMirror == FALSE) { // if inverse grayscale is false
-					ScreenMirror = TRUE; // make true
+			if ((((XWindowPosition > 181) and (XWindowPosition < 190)) and ((YWindowPosition > 235) and (YWindowPosition < 244))) && FractDrop == FALSE) {
+				if (ScreenMirror == FALSE) {
+					ScreenMirror = TRUE;
 					DestroyAll(hWnd);
-					FormulaMenu(hWnd); // rerender
+					FormulaMenu(hWnd);
 				}
 				else { ScreenMirror = FALSE; DestroyAll(hWnd); FormulaMenu(hWnd); } // if true, make false, and rerender
 			}
-			if (((XWindowPosition > 181) and (XWindowPosition < 190)) and ((YWindowPosition > 267) and (YWindowPosition < 276))) { // If inverse grayscale option is selected
-				if (JuliaMode == FALSE) { // if inverse grayscale is false
-					JuliaMode = TRUE; // make true
+			if ((((XWindowPosition > 181) and (XWindowPosition < 190)) and ((YWindowPosition > 267) and (YWindowPosition < 276))) && FractDrop == FALSE) {
+				if (JuliaMode == FALSE) {
+					JuliaMode = TRUE;
 					DestroyAll(hWnd);
-					FormulaMenu(hWnd); // rerender
+					FormulaMenu(hWnd);
 				}
 				else { JuliaMode = FALSE; DestroyAll(hWnd); FormulaMenu(hWnd); } // if true, make false, and rerender
+			}
+			if ((((XWindowPosition > 261) and (XWindowPosition < 340)) and ((YWindowPosition > 321) and (YWindowPosition < 340))) && FractDrop == FALSE) { DestroyAll(hWnd); } // if Cancel button is hit
+			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); } // if X button is hit
+			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 321) and (YWindowPosition < 340))) && FractDrop == FALSE) { // if Apply button is hit
+				TrueScreenMirror = ScreenMirror;
+				TrueJuliaMode = JuliaMode;
+				DestroyAll(hWnd);
+			}
+			if (FractDrop == FALSE) { // If dropdown menu is not open
+				if (((XWindowPosition > 311) and (XWindowPosition < 330)) and ((YWindowPosition > 191) and (YWindowPosition < 210))) { FractDropdown(hWnd); break; }
+			}
+			if (FractDrop == TRUE) { // If dropdown menu is open
+				if (((XWindowPosition > 311) and (XWindowPosition < 330)) and ((YWindowPosition > 191) and (YWindowPosition < 210))) { DestroyFractDropdown(hWnd); }
 			}
 		}
 		if (ColorOpen == TRUE) {}
@@ -267,15 +303,11 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				} else { DestroyIncorrectNumberNotif(); IncorrectNumBox(hWnd); } // if incorrect open infobox
 				if (!str3.empty() && str3.find_first_not_of("0123456789") == std::string::npos) { // if int
 					NewZoom = stoull(str3); // convert to unassigned long long and save
-					SetWindowTextW(Info6a, ZoomLocation); // write text
+					SetWindowTextW(Info5, ZoomLocation); // write text
 				} else { DestroyIncorrectNumberNotif(); IncorrectNumBox(hWnd); } // if incorrect open infobox
 			}
-			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 315)))) {
-				DestroyAll(hWnd); // Close menu from cancel button
-			}
-			if (((XWindowPosition > 332) and (XWindowPosition < 348) and ((YWindowPosition > 178) and (YWindowPosition < 194)))) {
-				DestroyAll(hWnd); // Close menu from X button
-			}
+			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 315)))) { DestroyAll(hWnd); } // Close menu from cancel button
+			if (((XWindowPosition > 332) and (XWindowPosition < 348) and ((YWindowPosition > 178) and (YWindowPosition < 194)))) { DestroyAll(hWnd); } // Close menu from X button
 		}
 		if (HelpOpen == TRUE) { // While help menu open
 			if (((XWindowPosition > 357) and (XWindowPosition < 376) and ((YWindowPosition > 129) and (YWindowPosition < 146)))) { ShellExecute(NULL, NULL, L"https://github.com/BrendanScott105/CMandel", NULL, NULL, SW_SHOWNORMAL); LinkBox(hWnd); } // Open URL in browser
@@ -300,8 +332,10 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		return DefWindowProcW(hWnd, defmsg, wp, lp); // return
 	}
 }
+
 void InfoBar(HWND hWnd) // add current view information bar
 {
+	Info0a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 0, 538, 9, 19, hWnd, NULL, NULL, NULL);
 	Info1a = CreateWindowW(L"static", L"Iterations : ", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 520, 123, 19, hWnd, NULL, NULL, NULL); // Display initially
 	Info1 = CreateWindowW(L"static", L"200", WS_VISIBLE | WS_CHILD, 73, 521, 48, 17, hWnd, NULL, NULL, NULL);
 	Info2a = CreateWindowW(L"static", L"Real : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 131, 520, 179, 19, hWnd, NULL, NULL, NULL);
@@ -310,23 +344,22 @@ void InfoBar(HWND hWnd) // add current view information bar
 	Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 364, 521, 138, 17, hWnd, NULL, NULL, NULL);
 	Info4a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 309, 520, 10, 19, hWnd, NULL, NULL, NULL);
 	Info4 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 121, 520, 10, 19, hWnd, NULL, NULL, NULL);
-	Info5a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, -1, 538, 23, 19, hWnd, NULL, NULL, NULL);
-	Info5 = CreateWindowW(L"static", L"Zoom : ", WS_VISIBLE | WS_CHILD, 23, 539, 210, 19, hWnd, NULL, NULL, NULL);
-	Info6a = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_CHILD, 72, 539, 160, 17, hWnd, NULL, NULL, NULL);
-	Info6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 233, 539, 23, 19, hWnd, NULL, NULL, NULL);
-	Info7a = CreateWindowW(L"static", L"Rotation :", WS_VISIBLE | WS_BORDER | WS_CHILD, 255, 538, 97, 19, hWnd, NULL, NULL, NULL);
-	Info7 = CreateWindowW(L"static", L"360", WS_VISIBLE | WS_CHILD, 322, 539, 30, 17, hWnd, NULL, NULL, NULL);
-	Info8a = CreateWindowW(L"static", L"°", WS_VISIBLE | WS_CHILD, 346, 539, 6, 17, hWnd, NULL, NULL, NULL);
-	Info8 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 353, 539, 23, 19, hWnd, NULL, NULL, NULL);
-	Info9a = CreateWindowW(L"static", L"Color preset :", WS_VISIBLE | WS_BORDER | WS_CHILD, 375, 538, 103, 19, hWnd, NULL, NULL, NULL);
-	Info9 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 478, 539, 23, 19, hWnd, NULL, NULL, NULL);
-	Info0a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 538, 500, 1, hWnd, NULL, NULL, NULL);
-	Info0 = CreateWindowW(L"static", L"D", WS_VISIBLE | WS_CHILD , 467, 539, 10, 19, hWnd, NULL, NULL, NULL);
+	Info5a = CreateWindowW(L"static", L"Zoom : ", WS_VISIBLE | WS_CHILD, 10, 539, 210, 19, hWnd, NULL, NULL, NULL);
+	Info5 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_CHILD, 60, 539, 160, 17, hWnd, NULL, NULL, NULL);
+	Info6a = CreateWindowW(L"static", L"Rotation :", WS_VISIBLE | WS_BORDER | WS_CHILD, 220, 538, 97, 19, hWnd, NULL, NULL, NULL);
+	Info6 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 287, 539, 30, 17, hWnd, NULL, NULL, NULL);
+	Info7a = CreateWindowW(L"static", L"°", WS_VISIBLE | WS_CHILD, 311, 539, 6, 17, hWnd, NULL, NULL, NULL);
+	Info7 = CreateWindowW(L"static", L"Color preset :", WS_VISIBLE | WS_BORDER | WS_CHILD, 316, 538, 103, 19, hWnd, NULL, NULL, NULL);
+	Info8a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 538, 500, 1, hWnd, NULL, NULL, NULL);
+	Info8 = CreateWindowW(L"static", L"D", WS_VISIBLE | WS_CHILD , 408, 539, 10, 19, hWnd, NULL, NULL, NULL);
+	Info9a = CreateWindowW(L"static", L"Fractal :", WS_VISIBLE | WS_BORDER | WS_CHILD, 418, 538, 74, 19, hWnd, NULL, NULL, NULL);
+	Info9 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 475, 539, 16, 17, hWnd, NULL, NULL, NULL);
+	Info0 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 491, 538, 9, 19, hWnd, NULL, NULL, NULL);
 }
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.27", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.2.8", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
@@ -343,7 +376,7 @@ void FormulaMenu(HWND hWnd) // Create formula menu
 	long L01, L02;
 	Formula1 = CreateWindowW(L"static", L" Select Formula...\n\n\n\n\n             Mirror screen space\n\n             Julia set variant\n             [Position modifies C]", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 170, 200, 200, hWnd, NULL, NULL, NULL);
 	Formula2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 190, 200, 1, hWnd, NULL, NULL, NULL);
-	Formula3 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 140, 20, hWnd, NULL, NULL, NULL);
+	Formula3 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 141, 20, hWnd, NULL, NULL, NULL);
 	Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
 	if (ScreenMirror == TRUE) { L01 = SS_BLACKRECT; } else { L01 = SS_LEFT; }
 	Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER | L01, 180, 254, 10, 10, hWnd, NULL, NULL, NULL);
@@ -359,7 +392,7 @@ void ColorMenu(HWND hWnd) // Create color menu
 {
 	Color1 = CreateWindowW(L"static", L" Choose color preset...\n\n\n\n\n             Smooth coloring\n\n             Color Preview", WS_VISIBLE | WS_BORDER | WS_CHILD , 150, 170, 200, 200, hWnd, NULL, NULL, NULL);
 	Color2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 190, 200, 1, hWnd, NULL, NULL, NULL);
-	Color3 = CreateWindowW(L"static", L"Default colors", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 140, 20, hWnd, NULL, NULL, NULL);
+	Color3 = CreateWindowW(L"static", L"Default colors", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 141, 20, hWnd, NULL, NULL, NULL);
 	Color4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
 	Color5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 180, 254, 10, 10, hWnd, NULL, NULL, NULL);
 	Color6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 340, 80, 20, hWnd, NULL, NULL, NULL);
@@ -456,6 +489,24 @@ void IncorrectNumBox(HWND hWnd) // Create link notif box
 	IN2 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 119, 382, 16, 16, hWnd, NULL, NULL, NULL);
 	IN3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 136, 380, 1, 20, hWnd, NULL, NULL, NULL);
 	IncorrectNumberNotif = TRUE;
+}
+
+void FractDropdown(HWND hWnd) // Create Fractal dropdown menu
+{
+	DestroyWindow(Formula4);
+	FDdrop1 = CreateWindowW(L"static", L"▲", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
+	FDdrop2 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 229, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdrop3 = CreateWindowW(L"static", L"Burning ship", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 248, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdrop4 = CreateWindowW(L"static", L"Buffalo", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 267, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdrop5 = CreateWindowW(L"static", L"Celtic", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 286, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdrop6 = CreateWindowW(L"static", L"Mandelbar", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 305, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdrop7 = CreateWindowW(L"static", L"Mandelbar Celtic", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 324, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdrop8 = CreateWindowW(L"static", L"Perp. Mandelbrot", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 343, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdrop9 = CreateWindowW(L"static", L"Perp. Burning ship", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 362, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdropA = CreateWindowW(L"static", L"Perp. Buffalo", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 381, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdropB = CreateWindowW(L"static", L"Perp. Celtic", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 400, 141, 20, hWnd, NULL, NULL, NULL);
+	FDdropC = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 170, 228, 141, 3, hWnd, NULL, NULL, NULL);
+	FractDrop = TRUE;
 }
 
 std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
@@ -573,6 +624,23 @@ void DestroyIncorrectNumberNotif() // Destroy incorrect number notif
 	IncorrectNumberNotif = FALSE;
 }
 
+void DestroyFractDropdown(HWND hWnd) { // Destroy fract dropdown
+	DestroyWindow(FDdrop1);
+	DestroyWindow(FDdrop2);
+	DestroyWindow(FDdrop3);
+	DestroyWindow(FDdrop4);
+	DestroyWindow(FDdrop5);
+	DestroyWindow(FDdrop6);
+	DestroyWindow(FDdrop7);
+	DestroyWindow(FDdrop8);
+	DestroyWindow(FDdrop9);
+	DestroyWindow(FDdropA);
+	DestroyWindow(FDdropB);
+	DestroyWindow(FDdropC);
+	Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
+	FractDrop = FALSE;
+}
+
 void DestroyAll(HWND hWnd) // Destroy all menus
 {
 	DestroyFormulaMenu();
@@ -583,4 +651,6 @@ void DestroyAll(HWND hWnd) // Destroy all menus
 	DestroyConfigDrop(hWnd);
 	DestroyFiltersDrop(hWnd);
 	DestroyIncorrectNumberNotif();
+	DestroyFractDropdown(hWnd);
+	DestroyWindow(Formula4);
 }
