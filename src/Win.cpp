@@ -71,7 +71,7 @@ ULONG_PTR GdiToken;
 
 BOOL ScreenMirror = FALSE;
 BOOL JuliaMode = FALSE;
-INT FractalType = 0;
+INT FractalType = 1;
 /*Window variables end*/
 
 /*Fractal variable definitions start*/
@@ -80,7 +80,7 @@ BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect,
 double NewReal = 0; double NewImag = 0; unsigned long long NewZoom = 0;
 BOOL TrueScreenMirror = FALSE;
 BOOL TrueJuliaMode = FALSE;
-INT RealFractalType = 0;
+INT RealFractalType = 1;
 /*Fractal variables end*/
 
 /*######################################################
@@ -186,6 +186,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			while (DragDetect(hWnd, Cursor)) {
 				GetCursorPos(&Cursor); // Get cursor position
 				MoveWindow(hWnd, Cursor.x - XWindowPosition, Cursor.y - YWindowPosition - 20, 502, 558, TRUE);
+				UpdateWindow(hWnd);
 			}
 		}
 		if (FiltersDrop == TRUE) { // When filters menu is open
@@ -271,6 +272,9 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 321) and (YWindowPosition < 340))) && FractDrop == FALSE) { // if Apply button is hit
 				TrueScreenMirror = ScreenMirror;
 				TrueJuliaMode = JuliaMode;
+				RealFractalType = FractalType;
+				std::wstring stemp3 = s2ws(std::to_string(RealFractalType)); // to LPCWSTR
+				SetWindowTextW(Info9, stemp3.c_str());
 				DestroyAll(hWnd);
 			}
 			if (FractDrop == FALSE) { // If dropdown menu is not open
@@ -278,6 +282,16 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			}
 			if (FractDrop == TRUE) { // If dropdown menu is open
 				if (((XWindowPosition > 311) and (XWindowPosition < 330)) and ((YWindowPosition > 191) and (YWindowPosition < 210))) { DestroyFractDropdown(hWnd); }
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 211) and (YWindowPosition < 229))) { FractalType = 1; SetWindowTextW(Formula3, L"Mandelbrot set"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 229) and (YWindowPosition < 248))) { FractalType = 2; SetWindowTextW(Formula3, L"Burning ship"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 248) and (YWindowPosition < 267))) { FractalType = 3; SetWindowTextW(Formula3, L"Buffalo"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 267) and (YWindowPosition < 286))) { FractalType = 4; SetWindowTextW(Formula3, L"Celtic"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 286) and (YWindowPosition < 305))) { FractalType = 5; SetWindowTextW(Formula3, L"Mandelbar"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 305) and (YWindowPosition < 324))) { FractalType = 6; SetWindowTextW(Formula3, L"Mandelbar Celtic"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 324) and (YWindowPosition < 343))) { FractalType = 7; SetWindowTextW(Formula3, L"Perp. Mandelbrot"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 343) and (YWindowPosition < 362))) { FractalType = 8; SetWindowTextW(Formula3, L"Perp. Burning ship"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 362) and (YWindowPosition < 381))) { FractalType = 9; SetWindowTextW(Formula3, L"Perp. Buffalo"); DestroyFractDropdown(hWnd);}
+				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 381) and (YWindowPosition < 400))) { FractalType = 10; SetWindowTextW(Formula3, L"Perp. Celtic"); DestroyFractDropdown(hWnd);}
 			}
 		}
 		if (ColorOpen == TRUE) {}
@@ -353,13 +367,13 @@ void InfoBar(HWND hWnd) // add current view information bar
 	Info8a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 538, 500, 1, hWnd, NULL, NULL, NULL);
 	Info8 = CreateWindowW(L"static", L"D", WS_VISIBLE | WS_CHILD , 408, 539, 10, 19, hWnd, NULL, NULL, NULL);
 	Info9a = CreateWindowW(L"static", L"Fractal :", WS_VISIBLE | WS_BORDER | WS_CHILD, 418, 538, 74, 19, hWnd, NULL, NULL, NULL);
-	Info9 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 475, 539, 16, 17, hWnd, NULL, NULL, NULL);
+	Info9 = CreateWindowW(L"static", L"1", WS_VISIBLE | WS_CHILD, 475, 539, 16, 17, hWnd, NULL, NULL, NULL);
 	Info0 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 491, 538, 9, 19, hWnd, NULL, NULL, NULL);
 }
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.2.8", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.2.9", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
