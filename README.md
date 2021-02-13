@@ -8,10 +8,10 @@ Reworked Mandelbrot explorer
 - Lightweight  
 
 # File Index  
-src/color.cpp - Color schemes and smooth coloring
-src/effect.cpp - Various effects
-src/formula.cpp - Function definitions in optimized form
-src/rect.cpp - Contains rectangle optimization and others
-src/render.cpp - General rendering, selects optimizations when possible
-src/view.cpp - Location, rotation, and zoom
-src/Win.cpp - Window and menu creation and definition [Main file, imports all others]
+src/color.cpp - Color schemes and smooth coloring  
+src/effect.cpp - Various effects  
+src/formula.cpp - Function definitions in optimized form  
+src/rect.cpp - Contains rectangle optimization and others  
+src/render.cpp - General rendering, selects optimizations when possible  
+src/view.cpp - Location, rotation, and zoom  
+src/Win.cpp - Window and menu creation and definition [Main file, imports all others]  
