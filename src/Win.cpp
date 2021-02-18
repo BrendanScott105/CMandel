@@ -39,6 +39,7 @@ void DestroyAll(HWND); //Declare existence
 
 void SetZoomDensity(INT); // Declare
 void SetLocation(INT); // Declare
+void SetRotation(INT); // Declare
 
 HMENU hMenu; // define header menu
 
@@ -191,6 +192,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		if (wp == 0x41) { SetLocation(1); }
 		if (wp == 0x53) { SetLocation(2); }
 		if (wp == 0x44) { SetLocation(3); }
+		if (wp == 0x45) { SetRotation(0); } // Rotate clockwise
+		if (wp == 0x51) { SetRotation(1); } // Rotate counterclockwise
 		if (wp == VK_F5) {} // For rerendering
 
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
@@ -371,11 +374,12 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 					SetWindowTextW(Info3, ImagLocation); // write text
 				}
 				else { DestroyIncorrectNumberNotif(); IncorrectNumBox(hWnd); } // if incorrect open infobox
-				if (!str3.empty() && str3.find_first_not_of("0123456789") == std::string::npos) { // if int
-					NewZoom = stoull(str3); // convert to unassigned long long and save
+				if (!str3.empty() && str3.find_first_not_of("0123456789-.") == std::string::npos) { // if int
+					NewZoom = stod(str3); // convert to unassigned long long and save
 					SetWindowTextW(Info5, ZoomLocation); // write text
 				}
 				else { DestroyIncorrectNumberNotif(); IncorrectNumBox(hWnd); } // if incorrect open infobox
+				DestroyAll(hWnd);
 			}
 			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 315)))) { DestroyAll(hWnd); } // Close menu from cancel button
 			if (((XWindowPosition > 332) and (XWindowPosition < 348) and ((YWindowPosition > 178) and (YWindowPosition < 194)))) { DestroyAll(hWnd); } // Close menu from X button
@@ -416,7 +420,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 	Info5a = CreateWindowW(L"static", L"Zoom : ", WS_VISIBLE | WS_CHILD, 2, 558, 229, 19, hWnd, NULL, NULL, NULL);
 	Info5 = CreateWindowW(L"static", L"2", WS_VISIBLE | WS_CHILD, 52, 558, 180, 16, hWnd, NULL, NULL, NULL);
 	Info6a = CreateWindowW(L"static", L"Rotation :", WS_VISIBLE | WS_BORDER | WS_CHILD, 232, 557, 98, 18, hWnd, NULL, NULL, NULL);
-	Info6 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 299, 558, 29, 16, hWnd, NULL, NULL, NULL);
+	Info6 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 299, 558, 25, 16, hWnd, NULL, NULL, NULL);
 	Info7 = CreateWindowW(L"static", L"Color preset :", WS_VISIBLE | WS_BORDER | WS_CHILD, 324, 557, 103, 18, hWnd, NULL, NULL, NULL);
 	Info8 = CreateWindowW(L"static", L"D", WS_VISIBLE | WS_CHILD, 416, 558, 10, 16, hWnd, NULL, NULL, NULL);
 	Info9a = CreateWindowW(L"static", L"Fractal :", WS_VISIBLE | WS_BORDER | WS_CHILD, 426, 557, 74, 18, hWnd, NULL, NULL, NULL);
@@ -427,7 +431,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.3.1", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.4.0", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
@@ -496,11 +500,11 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 	Location1 = CreateWindowW(L"static", L" Set location and zoom...", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 195, 200, 150, hWnd, NULL, NULL, NULL);
 	Location2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 215, 200, 1, hWnd, NULL, NULL, NULL);
 	Location3 = CreateWindowW(L"edit", L"Real position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 225, 180, 20, hWnd, NULL, NULL, NULL);
-	SendMessage(Location3, EM_SETLIMITTEXT, 17, NULL);
+	SendMessage(Location3, EM_SETLIMITTEXT, 22, NULL);
 	Location4 = CreateWindowW(L"edit", L"Imaginary position", WS_VISIBLE | WS_BORDER | WS_CHILD, 160, 255, 180, 20, hWnd, NULL, NULL, NULL);
-	SendMessage(Location4, EM_SETLIMITTEXT, 17, NULL);
+	SendMessage(Location4, EM_SETLIMITTEXT, 22, NULL);
 	Location5 = CreateWindowW(L"edit", L"Zoom [Standard notation]", WS_VISIBLE | WS_BORDER | WS_CHILD | ES_NUMBER, 160, 285, 180, 20, hWnd, NULL, NULL, NULL);
-	SendMessage(Location5, EM_SETLIMITTEXT, 20, NULL);
+	SendMessage(Location5, EM_SETLIMITTEXT, 22, NULL);
 	Location6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 315, 80, 20, hWnd, NULL, NULL, NULL);
 	Location7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 315, 80, 20, hWnd, NULL, NULL, NULL);
 	Location8 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 197, 17, 17, hWnd, NULL, NULL, NULL);
@@ -509,7 +513,7 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 
 void HelpMenu(HWND hWnd) // Create help menu
 {
-	HelpMenu1 = CreateWindowW(L"static", L" About CMandel....   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n x86 Build - 64 Bit | Detected threads :\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n Mouse left : Zoom in\n Mouse right : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Rerender entire screen space\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 64 Bits\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
+	HelpMenu1 = CreateWindowW(L"static", L" About CMandel....   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n x86 Build - 64 Bit | Detected threads :\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Rerender entire screen space\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 64 Bits\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
 	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 19, 300, 1, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu4 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
@@ -801,3 +805,21 @@ void SetLocation(INT ULDR) // Set new position on keypress
 	temp6 = (LPCWSTR)Wtemp6.c_str();
 	SetWindowTextW(Info3, temp6);
 }
+
+void SetRotation(INT CwCCw) // Set new rotation position
+{
+	if (CwCCw == 0) { Rotation += 1; }
+	else { Rotation -= 1; }
+	if (Rotation > 359) { Rotation = 0; }
+	if (Rotation < 0) { Rotation = 359; }
+	LPCWSTR temp9;
+	std::wstring Wtemp9 = to_wstring(Rotation);
+	temp9 = (LPCWSTR)Wtemp9.c_str();
+	SetWindowTextW(Info6, temp9);
+}
+
+/*#######################
+END LOCATION MODIFICATION
+#########################
+START
+#######################*/
