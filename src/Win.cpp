@@ -1,14 +1,19 @@
 #include <windows.h> // Include
 #include <gdiplus.h>
+#include <cmath>
 #include <string>
 #include <thread>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+
+using namespace std;
 
 /*Window variables start*/
 LRESULT CALLBACK Proc(HWND, UINT, WPARAM, LPARAM); // Declare existence
-std::wstring s2ws(const std::string& s);
 void WinMenus(HWND); // Declare existence
-void TitleBar(HWND); // Declare existence
 void InfoBar(HWND); // Declare existence
+void TitleBar(HWND); // Declare existence
 void FormulaMenu(HWND); //Declare existence
 void ColorMenu(HWND); //Declare existence
 void LocationMenu(HWND); //Declare existence
@@ -32,6 +37,9 @@ void DestroyFractDropdown(HWND); // Declare existence
 void DestroyColorDropdown(HWND); // Declare existence
 void DestroyAll(HWND); //Declare existence
 
+void SetZoomDensity(INT); // Declare
+void SetLocation(INT); // Declare
+
 HMENU hMenu; // define header menu
 
 HWND Formula1, Formula2, Formula3, Formula4, Formula5, Formula6, Formula7, Formula8, Formula9; // Declare formula menu elements globally
@@ -42,7 +50,7 @@ HWND Color1, Color2, Color3, Color4, Color5, Color6, Color7, Color8; // Declare 
 
 HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4, HelpMenu5, HelpMenu6, HelpMenu7; // Declare help menu elements globally
 
-HWND Top1, Top2, Top3, Top4, Top5, Top6, Top7, Top8, Top9, Top0; // Declare top level menu elements globally
+HWND Top1, Top2, Top3, Top4, Top5, Top6, Top7, Top8, Top9, Top0, TopA; // Declare top level menu elements globally
 HWND Top1a, Top2a, Top3a, Top4a, Top5a, Top6a, Top7a, Top8a, Top9a;
 HWND Top1b, Top2b, Top3b, Top4b, Top5b, Top6b, Top7b, Top8b, Top9b, Top0b, TopAb, TopBb, TopCb, TopDb, TopEb, TopFb;
 
@@ -82,14 +90,15 @@ INT ColorType = 0;
 
 /*Fractal variable definitions start*/
 int Iters = 200; // define iterations
+double PixelDif = 0.008;
 BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect, Inverse edge, Grayscale, Inverse Grayscale
-double NewReal = 0; double NewImag = 0; unsigned long long NewZoom = 0;
+double NewReal = 0; double NewImag = 0; double NewZoom = 2; int Rotation = 0;
 INT RealFractalType = 1;
 /*Fractal variables end*/
 
-/*######################################################
-THIS IS WHERE THE WINDOW CREATION AND INTERFACING STARTS
-######################################################*/
+/*#####################
+WINDOW LOGIC AND DEFINE
+#####################*/
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) // Enter
 {
@@ -104,7 +113,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	if (!RegisterClassW(&win)) // Register win class
 		return -1;
 
-	RealWinMain = CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME) & ~WS_MAXIMIZEBOX & ~WS_CAPTION | WS_VISIBLE | WS_BORDER | WS_POPUP, 500, 200, 502, 558, NULL, NULL, NULL, NULL); // Create window with basic params
+	RealWinMain = CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME) & ~WS_MAXIMIZEBOX & ~WS_CAPTION | WS_VISIBLE | WS_BORDER | WS_POPUP, 500, 200, 502, 577, NULL, NULL, NULL, NULL); // Create window with basic params
 
 	MSG defmsg = { 0 }; // define empty message
 	while (GetMessage(&defmsg, NULL, NULL, NULL)) // keep window open
@@ -122,8 +131,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 	switch (defmsg)
 	{
 	case WM_CREATE: // when window is created
-		InfoBar(hWnd); // call info bar function
 		TitleBar(hWnd); // Call title bar function
+		InfoBar(hWnd);
 		break;
 	case WM_PAINT:
 		Gdiplus::GdiplusStartup(&GdiToken, &gdiStart, nullptr);
@@ -151,9 +160,10 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				Iters++; // by 1
 			}
 			if (Iters > 999999) { Iters = 999999; }
-			std::wstring stemp = s2ws(std::to_string(Iters)); // to LPCWSTR
-			DestroyWindow(Info1);
-			HWND Info1 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_CHILD, 73, 521, 48, 17, hWnd, NULL, NULL, NULL); // Change displayed value
+			LPCWSTR temp8;
+			std::wstring Wtemp2 = to_wstring(Iters);
+			temp8 = (LPCWSTR)Wtemp2.c_str();
+			SetWindowTextW(Info1, temp8);
 		}
 		if (wp == VK_OEM_MINUS and Iters > 0) // when "-" is hit
 		{
@@ -170,10 +180,19 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				Iters--; // by 1
 			}
 			if (Iters < 0) { Iters = 0; }
-			std::wstring stemp = s2ws(std::to_string(Iters)); // to LPCWSTR
-			DestroyWindow(Info1);
-			HWND Info1 = CreateWindowW(L"static", stemp.c_str(), WS_VISIBLE | WS_CHILD, 73, 521, 48, 17, hWnd, NULL, NULL, NULL); // Change displayed value
+			LPCWSTR temp9;
+			std::wstring Wtemp2 = to_wstring(Iters);
+			temp9 = (LPCWSTR)Wtemp2.c_str();
+			SetWindowTextW(Info1, temp9);
 		}
+		if (wp == VK_UP) {SetZoomDensity(1);} // Zoom in
+		if (wp == VK_DOWN) {SetZoomDensity(0);} // Zoom out
+		if (wp == 0x57) { SetLocation(0); } // Set new position
+		if (wp == 0x41) { SetLocation(1); }
+		if (wp == 0x53) { SetLocation(2); }
+		if (wp == 0x44) { SetLocation(3); }
+		if (wp == VK_F5) {} // For rerendering
+
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
 	{
 		RECT WinRect = { NULL };
@@ -185,7 +204,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		{
 			while (DragDetect(hWnd, Cursor)) {
 				GetCursorPos(&Cursor); // Get cursor position
-				MoveWindow(hWnd, Cursor.x - XWindowPosition, Cursor.y - YWindowPosition - 20, 502, 558, TRUE);
+				MoveWindow(hWnd, Cursor.x - XWindowPosition, Cursor.y - YWindowPosition - 20, 502, 577, TRUE);
 				UpdateWindow(hWnd);
 			}
 		}
@@ -271,8 +290,10 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); } // if X button is hit
 			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 321) and (YWindowPosition < 340))) && FractDrop == FALSE) { // if Apply button is hit
 				RealFractalType = FractalType;
-				std::wstring stemp3 = s2ws(std::to_string(RealFractalType)); // to LPCWSTR
-				SetWindowTextW(Info9, stemp3.c_str());
+				LPCWSTR temp1;
+				std::wstring Wtemp1 = to_wstring(RealFractalType);
+				temp1 = (LPCWSTR)Wtemp1.c_str();
+				SetWindowTextW(Info9, temp1);
 				DestroyAll(hWnd);
 			}
 			if (FractDrop == FALSE) { // If dropdown menu is not open
@@ -302,11 +323,14 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				else { SmoothColor = FALSE; DestroyAll(hWnd); ColorMenu(hWnd); } // if true, make false, and rerender
 			}
 			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 321) and (YWindowPosition < 340))) && ColorDrop == FALSE) { // if Apply button is hit
-				std::wstring stemp4 = s2ws(std::to_string(ColorType)); // to LPCWSTR
+				LPCWSTR temp2;
+				std::wstring Wtemp2 = to_wstring(ColorType);
+				temp2 = (LPCWSTR)Wtemp2.c_str(); // to LPCWSTR
 				if (ColorType == 0) {
-					SetWindowTextW(Info8, L"D");
-				} else {
-					SetWindowTextW(Info8, stemp4.c_str());
+					SetWindowTextW(Info8, temp2);
+				}
+				else {
+					SetWindowTextW(Info8, temp2);
 				}
 				DestroyAll(hWnd);
 			}
@@ -382,31 +406,28 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 
 void InfoBar(HWND hWnd) // add current view information bar
 {
-	Info0a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 0, 538, 9, 19, hWnd, NULL, NULL, NULL);
-	Info1a = CreateWindowW(L"static", L"Iterations : ", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 520, 123, 19, hWnd, NULL, NULL, NULL); // Display initially
-	Info1 = CreateWindowW(L"static", L"200", WS_VISIBLE | WS_CHILD, 73, 521, 48, 17, hWnd, NULL, NULL, NULL);
-	Info2a = CreateWindowW(L"static", L"Real : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 131, 520, 179, 19, hWnd, NULL, NULL, NULL);
-	Info2 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 173, 521, 136, 17, hWnd, NULL, NULL, NULL);
-	Info3a = CreateWindowW(L"static", L"Imag : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 319, 520, 182, 19, hWnd, NULL, NULL, NULL);
-	Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 364, 521, 138, 17, hWnd, NULL, NULL, NULL);
-	Info4a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 309, 520, 10, 19, hWnd, NULL, NULL, NULL);
-	Info4 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 121, 520, 10, 19, hWnd, NULL, NULL, NULL);
-	Info5a = CreateWindowW(L"static", L"Zoom : ", WS_VISIBLE | WS_CHILD, 10, 539, 210, 19, hWnd, NULL, NULL, NULL);
-	Info5 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_CHILD, 60, 539, 160, 17, hWnd, NULL, NULL, NULL);
-	Info6a = CreateWindowW(L"static", L"Rotation :", WS_VISIBLE | WS_BORDER | WS_CHILD, 220, 538, 97, 19, hWnd, NULL, NULL, NULL);
-	Info6 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 287, 539, 30, 17, hWnd, NULL, NULL, NULL);
-	Info7a = CreateWindowW(L"static", L"°", WS_VISIBLE | WS_CHILD, 311, 539, 6, 17, hWnd, NULL, NULL, NULL);
-	Info7 = CreateWindowW(L"static", L"Color preset :", WS_VISIBLE | WS_BORDER | WS_CHILD, 316, 538, 103, 19, hWnd, NULL, NULL, NULL);
-	Info8a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 538, 500, 1, hWnd, NULL, NULL, NULL);
-	Info8 = CreateWindowW(L"static", L"D", WS_VISIBLE | WS_CHILD, 408, 539, 10, 19, hWnd, NULL, NULL, NULL);
-	Info9a = CreateWindowW(L"static", L"Fractal :", WS_VISIBLE | WS_BORDER | WS_CHILD, 418, 538, 74, 19, hWnd, NULL, NULL, NULL);
-	Info9 = CreateWindowW(L"static", L"1", WS_VISIBLE | WS_CHILD, 475, 539, 16, 17, hWnd, NULL, NULL, NULL);
-	Info0 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 491, 538, 9, 19, hWnd, NULL, NULL, NULL);
+	Info1a = CreateWindowW(L"static", L"Iterations : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 377, 539, 123, 19, hWnd, NULL, NULL, NULL); // Display initially
+	Info1 = CreateWindowW(L"static", L"200", WS_VISIBLE | WS_CHILD, 451, 540, 48, 17, hWnd, NULL, NULL, NULL);
+	Info2a = CreateWindowW(L"static", L"Real : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 521, 500, 19, hWnd, NULL, NULL, NULL);
+	Info2 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 43, 522, 456, 17, hWnd, NULL, NULL, NULL);
+	Info3a = CreateWindowW(L"static", L"Imag : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 539, 333, 19, hWnd, NULL, NULL, NULL);
+	Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 43, 540, 333, 17, hWnd, NULL, NULL, NULL);
+	Info4a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 0, 558, 1, 19, hWnd, NULL, NULL, NULL);
+	Info5a = CreateWindowW(L"static", L"Zoom : ", WS_VISIBLE | WS_CHILD, 2, 558, 229, 19, hWnd, NULL, NULL, NULL);
+	Info5 = CreateWindowW(L"static", L"2", WS_VISIBLE | WS_CHILD, 52, 558, 180, 16, hWnd, NULL, NULL, NULL);
+	Info6a = CreateWindowW(L"static", L"Rotation :", WS_VISIBLE | WS_BORDER | WS_CHILD, 232, 557, 98, 18, hWnd, NULL, NULL, NULL);
+	Info6 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 299, 558, 29, 16, hWnd, NULL, NULL, NULL);
+	Info7 = CreateWindowW(L"static", L"Color preset :", WS_VISIBLE | WS_BORDER | WS_CHILD, 324, 557, 103, 18, hWnd, NULL, NULL, NULL);
+	Info8 = CreateWindowW(L"static", L"D", WS_VISIBLE | WS_CHILD, 416, 558, 10, 16, hWnd, NULL, NULL, NULL);
+	Info9a = CreateWindowW(L"static", L"Fractal :", WS_VISIBLE | WS_BORDER | WS_CHILD, 426, 557, 74, 18, hWnd, NULL, NULL, NULL);
+	Info9 = CreateWindowW(L"static", L"1", WS_VISIBLE | WS_CHILD, 483, 558, 16, 16, hWnd, NULL, NULL, NULL);
+	Info0a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 520, 500, 1, hWnd, NULL, NULL, NULL);
+	Info0 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 0, 574, 232, 1, hWnd, NULL, NULL, NULL);
 }
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.3.0", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.3.1", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
@@ -416,6 +437,7 @@ void TitleBar(HWND hWnd) // Create title bar
 	Top8 = CreateWindowW(L"static", L"?", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 449, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top9 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 470, 12, 8, 2, hWnd, NULL, NULL, NULL);
 	Top0 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 447, -1, 1, 20, hWnd, NULL, NULL, NULL);
+	TopA = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 19, 500, 1, hWnd, NULL, NULL, NULL);
 }
 
 void FormulaMenu(HWND hWnd) // Create formula menu
@@ -494,8 +516,10 @@ void HelpMenu(HWND hWnd) // Create help menu
 	HelpMenu5 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 215, 315, 80, 20, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu6 = CreateWindowW(L"static", L"🡭", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 256, 48, 17, 17, HelpMenu1, NULL, NULL, NULL);
 	int Concurrent = std::thread::hardware_concurrency();
-	std::wstring concurrence = s2ws(std::to_string(Concurrent)); // to LPCWSTR
-	HelpMenu7 = CreateWindowW(L"static", concurrence.c_str(), WS_VISIBLE | WS_CHILD, 249, 80, 51, 17, HelpMenu1, NULL, NULL, NULL);
+	LPCWSTR temp3;
+	std::wstring Wtemp3 = to_wstring(std::thread::hardware_concurrency());
+	temp3 = (LPCWSTR)Wtemp3.c_str();
+	HelpMenu7 = CreateWindowW(L"static", temp3, WS_VISIBLE | WS_CHILD, 249, 80, 51, 17, HelpMenu1, NULL, NULL, NULL);
 	HelpOpen = TRUE;
 }
 
@@ -591,18 +615,6 @@ void ColorDropdown(HWND hWnd) // Create Fractal dropdown menu
 	CDdrop7 = CreateWindowW(L"static", L"Preset 5", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 324, 141, 20, hWnd, NULL, NULL, NULL);
 	CDdrop8 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 170, 228, 141, 3, hWnd, NULL, NULL, NULL);
 	ColorDrop = TRUE;
-}
-
-std::wstring s2ws(const std::string& s) // CONVERT STRING TO LPCWSTR
-{
-	int len;
-	int slength = (int)s.length() + 1;
-	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
-	wchar_t* buf = new wchar_t[len];
-	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
-	std::wstring r(buf);
-	delete[] buf;
-	return r;
 }
 
 void DestroyFormulaMenu() // Destroy formula menu
@@ -748,4 +760,44 @@ void DestroyAll(HWND hWnd) // Destroy all menus
 	DestroyConfigDrop(hWnd);
 	DestroyFiltersDrop(hWnd);
 	DestroyIncorrectNumberNotif();
+}
+
+/*#########################
+END WINDOW LOGIC AND DEFINE
+###########################
+START LOCATION MODIFICATION
+#########################*/
+
+void SetZoomDensity(INT InOut) // Set pixel density for determining distance between points
+{
+	if (InOut == 1) { NewZoom = NewZoom * 1.1; }
+	if (NewZoom > 1125899906842624) { NewZoom = 1125899906842624; }
+	if (InOut == 0) { NewZoom = NewZoom / 1.1; }
+	PixelDif = (4 * (4 / NewZoom)) / 500;
+	LPCWSTR temp4;
+	std::wstring Wtemp4 = to_wstring(NewZoom);
+	temp4 = (LPCWSTR)Wtemp4.c_str();
+	SetWindowTextW(Info5, temp4);
+}
+
+void SetLocation(INT ULDR) // Set new position on keypress
+{
+	if (ULDR == 0) { NewImag += PixelDif; }
+	if (ULDR == 1) { NewReal -= PixelDif; }
+	if (ULDR == 2) { NewImag -= PixelDif; }
+	if (ULDR == 3) { NewReal += PixelDif; }
+	LPCWSTR temp5;
+	std::stringstream stream;
+	stream << std::fixed << std::setprecision(55) << NewReal;
+	const std::string string5 = stream.str();
+	const std::wstring Wtemp5(string5.begin(), string5.end());
+	temp5 = (LPCWSTR)Wtemp5.c_str();
+	SetWindowTextW(Info2, temp5);
+	LPCWSTR temp6;
+	std::stringstream stream2;
+	stream2 << std::fixed << std::setprecision(40) << NewImag;
+	const std::string string6 = stream2.str();
+	const std::wstring Wtemp6(string6.begin(), string6.end());
+	temp6 = (LPCWSTR)Wtemp6.c_str();
+	SetWindowTextW(Info3, temp6);
 }
