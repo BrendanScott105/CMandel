@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <complex>
 
 using namespace std;
 
@@ -41,29 +42,22 @@ void SetZoomDensity(INT); // Declare
 void SetLocation(INT); // Declare
 void SetRotation(INT); // Declare
 
+std::complex<long double> TableToComplex(INT, INT); // X, Y
+
 HMENU hMenu; // define header menu
 
 HWND Formula1, Formula2, Formula3, Formula4, Formula5, Formula6, Formula7, Formula8, Formula9; // Declare formula menu elements globally
-
 HWND Location1, Location2, Location3, Location4, Location5, Location6, Location7, Location8; // Declare Location menu elements globally
-
 HWND Color1, Color2, Color3, Color4, Color5, Color6, Color7, Color8; // Declare color menu elements globally
-
 HWND HelpMenu1, HelpMenu2, HelpMenu3, HelpMenu4, HelpMenu5, HelpMenu6, HelpMenu7; // Declare help menu elements globally
-
 HWND Top1, Top2, Top3, Top4, Top5, Top6, Top7, Top8, Top9, Top0, TopA; // Declare top level menu elements globally
 HWND Top1a, Top2a, Top3a, Top4a, Top5a, Top6a, Top7a, Top8a, Top9a;
 HWND Top1b, Top2b, Top3b, Top4b, Top5b, Top6b, Top7b, Top8b, Top9b, Top0b, TopAb, TopBb, TopCb, TopDb, TopEb, TopFb;
-
 HWND Info0a, Info0, Info1a, Info1, Info2a, Info2, Info3a, Info3, Info4a, Info4, Info5a, Info5, Info6a, Info6, Info7a, Info7, Info8a, Info8, Info9a, Info9; // Declare info elements globally
-
 HWND Link1, Link2, Link3; // Declare link notif elements globally
-
 HWND IN1, IN2, IN3; // Declare Incorrect Number notif elements globally
-
 HWND FDdrop1, FDdrop2, FDdrop3, FDdrop4, FDdrop5, FDdrop6, FDdrop7, FDdrop8, FDdrop9, FDdropA, FDdropB, FDdropC; // Declare fractal dropdown elements globally
 HWND CDdrop1, CDdrop2, CDdrop3, CDdrop4, CDdrop5, CDdrop6, CDdrop7, CDdrop8; // Declare color dropdown elements globally
-
 HWND RealWinMain; // Declare main window
 
 BOOL FormulaOpen;
@@ -91,10 +85,12 @@ INT ColorType = 0;
 
 /*Fractal variable definitions start*/
 int Iters = 200; // define iterations
-double PixelDif = 0.008;
+long double PixelDif = 0.008;
 BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect, Inverse edge, Grayscale, Inverse Grayscale
-double NewReal = 0; double NewImag = 0; double NewZoom = 2; int Rotation = 0;
+long double NewReal = 0; long double NewImag = 0; long double NewZoom = 2; int Rotation = 0;
 INT RealFractalType = 1;
+
+int ScreenSpaceIters [500][500];
 /*Fractal variables end*/
 
 /*#####################
@@ -138,7 +134,16 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 	case WM_PAINT:
 		Gdiplus::GdiplusStartup(&GdiToken, &gdiStart, nullptr);
 		hdc = BeginPaint(hWnd, &ps);
-		// Call main render function here
+		for (int x = 0; x < 500; x++)
+		{
+			for (int y = 0; y < 500; y++)
+			{
+				if (TableToComplex(x, y).real() > -2) { SetPixel(hdc, x, y+20, RGB(0, 0, x/2)); }
+				if (TableToComplex(x, y).real() > -1) { SetPixel(hdc, x, y + 20, RGB(0, x/2, 0)); }
+				if (TableToComplex(x, y).real() > 0) { SetPixel(hdc, x, y + 20, RGB(x/2, 0, 0)); }
+				if (TableToComplex(x, y).real() > 1) { SetPixel(hdc, x, y + 20, RGB(x / 2, x / 2, x / 2)); }
+			}
+		}
 		EndPaint(hWnd, &ps);
 		return 0;
 	case WM_DESTROY: // when close is hit
@@ -513,7 +518,7 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 
 void HelpMenu(HWND hWnd) // Create help menu
 {
-	HelpMenu1 = CreateWindowW(L"static", L" About CMandel....   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n x86 Build - 64 Bit | Detected threads :\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Rerender entire screen space\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom limited to 64 Bits\n - Precision limited to 64 Bits\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
+	HelpMenu1 = CreateWindowW(L"static", L" About CMandel....   © 2021, Brendan Scott\n\n This is open source software :\n Github.com/BrendanScott105/CMandel\n\n x86 Build - 64 Bit | Detected threads :\n\n Controls :\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Rerender entire screen space\n\n Limitations :\n - Iterations does not exceed 999999\n - Zoom and location limited to CPU specific\n   long double precision\n - Resolution locked at 500x500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
 	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 19, 300, 1, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu4 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
@@ -774,36 +779,35 @@ START LOCATION MODIFICATION
 
 void SetZoomDensity(INT InOut) // Set pixel density for determining distance between points
 {
-	if (InOut == 1) { NewZoom = NewZoom * 1.1; }
-	if (NewZoom > 1125899906842624) { NewZoom = 1125899906842624; }
+	if (InOut == 1) { NewZoom = NewZoom * 1.1; } // Zoom in and out
 	if (InOut == 0) { NewZoom = NewZoom / 1.1; }
-	PixelDif = (4 * (4 / NewZoom)) / 500;
+	PixelDif = (4 * (4 / NewZoom)) / 500; // Zoom logic, allows for non 2^n zoom levels
 	LPCWSTR temp4;
-	std::wstring Wtemp4 = to_wstring(NewZoom);
+	std::wstring Wtemp4 = to_wstring(NewZoom); // Convert
 	temp4 = (LPCWSTR)Wtemp4.c_str();
 	SetWindowTextW(Info5, temp4);
 }
 
 void SetLocation(INT ULDR) // Set new position on keypress
 {
-	if (ULDR == 0) { NewImag += PixelDif; }
+	if (ULDR == 0) { NewImag += PixelDif; } // Proper addition and subtraction
 	if (ULDR == 1) { NewReal -= PixelDif; }
 	if (ULDR == 2) { NewImag -= PixelDif; }
 	if (ULDR == 3) { NewReal += PixelDif; }
 	LPCWSTR temp5;
 	std::stringstream stream;
-	stream << std::fixed << std::setprecision(55) << NewReal;
-	const std::string string5 = stream.str();
+	stream << std::fixed << std::setprecision(55) << NewReal; // Set precision of window number
+	const std::string string5 = stream.str(); // Convert
 	const std::wstring Wtemp5(string5.begin(), string5.end());
 	temp5 = (LPCWSTR)Wtemp5.c_str();
-	SetWindowTextW(Info2, temp5);
+	SetWindowTextW(Info2, temp5); // Set window text
 	LPCWSTR temp6;
 	std::stringstream stream2;
-	stream2 << std::fixed << std::setprecision(40) << NewImag;
-	const std::string string6 = stream2.str();
+	stream2 << std::fixed << std::setprecision(40) << NewImag; // Set precision of window number
+	const std::string string6 = stream2.str(); // Convert
 	const std::wstring Wtemp6(string6.begin(), string6.end());
 	temp6 = (LPCWSTR)Wtemp6.c_str();
-	SetWindowTextW(Info3, temp6);
+	SetWindowTextW(Info3, temp6); // Set window text
 }
 
 void SetRotation(INT CwCCw) // Set new rotation position
@@ -821,5 +825,39 @@ void SetRotation(INT CwCCw) // Set new rotation position
 /*#######################
 END LOCATION MODIFICATION
 #########################
-START
+START ITER TABLE TO CMPLX
 #######################*/
+
+std::complex<long double> TableToComplex(INT TableX, INT TableY) // Input screen coordinates and return a complex at the given location
+{
+	long double TTCoutReal = NewReal;
+	long double TTCoutImag = NewImag;
+	if (TableX > 250)
+	{
+		TTCoutReal += (PixelDif / 2);
+		TTCoutReal += (PixelDif * (TableX));
+		TTCoutReal -= 2;
+	} else {
+		TTCoutReal += (PixelDif / 2);
+		TTCoutReal += (PixelDif * (long double)TableX);
+		TTCoutReal -= 2;
+	}
+	if (TableY > 250)
+	{
+		TTCoutImag += (PixelDif / 2);
+		TTCoutImag += (PixelDif * TableY);
+		TTCoutImag -= 2;
+	} else {
+		TTCoutImag += (PixelDif / 2);
+		TTCoutImag += (PixelDif * (long double)TableY);
+		TTCoutImag -= 2;
+	}
+	std::complex<long double> ComplexOutput(TTCoutReal, TTCoutImag);
+	return(ComplexOutput);
+}
+
+/*#####################
+END ITER TABLE TO CMPLX
+#######################
+START FASTER IMG SETPXL
+#####################*/
