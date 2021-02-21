@@ -795,7 +795,7 @@ std::complex<long double> TableToComplex(INT TableX, INT TableY) // Input screen
 	} else {
 		TTCoutReal -= (PixelDif * (249 - (long double)TableX));
 	}
-	if (TableY > 249)
+	if (TableY < 249)
 	{
 		TTCoutImag -= (PixelDif * (249 - (long double)TableY));
 	} else {
