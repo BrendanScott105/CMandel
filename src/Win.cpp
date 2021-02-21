@@ -42,6 +42,8 @@ void SetZoomDensity(INT); // Declare
 void SetLocation(INT); // Declare
 void SetRotation(INT); // Declare
 
+void RedrawWin(HWND); // Declare small function
+
 std::complex<long double> TableToComplex(INT, INT); // X, Y
 
 HMENU hMenu; // define header menu
@@ -93,9 +95,9 @@ INT RealFractalType = 1;
 int ScreenSpaceIters [500][500];
 /*Fractal variables end*/
 
-/*#####################
-WINDOW LOGIC AND DEFINE
-#####################*/
+/*##########
+WINDOW LOGIC
+##########*/
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) // Enter
 {
@@ -134,16 +136,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 	case WM_PAINT:
 		Gdiplus::GdiplusStartup(&GdiToken, &gdiStart, nullptr);
 		hdc = BeginPaint(hWnd, &ps);
-		for (int x = 0; x < 500; x++)
-		{
-			for (int y = 0; y < 500; y++)
-			{
-				if (TableToComplex(x, y).real() > -2) { SetPixel(hdc, x, y+20, RGB(0, 0, x/2)); }
-				if (TableToComplex(x, y).real() > -1) { SetPixel(hdc, x, y + 20, RGB(0, x/2, 0)); }
-				if (TableToComplex(x, y).real() > 0) { SetPixel(hdc, x, y + 20, RGB(x/2, 0, 0)); }
-				if (TableToComplex(x, y).real() > 1) { SetPixel(hdc, x, y + 20, RGB(x / 2, x / 2, x / 2)); }
-			}
-		}
+		//Test pattern
+		//Test pattern
 		EndPaint(hWnd, &ps);
 		return 0;
 	case WM_DESTROY: // when close is hit
@@ -191,15 +185,15 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			temp9 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp9);
 		}
-		if (wp == VK_UP) {SetZoomDensity(1);} // Zoom in
-		if (wp == VK_DOWN) {SetZoomDensity(0);} // Zoom out
-		if (wp == 0x57) { SetLocation(0); } // Set new position
-		if (wp == 0x41) { SetLocation(1); }
-		if (wp == 0x53) { SetLocation(2); }
-		if (wp == 0x44) { SetLocation(3); }
-		if (wp == 0x45) { SetRotation(0); } // Rotate clockwise
-		if (wp == 0x51) { SetRotation(1); } // Rotate counterclockwise
-		if (wp == VK_F5) {} // For rerendering
+		if (wp == VK_UP) { SetZoomDensity(1); RedrawWin(hWnd); } // Zoom in
+		if (wp == VK_DOWN) {SetZoomDensity(0); RedrawWin(hWnd); } // Zoom out
+		if (wp == 0x57) { SetLocation(0); RedrawWin(hWnd); } // Set new position
+		if (wp == 0x41) { SetLocation(1); RedrawWin(hWnd); }
+		if (wp == 0x53) { SetLocation(2); RedrawWin(hWnd); }
+		if (wp == 0x44) { SetLocation(3); RedrawWin(hWnd); }
+		if (wp == 0x45) { SetRotation(0); RedrawWin(hWnd); } // Rotate clockwise
+		if (wp == 0x51) { SetRotation(1); RedrawWin(hWnd); } // Rotate counterclockwise
+		if (wp == VK_F5) { RedrawWin(hWnd); } // For rerendering
 
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
 	{
@@ -412,6 +406,12 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		return DefWindowProcW(hWnd, defmsg, wp, lp); // return
 	}
 }
+
+/*##############
+END WINDOW LOGIC
+################
+START WINDOW DEF
+##############*/
 
 void InfoBar(HWND hWnd) // add current view information bar
 {
@@ -626,73 +626,49 @@ void ColorDropdown(HWND hWnd) // Create Fractal dropdown menu
 	ColorDrop = TRUE;
 }
 
+/*############
+END WINDOW DEF
+##############
+START DESTROY
+############*/
+
 void DestroyFormulaMenu() // Destroy formula menu
 {
-	DestroyWindow(Formula1);
-	DestroyWindow(Formula2);
-	DestroyWindow(Formula3);
-	DestroyWindow(Formula4);
-	DestroyWindow(Formula5);
-	DestroyWindow(Formula6);
-	DestroyWindow(Formula7);
-	DestroyWindow(Formula8);
-	DestroyWindow(Formula9);
-	FormulaOpen = FALSE;
+	DestroyWindow(Formula1);DestroyWindow(Formula2);DestroyWindow(Formula3);DestroyWindow(Formula4);
+	DestroyWindow(Formula5);DestroyWindow(Formula6);DestroyWindow(Formula7);DestroyWindow(Formula8);
+	DestroyWindow(Formula9);FormulaOpen = FALSE;
 }
 
 void DestroyColorMenu() // Destroy color menu
 {
-	DestroyWindow(Color1);
-	DestroyWindow(Color2);
-	DestroyWindow(Color3);
-	DestroyWindow(Color4);
-	DestroyWindow(Color5);
-	DestroyWindow(Color6);
-	DestroyWindow(Color7);
-	DestroyWindow(Color8);
+	DestroyWindow(Color1);DestroyWindow(Color2);DestroyWindow(Color3);DestroyWindow(Color4);
+	DestroyWindow(Color5);DestroyWindow(Color6);DestroyWindow(Color7);DestroyWindow(Color8);
 	ColorOpen = FALSE;
 }
 
 void DestroyLocationMenu() // Destroy location menu
 {
-	DestroyWindow(Location1);
-	DestroyWindow(Location2);
-	DestroyWindow(Location3);
-	DestroyWindow(Location4);
-	DestroyWindow(Location5);
-	DestroyWindow(Location6);
-	DestroyWindow(Location7);
-	DestroyWindow(Location8);
+	DestroyWindow(Location1);DestroyWindow(Location2);DestroyWindow(Location3);DestroyWindow(Location4);
+	DestroyWindow(Location5);DestroyWindow(Location6);DestroyWindow(Location7);DestroyWindow(Location8);
 	LocationOpen = FALSE;
 }
 
 void DestroyHelpMenu() // Destroy help menu
 {
-	DestroyWindow(HelpMenu1);
-	DestroyWindow(HelpMenu2);
-	DestroyWindow(HelpMenu3);
-	DestroyWindow(HelpMenu4);
+	DestroyWindow(HelpMenu1);DestroyWindow(HelpMenu2);DestroyWindow(HelpMenu3);DestroyWindow(HelpMenu4);
 	HelpOpen = FALSE;
 }
 
 void DestroyLinkNotif() // Destroy link notif
 {
-	DestroyWindow(Link1);
-	DestroyWindow(Link2);
-	DestroyWindow(Link3);
+	DestroyWindow(Link1);DestroyWindow(Link2);DestroyWindow(Link3);
 	LinkNotif = FALSE;
 }
 
 void DestroyConfigDrop(HWND hWnd) // Destroy configuration dropdown menu
 {
-	DestroyWindow(Top1a);
-	DestroyWindow(Top2a);
-	DestroyWindow(Top3a);
-	DestroyWindow(Top4a);
-	DestroyWindow(Top5a);
-	DestroyWindow(Top6a);
-	DestroyWindow(Top7a);
-	DestroyWindow(Top8a);
+	DestroyWindow(Top1a);DestroyWindow(Top2a);DestroyWindow(Top3a);DestroyWindow(Top4a);
+	DestroyWindow(Top5a);DestroyWindow(Top6a);DestroyWindow(Top7a);DestroyWindow(Top8a);
 	DestroyWindow(Top9a);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	ConfigureDrop = FALSE;
@@ -700,79 +676,43 @@ void DestroyConfigDrop(HWND hWnd) // Destroy configuration dropdown menu
 
 void DestroyFiltersDrop(HWND hWnd) // Destroy filters dropdown menu
 {
-	DestroyWindow(Top1b);
-	DestroyWindow(Top2b);
-	DestroyWindow(Top3b);
-	DestroyWindow(Top4b);
-	DestroyWindow(Top5b);
-	DestroyWindow(Top6b);
-	DestroyWindow(Top7b);
-	DestroyWindow(Top8b);
-	DestroyWindow(Top9b);
-	DestroyWindow(Top0b);
-	DestroyWindow(TopAb);
-	DestroyWindow(TopBb);
-	DestroyWindow(TopCb);
-	DestroyWindow(TopDb);
-	DestroyWindow(TopEb);
-	DestroyWindow(TopFb);
+	DestroyWindow(Top1b);DestroyWindow(Top2b);DestroyWindow(Top3b);DestroyWindow(Top4b);
+	DestroyWindow(Top5b);DestroyWindow(Top6b);DestroyWindow(Top7b);DestroyWindow(Top8b);
+	DestroyWindow(Top9b);DestroyWindow(Top0b);DestroyWindow(TopAb);DestroyWindow(TopBb);
+	DestroyWindow(TopCb);DestroyWindow(TopDb);DestroyWindow(TopEb);DestroyWindow(TopFb);
 	Top5 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 136, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	FiltersDrop = FALSE;
 }
 
 void DestroyIncorrectNumberNotif() // Destroy incorrect number notif
 {
-	DestroyWindow(IN1);
-	DestroyWindow(IN2);
-	DestroyWindow(IN3);
+	DestroyWindow(IN1);DestroyWindow(IN2);DestroyWindow(IN3);
 	IncorrectNumberNotif = FALSE;
 }
 
 void DestroyFractDropdown(HWND hWnd) // Destroy fract dropdown
 { 
-	DestroyWindow(FDdrop1);
-	DestroyWindow(FDdrop2);
-	DestroyWindow(FDdrop3);
-	DestroyWindow(FDdrop4);
-	DestroyWindow(FDdrop5);
-	DestroyWindow(FDdrop6);
-	DestroyWindow(FDdrop7);
-	DestroyWindow(FDdrop8);
-	DestroyWindow(FDdrop9);
-	DestroyWindow(FDdropA);
-	DestroyWindow(FDdropB);
-	DestroyWindow(FDdropC);
+	DestroyWindow(FDdrop1);DestroyWindow(FDdrop2);DestroyWindow(FDdrop3);DestroyWindow(FDdrop4);
+	DestroyWindow(FDdrop5);DestroyWindow(FDdrop6);DestroyWindow(FDdrop7);DestroyWindow(FDdrop8);
+	DestroyWindow(FDdrop9);DestroyWindow(FDdropA);DestroyWindow(FDdropB);DestroyWindow(FDdropC);
 	FractDrop = FALSE;
 }
 
 void DestroyColorDropdown(HWND hWnd) { // Destroy fract dropdown
-	DestroyWindow(CDdrop1);
-	DestroyWindow(CDdrop2);
-	DestroyWindow(CDdrop3);
-	DestroyWindow(CDdrop4);
-	DestroyWindow(CDdrop5);
-	DestroyWindow(CDdrop6);
-	DestroyWindow(CDdrop7);
-	DestroyWindow(CDdrop8);
+	DestroyWindow(CDdrop1);DestroyWindow(CDdrop2);DestroyWindow(CDdrop3);DestroyWindow(CDdrop4);
+	DestroyWindow(CDdrop5);DestroyWindow(CDdrop6);DestroyWindow(CDdrop7);DestroyWindow(CDdrop8);
 	ColorDrop = FALSE;
 }
 
 void DestroyAll(HWND hWnd) // Destroy all menus
 {
-	DestroyFractDropdown(hWnd);
-	DestroyColorDropdown(hWnd);
-	DestroyFormulaMenu();
-	DestroyColorMenu();
-	DestroyLocationMenu();
-	DestroyHelpMenu();
-	DestroyLinkNotif();
-	DestroyConfigDrop(hWnd);
-	DestroyFiltersDrop(hWnd);
-	DestroyIncorrectNumberNotif();
+	DestroyFractDropdown(hWnd);DestroyColorDropdown(hWnd);DestroyFormulaMenu();
+	DestroyColorMenu();DestroyLocationMenu();DestroyHelpMenu();DestroyLinkNotif();
+	DestroyConfigDrop(hWnd);DestroyFiltersDrop(hWnd);DestroyIncorrectNumberNotif();
 }
 
 /*#########################
-END WINDOW LOGIC AND DEFINE
+END WINDOW DESTROY
 ###########################
 START LOCATION MODIFICATION
 #########################*/
@@ -859,5 +799,14 @@ std::complex<long double> TableToComplex(INT TableX, INT TableY) // Input screen
 /*#####################
 END ITER TABLE TO CMPLX
 #######################
-START FASTER IMG SETPXL
+START PULL FROM ITERTBL
 #####################*/
+
+
+
+/* Small functions */
+void RedrawWin(HWND hWnd)
+{
+	InvalidateRect(hWnd, NULL, TRUE);
+	UpdateWindow(hWnd);
+}
