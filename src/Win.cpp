@@ -89,7 +89,7 @@ INT ColorType = 0;
 int Iters = 200; // define iterations
 long double PixelDif = 0.008;
 BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect, Inverse edge, Grayscale, Inverse Grayscale
-long double NewReal = 0; long double NewImag = 0; long double NewZoom = 2; int Rotation = 0;
+long double NewReal = 0; long double NewImag = 0; long double NewZoom = 4; int Rotation = 0;
 INT RealFractalType = 1;
 
 int ScreenSpaceIters [500][500];
@@ -137,6 +137,23 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		Gdiplus::GdiplusStartup(&GdiToken, &gdiStart, nullptr);
 		hdc = BeginPaint(hWnd, &ps);
 		//Test pattern
+		for (int x = 0; x < 500; x++)
+		{
+			for (int y = 0; y < 500; y++)
+			{
+				if (TableToComplex(x, y).real() > 1) { SetPixel(hdc, x, y + 20, RGB(x / 2, x / 2, x / 2)); }
+				else if (TableToComplex(x, y).real() > 0) { SetPixel(hdc, x, y + 20, RGB(x / 2, 0, 0)); }
+				else if (TableToComplex(x, y).real() > -1) { SetPixel(hdc, x, y + 20, RGB(0, x / 2, 0)); }
+				else if (TableToComplex(x, y).real() > -2) { SetPixel(hdc, x, y + 20, RGB(0, 0, x / 2)); }
+			}
+			LPCWSTR temp5;
+			std::stringstream stream;
+			stream << std::fixed << std::setprecision(55) << TableToComplex(x, 0).real(); // Set precision of window number
+			const std::string string5 = stream.str(); // Convert
+			const std::wstring Wtemp5(string5.begin(), string5.end());
+			temp5 = (LPCWSTR)Wtemp5.c_str();
+			SetWindowTextW(Info2, temp5); // Set window text
+		}
 		//Test pattern
 		EndPaint(hWnd, &ps);
 		return 0;
@@ -423,7 +440,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 	Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 43, 540, 333, 17, hWnd, NULL, NULL, NULL);
 	Info4a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 0, 558, 1, 19, hWnd, NULL, NULL, NULL);
 	Info5a = CreateWindowW(L"static", L"Zoom : ", WS_VISIBLE | WS_CHILD, 2, 558, 229, 19, hWnd, NULL, NULL, NULL);
-	Info5 = CreateWindowW(L"static", L"2", WS_VISIBLE | WS_CHILD, 52, 558, 180, 16, hWnd, NULL, NULL, NULL);
+	Info5 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_CHILD, 52, 558, 180, 16, hWnd, NULL, NULL, NULL);
 	Info6a = CreateWindowW(L"static", L"Rotation :", WS_VISIBLE | WS_BORDER | WS_CHILD, 232, 557, 98, 18, hWnd, NULL, NULL, NULL);
 	Info6 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 299, 558, 25, 16, hWnd, NULL, NULL, NULL);
 	Info7 = CreateWindowW(L"static", L"Color preset :", WS_VISIBLE | WS_BORDER | WS_CHILD, 324, 557, 103, 18, hWnd, NULL, NULL, NULL);
@@ -772,25 +789,17 @@ std::complex<long double> TableToComplex(INT TableX, INT TableY) // Input screen
 {
 	long double TTCoutReal = NewReal;
 	long double TTCoutImag = NewImag;
-	if (TableX > 250)
+	if (TableX < 249)
 	{
-		TTCoutReal += (PixelDif / 2);
-		TTCoutReal += (PixelDif * (TableX));
-		TTCoutReal -= 2;
+		TTCoutReal -= (PixelDif * (249 - (long double)TableX));
 	} else {
-		TTCoutReal += (PixelDif / 2);
-		TTCoutReal += (PixelDif * (long double)TableX);
-		TTCoutReal -= 2;
+		TTCoutReal -= (PixelDif * (249 - (long double)TableX));
 	}
-	if (TableY > 250)
+	if (TableY > 249)
 	{
-		TTCoutImag += (PixelDif / 2);
-		TTCoutImag += (PixelDif * TableY);
-		TTCoutImag -= 2;
+		TTCoutImag -= (PixelDif * (249 - (long double)TableY));
 	} else {
-		TTCoutImag += (PixelDif / 2);
-		TTCoutImag += (PixelDif * (long double)TableY);
-		TTCoutImag -= 2;
+		TTCoutImag -= (PixelDif * (249 - (long double)TableY));
 	}
 	std::complex<long double> ComplexOutput(TTCoutReal, TTCoutImag);
 	return(ComplexOutput);
