@@ -1,5 +1,5 @@
+#include <SFML/Graphics.hpp>
 #include <windows.h> // Include
-#include <gdiplus.h>
 #include <cmath>
 #include <string>
 #include <thread>
@@ -42,8 +42,6 @@ void SetZoomDensity(INT); // Declare
 void SetLocation(INT); // Declare
 void SetRotation(INT); // Declare
 
-void RedrawWin(HWND); // Declare small function
-
 std::complex<long double> TableToComplex(INT, INT); // X, Y
 
 HMENU hMenu; // define header menu
@@ -75,9 +73,9 @@ BOOL ColorDrop = FALSE;
 BOOL SmoothColor = FALSE;
 
 POINT Cursor;
-
-Gdiplus::GdiplusStartupInput gdiStart;
 ULONG_PTR GdiToken;
+HDC hdc;
+PAINTSTRUCT ps;
 
 BOOL ScreenMirror = FALSE;
 BOOL JuliaMode = FALSE;
@@ -92,7 +90,7 @@ BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect,
 long double NewReal = 0; long double NewImag = 0; long double NewZoom = 4; int Rotation = 0;
 INT RealFractalType = 1;
 
-int ScreenSpaceIters [500][500];
+int ScreenSpaceIters[500][500];
 /*Fractal variables end*/
 
 /*##########
@@ -113,20 +111,48 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		return -1;
 
 	RealWinMain = CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME) & ~WS_MAXIMIZEBOX & ~WS_CAPTION | WS_VISIBLE | WS_BORDER | WS_POPUP, 500, 200, 502, 577, NULL, NULL, NULL, NULL); // Create window with basic params
-
-	MSG defmsg = { 0 }; // define empty message
-	while (GetMessage(&defmsg, NULL, NULL, NULL)) // keep window open
+	Info1a = CreateWindowW(L"static", NULL, WS_VISIBLE | WS_CHILD, 0, 20, 500, 500, RealWinMain, NULL, NULL, NULL);
+	sf::RenderWindow SFMLMain(Info1a);
+	MSG Message;
+	Message.message = ~WM_QUIT;
+	while (Message.message != WM_QUIT)
 	{
-		TranslateMessage(&defmsg);
-		DispatchMessage(&defmsg);
+		if (PeekMessage(&Message, NULL, 0, 0, PM_REMOVE))
+		{
+			// If a message was waiting in the message queue, process it
+			TranslateMessage(&Message);
+			DispatchMessage(&Message);
+		}
+		else
+		{
+			sf::Image ImageMain;
+			ImageMain.create(500, 500);
+
+			//TEST PATTERN
+			for (int x = 0; x < 500; x++)
+			{
+				for (int y = 0; y < 500; y++)
+				{
+					if (TableToComplex(x, y).real() > 1) { ImageMain.setPixel(x, y, sf::Color(x / 2, x / 2, x / 2)); }
+					else if (TableToComplex(x, y).real() > 0) { ImageMain.setPixel(x, y, sf::Color(x / 2, 0, 0)); }
+					else if (TableToComplex(x, y).real() > -1) { ImageMain.setPixel(x, y, sf::Color(0, x / 2, 0)); }
+					else if (TableToComplex(x, y).real() > -2) { ImageMain.setPixel(x, y, sf::Color(0, 0, x / 2)); }
+				}
+			}
+			//TEST PATTERN
+
+			sf::Texture TextureMain;
+			TextureMain.loadFromImage(ImageMain);
+			sf::Sprite SpriteMain(TextureMain);
+			SFMLMain.draw(SpriteMain);
+			SFMLMain.display();
+		}
 	}
-	return 0;
+
 }
 
 LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window procedure code
 {
-	HDC hdc;
-	PAINTSTRUCT ps;
 	switch (defmsg)
 	{
 	case WM_CREATE: // when window is created
@@ -134,31 +160,13 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		InfoBar(hWnd);
 		break;
 	case WM_PAINT:
-		Gdiplus::GdiplusStartup(&GdiToken, &gdiStart, nullptr);
+	{
 		hdc = BeginPaint(hWnd, &ps);
-		//Test pattern
-		for (int x = 0; x < 500; x++)
-		{
-			for (int y = 0; y < 500; y++)
-			{
-				if (TableToComplex(x, y).real() > 1) { SetPixel(hdc, x, y + 20, RGB(x / 2, x / 2, x / 2)); }
-				else if (TableToComplex(x, y).real() > 0) { SetPixel(hdc, x, y + 20, RGB(x / 2, 0, 0)); }
-				else if (TableToComplex(x, y).real() > -1) { SetPixel(hdc, x, y + 20, RGB(0, x / 2, 0)); }
-				else if (TableToComplex(x, y).real() > -2) { SetPixel(hdc, x, y + 20, RGB(0, 0, x / 2)); }
-			}
-			LPCWSTR temp5;
-			std::stringstream stream;
-			stream << std::fixed << std::setprecision(55) << TableToComplex(x, 0).real(); // Set precision of window number
-			const std::string string5 = stream.str(); // Convert
-			const std::wstring Wtemp5(string5.begin(), string5.end());
-			temp5 = (LPCWSTR)Wtemp5.c_str();
-			SetWindowTextW(Info2, temp5); // Set window text
-		}
-		//Test pattern
+		// Call main render function here
 		EndPaint(hWnd, &ps);
 		return 0;
+	}
 	case WM_DESTROY: // when close is hit
-		Gdiplus::GdiplusShutdown(GdiToken);
 		PostQuitMessage(0); // close and send exit code 0
 		break;
 	case WM_KEYDOWN:
@@ -202,15 +210,15 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			temp9 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp9);
 		}
-		if (wp == VK_UP) { SetZoomDensity(1); RedrawWin(hWnd); } // Zoom in
-		if (wp == VK_DOWN) {SetZoomDensity(0); RedrawWin(hWnd); } // Zoom out
-		if (wp == 0x57) { SetLocation(0); RedrawWin(hWnd); } // Set new position
-		if (wp == 0x41) { SetLocation(1); RedrawWin(hWnd); }
-		if (wp == 0x53) { SetLocation(2); RedrawWin(hWnd); }
-		if (wp == 0x44) { SetLocation(3); RedrawWin(hWnd); }
-		if (wp == 0x45) { SetRotation(0); RedrawWin(hWnd); } // Rotate clockwise
-		if (wp == 0x51) { SetRotation(1); RedrawWin(hWnd); } // Rotate counterclockwise
-		if (wp == VK_F5) { RedrawWin(hWnd); } // For rerendering
+		if (wp == VK_UP) { SetZoomDensity(1); } // Zoom in
+		if (wp == VK_DOWN) { SetZoomDensity(0); } // Zoom out
+		if (wp == 0x57) { SetLocation(0); } // Set new position
+		if (wp == 0x41) { SetLocation(1); }
+		if (wp == 0x53) { SetLocation(2); }
+		if (wp == 0x44) { SetLocation(3); }
+		if (wp == 0x45) { SetRotation(0); } // Rotate clockwise
+		if (wp == 0x51) { SetRotation(1); } // Rotate counterclockwise
+		if (wp == VK_F5) { } // For rerendering
 
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
 	{
@@ -651,41 +659,41 @@ START DESTROY
 
 void DestroyFormulaMenu() // Destroy formula menu
 {
-	DestroyWindow(Formula1);DestroyWindow(Formula2);DestroyWindow(Formula3);DestroyWindow(Formula4);
-	DestroyWindow(Formula5);DestroyWindow(Formula6);DestroyWindow(Formula7);DestroyWindow(Formula8);
-	DestroyWindow(Formula9);FormulaOpen = FALSE;
+	DestroyWindow(Formula1); DestroyWindow(Formula2); DestroyWindow(Formula3); DestroyWindow(Formula4);
+	DestroyWindow(Formula5); DestroyWindow(Formula6); DestroyWindow(Formula7); DestroyWindow(Formula8);
+	DestroyWindow(Formula9); FormulaOpen = FALSE;
 }
 
 void DestroyColorMenu() // Destroy color menu
 {
-	DestroyWindow(Color1);DestroyWindow(Color2);DestroyWindow(Color3);DestroyWindow(Color4);
-	DestroyWindow(Color5);DestroyWindow(Color6);DestroyWindow(Color7);DestroyWindow(Color8);
+	DestroyWindow(Color1); DestroyWindow(Color2); DestroyWindow(Color3); DestroyWindow(Color4);
+	DestroyWindow(Color5); DestroyWindow(Color6); DestroyWindow(Color7); DestroyWindow(Color8);
 	ColorOpen = FALSE;
 }
 
 void DestroyLocationMenu() // Destroy location menu
 {
-	DestroyWindow(Location1);DestroyWindow(Location2);DestroyWindow(Location3);DestroyWindow(Location4);
-	DestroyWindow(Location5);DestroyWindow(Location6);DestroyWindow(Location7);DestroyWindow(Location8);
+	DestroyWindow(Location1); DestroyWindow(Location2); DestroyWindow(Location3); DestroyWindow(Location4);
+	DestroyWindow(Location5); DestroyWindow(Location6); DestroyWindow(Location7); DestroyWindow(Location8);
 	LocationOpen = FALSE;
 }
 
 void DestroyHelpMenu() // Destroy help menu
 {
-	DestroyWindow(HelpMenu1);DestroyWindow(HelpMenu2);DestroyWindow(HelpMenu3);DestroyWindow(HelpMenu4);
+	DestroyWindow(HelpMenu1); DestroyWindow(HelpMenu2); DestroyWindow(HelpMenu3); DestroyWindow(HelpMenu4);
 	HelpOpen = FALSE;
 }
 
 void DestroyLinkNotif() // Destroy link notif
 {
-	DestroyWindow(Link1);DestroyWindow(Link2);DestroyWindow(Link3);
+	DestroyWindow(Link1); DestroyWindow(Link2); DestroyWindow(Link3);
 	LinkNotif = FALSE;
 }
 
 void DestroyConfigDrop(HWND hWnd) // Destroy configuration dropdown menu
 {
-	DestroyWindow(Top1a);DestroyWindow(Top2a);DestroyWindow(Top3a);DestroyWindow(Top4a);
-	DestroyWindow(Top5a);DestroyWindow(Top6a);DestroyWindow(Top7a);DestroyWindow(Top8a);
+	DestroyWindow(Top1a); DestroyWindow(Top2a); DestroyWindow(Top3a); DestroyWindow(Top4a);
+	DestroyWindow(Top5a); DestroyWindow(Top6a); DestroyWindow(Top7a); DestroyWindow(Top8a);
 	DestroyWindow(Top9a);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	ConfigureDrop = FALSE;
@@ -693,39 +701,39 @@ void DestroyConfigDrop(HWND hWnd) // Destroy configuration dropdown menu
 
 void DestroyFiltersDrop(HWND hWnd) // Destroy filters dropdown menu
 {
-	DestroyWindow(Top1b);DestroyWindow(Top2b);DestroyWindow(Top3b);DestroyWindow(Top4b);
-	DestroyWindow(Top5b);DestroyWindow(Top6b);DestroyWindow(Top7b);DestroyWindow(Top8b);
-	DestroyWindow(Top9b);DestroyWindow(Top0b);DestroyWindow(TopAb);DestroyWindow(TopBb);
-	DestroyWindow(TopCb);DestroyWindow(TopDb);DestroyWindow(TopEb);DestroyWindow(TopFb);
+	DestroyWindow(Top1b); DestroyWindow(Top2b); DestroyWindow(Top3b); DestroyWindow(Top4b);
+	DestroyWindow(Top5b); DestroyWindow(Top6b); DestroyWindow(Top7b); DestroyWindow(Top8b);
+	DestroyWindow(Top9b); DestroyWindow(Top0b); DestroyWindow(TopAb); DestroyWindow(TopBb);
+	DestroyWindow(TopCb); DestroyWindow(TopDb); DestroyWindow(TopEb); DestroyWindow(TopFb);
 	Top5 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 136, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	FiltersDrop = FALSE;
 }
 
 void DestroyIncorrectNumberNotif() // Destroy incorrect number notif
 {
-	DestroyWindow(IN1);DestroyWindow(IN2);DestroyWindow(IN3);
+	DestroyWindow(IN1); DestroyWindow(IN2); DestroyWindow(IN3);
 	IncorrectNumberNotif = FALSE;
 }
 
 void DestroyFractDropdown(HWND hWnd) // Destroy fract dropdown
-{ 
-	DestroyWindow(FDdrop1);DestroyWindow(FDdrop2);DestroyWindow(FDdrop3);DestroyWindow(FDdrop4);
-	DestroyWindow(FDdrop5);DestroyWindow(FDdrop6);DestroyWindow(FDdrop7);DestroyWindow(FDdrop8);
-	DestroyWindow(FDdrop9);DestroyWindow(FDdropA);DestroyWindow(FDdropB);DestroyWindow(FDdropC);
+{
+	DestroyWindow(FDdrop1); DestroyWindow(FDdrop2); DestroyWindow(FDdrop3); DestroyWindow(FDdrop4);
+	DestroyWindow(FDdrop5); DestroyWindow(FDdrop6); DestroyWindow(FDdrop7); DestroyWindow(FDdrop8);
+	DestroyWindow(FDdrop9); DestroyWindow(FDdropA); DestroyWindow(FDdropB); DestroyWindow(FDdropC);
 	FractDrop = FALSE;
 }
 
 void DestroyColorDropdown(HWND hWnd) { // Destroy fract dropdown
-	DestroyWindow(CDdrop1);DestroyWindow(CDdrop2);DestroyWindow(CDdrop3);DestroyWindow(CDdrop4);
-	DestroyWindow(CDdrop5);DestroyWindow(CDdrop6);DestroyWindow(CDdrop7);DestroyWindow(CDdrop8);
+	DestroyWindow(CDdrop1); DestroyWindow(CDdrop2); DestroyWindow(CDdrop3); DestroyWindow(CDdrop4);
+	DestroyWindow(CDdrop5); DestroyWindow(CDdrop6); DestroyWindow(CDdrop7); DestroyWindow(CDdrop8);
 	ColorDrop = FALSE;
 }
 
 void DestroyAll(HWND hWnd) // Destroy all menus
 {
-	DestroyFractDropdown(hWnd);DestroyColorDropdown(hWnd);DestroyFormulaMenu();
-	DestroyColorMenu();DestroyLocationMenu();DestroyHelpMenu();DestroyLinkNotif();
-	DestroyConfigDrop(hWnd);DestroyFiltersDrop(hWnd);DestroyIncorrectNumberNotif();
+	DestroyFractDropdown(hWnd); DestroyColorDropdown(hWnd); DestroyFormulaMenu();
+	DestroyColorMenu(); DestroyLocationMenu(); DestroyHelpMenu(); DestroyLinkNotif();
+	DestroyConfigDrop(hWnd); DestroyFiltersDrop(hWnd); DestroyIncorrectNumberNotif();
 }
 
 /*#########################
@@ -747,10 +755,10 @@ void SetZoomDensity(INT InOut) // Set pixel density for determining distance bet
 
 void SetLocation(INT ULDR) // Set new position on keypress
 {
-	if (ULDR == 0) { NewImag += PixelDif; } // Proper addition and subtraction
-	if (ULDR == 1) { NewReal -= PixelDif; }
-	if (ULDR == 2) { NewImag -= PixelDif; }
-	if (ULDR == 3) { NewReal += PixelDif; }
+	if (ULDR == 0) { NewImag += PixelDif*10; } // Proper addition and subtraction
+	if (ULDR == 1) { NewReal -= PixelDif*10; }
+	if (ULDR == 2) { NewImag -= PixelDif*10; }
+	if (ULDR == 3) { NewReal += PixelDif*10; }
 	LPCWSTR temp5;
 	std::stringstream stream;
 	stream << std::fixed << std::setprecision(55) << NewReal; // Set precision of window number
@@ -792,13 +800,15 @@ std::complex<long double> TableToComplex(INT TableX, INT TableY) // Input screen
 	if (TableX < 249)
 	{
 		TTCoutReal -= (PixelDif * (249 - (long double)TableX));
-	} else {
+	}
+	else {
 		TTCoutReal -= (PixelDif * (249 - (long double)TableX));
 	}
 	if (TableY < 249)
 	{
 		TTCoutImag -= (PixelDif * (249 - (long double)TableY));
-	} else {
+	}
+	else {
 		TTCoutImag -= (PixelDif * (249 - (long double)TableY));
 	}
 	std::complex<long double> ComplexOutput(TTCoutReal, TTCoutImag);
@@ -808,14 +818,5 @@ std::complex<long double> TableToComplex(INT TableX, INT TableY) // Input screen
 /*#####################
 END ITER TABLE TO CMPLX
 #######################
-START PULL FROM ITERTBL
+START COLORIZE WRAPPER
 #####################*/
-
-
-
-/* Small functions */
-void RedrawWin(HWND hWnd)
-{
-	InvalidateRect(hWnd, NULL, TRUE);
-	UpdateWindow(hWnd);
-}
