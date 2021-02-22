@@ -45,6 +45,8 @@ void PullFromIter(); // Declare
 
 void ColorizePlot(INT, INT, INT); // Declare
 
+void ShiftScreen(INT); // Declare
+
 std::complex<long double> TableToComplex(INT, INT); // X, Y
 
 HMENU hMenu; // define header menu
@@ -123,6 +125,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	RealWinMain = CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME) & ~WS_MAXIMIZEBOX & ~WS_CAPTION | WS_VISIBLE | WS_BORDER | WS_POPUP, 500, 200, 502, 577, NULL, NULL, NULL, NULL); // Create window with basic params
 	SubWin = CreateWindowW(L"static", NULL, WS_VISIBLE | WS_CHILD, 0, 20, 500, 500, RealWinMain, NULL, NULL, NULL);
 	sf::RenderWindow SFMLMain(SubWin);
+
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			ScreenSpaceIters[x][y] = x+y;
+		}
+	}
+
 	MSG Message;
 	Message.message = ~WM_QUIT;
 	while (Message.message != WM_QUIT)
@@ -138,9 +149,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 			{
 				ImageMain.create(500, 500);
 
-				//TEST PATTERN
 				PullFromIter();
-				//TEST PATTERN
 
 				TextureMain.loadFromImage(ImageMain);
 				sf::Sprite SpriteMain(TextureMain);
@@ -214,10 +223,10 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		}
 		if (wp == VK_UP) { SetZoomDensity(1); } // Zoom in
 		if (wp == VK_DOWN) { SetZoomDensity(0); } // Zoom out
-		if (wp == 0x57) { SetLocation(0); } // Set new position
-		if (wp == 0x41) { SetLocation(1); }
-		if (wp == 0x53) { SetLocation(2); }
-		if (wp == 0x44) { SetLocation(3); }
+		if (wp == 0x57) { SetLocation(0); ShiftScreen(3);} // Set new position
+		if (wp == 0x41) { SetLocation(1); ShiftScreen(2);}
+		if (wp == 0x53) { SetLocation(2); ShiftScreen(1);}
+		if (wp == 0x44) { SetLocation(3); ShiftScreen(0); }
 		if (wp == 0x45) { SetRotation(0); } // Rotate clockwise
 		if (wp == 0x51) { SetRotation(1); } // Rotate counterclockwise
 		if (wp == VK_F5) { } // For rerendering
@@ -811,13 +820,13 @@ END ITER TABLE TO CMPLX
 #######################
 START PULL FROM ITERTBL
 #####################*/
+
 void PullFromIter()
 {
 	for (int x = 0; x < 500; x++)
 	{
 		for (int y = 0; y < 500; y++)
 		{
-			ScreenSpaceIters[x][y] = x;
 			ColorizePlot(ScreenSpaceIters[x][y], x, y); // Pull iteration from iteration table and send it into colorize function
 		}
 	}
@@ -825,6 +834,55 @@ void PullFromIter()
 
 /*###################
 END PULL FROM ITERTBL
+#####################
+START SHIFT ITERTABLE
+###################*/
+
+void ShiftScreen(INT Direction) {
+	if (Direction == 0) // Move pixels to the left creating space on the right
+	{
+		for (int x = 0; x < 489; x++)
+		{
+			for (int y = 0; y < 500; y++)
+			{
+				ScreenSpaceIters[x][y] = ScreenSpaceIters[x + 10][y];
+			}
+		}
+	}
+	if (Direction == 1) // Move pixels to the top creating space on the bottom
+	{
+		for (int y = 0; y < 489; y++)
+		{
+			for (int x = 0; x < 500; x++)
+			{
+				ScreenSpaceIters[x][y] = ScreenSpaceIters[x][y + 10];
+			}
+		}
+	}
+	if (Direction == 2) // Move pixels to the right creating space on the left
+	{
+		for (int x = 0; x < 489; x++)
+		{
+			for (int y = 0; y < 500; y++)
+			{
+				ScreenSpaceIters[(489 - x)+10][y] = ScreenSpaceIters[(489-x)][y];
+			}
+		}
+	}
+	if (Direction == 3) // Move pixels to the bottom creating space on the top
+	{
+		for (int y = 0; y < 489; y++)
+		{
+			for (int x = 0; x < 500; x++)
+			{
+				ScreenSpaceIters[x][(489-y)+10] = ScreenSpaceIters[x][(489-y)];
+			}
+		}
+	}
+}
+
+/*###################
+END SHIFT ITERTABLE
 #####################
 START MAIN COLOR FUNC
 ###################*/
