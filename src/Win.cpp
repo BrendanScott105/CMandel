@@ -203,6 +203,13 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			std::wstring Wtemp2 = to_wstring(Iters);
 			temp8 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp8);
+			for (int x = 0; x < 500; x++)
+			{
+				for (int y = 0; y < 500; y++)
+				{
+					PlotPoint(x, y);
+				}
+			}
 		}
 		if (wp == VK_OEM_MINUS and Iters > 0) // when "-" is hit
 		{
@@ -223,6 +230,13 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			std::wstring Wtemp2 = to_wstring(Iters);
 			temp9 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp9);
+			for (int x = 0; x < 500; x++)
+			{
+				for (int y = 0; y < 500; y++)
+				{
+					PlotPoint(x, y);
+				}
+			}
 		}
 		if (wp == VK_UP) { SetZoomDensity(1); PlotPoint(250, 250);} // Zoom in
 		if (wp == VK_DOWN) { SetZoomDensity(0); PlotPoint(250, 250);} // Zoom out
@@ -411,7 +425,16 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 					Valid3 = TRUE;
 				}
 				else { DestroyIncorrectNumberNotif(); IncorrectNumBox(hWnd); } // if incorrect open infobox
-				if ((Valid1 && Valid2 &&Valid3) == TRUE) { DestroyAll(hWnd); }
+				if ((Valid1 && Valid2 &&Valid3) == TRUE) { 
+					DestroyAll(hWnd);
+					for (int x = 0; x < 500; x++)
+					{
+						for (int y = 0; y < 500; y++)
+						{
+							PlotPoint(x, y);
+						}
+					}
+				}
 			}
 			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 320)))) { DestroyAll(hWnd); } // Close menu from cancel button
 			if (((XWindowPosition > 332) and (XWindowPosition < 348) and ((YWindowPosition > 178) and (YWindowPosition < 194)))) { DestroyAll(hWnd); } // Close menu from X button
@@ -464,7 +487,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.4.3", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.5", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -760,6 +783,13 @@ void SetZoomDensity(INT InOut) // Set pixel density for determining distance bet
 	const std::wstring Wtemp5(string5.begin(), string5.end());
 	temp4 = (LPCWSTR)Wtemp5.c_str();
 	SetWindowTextW(Info5, temp4); // Set window text
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			PlotPoint(x, y);
+		}
+	}
 }
 
 void SetLocation(INT ULDR) // Set new position on keypress
@@ -857,6 +887,13 @@ void ShiftScreen(INT Direction) {
 				ScreenSpaceIters[x][y] = ScreenSpaceIters[x + 10][y];
 			}
 		}
+		for (int x = 489; x < 500; x++)
+		{
+			for (int y = 0; y < 500; y++)
+			{
+				PlotPoint(x, y);
+			}
+		}
 	}
 	if (Direction == 1) // Move pixels to the top creating space on the bottom
 	{
@@ -865,6 +902,13 @@ void ShiftScreen(INT Direction) {
 			for (int x = 0; x < 500; x++)
 			{
 				ScreenSpaceIters[x][y] = ScreenSpaceIters[x][y + 10];
+			}
+		}
+		for (int x = 0; x < 500; x++)
+		{
+			for (int y = 489; y < 500; y++)
+			{
+				PlotPoint(x, y);
 			}
 		}
 	}
@@ -877,6 +921,13 @@ void ShiftScreen(INT Direction) {
 			ScreenSpaceIters[(489 - x) + 10][y] = ScreenSpaceIters[(489 - x)][y];
 		}
 	}
+	for (int x = 0; x < 11; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			PlotPoint(x, y);
+		}
+	}
 	}
 	if (Direction == 3) // Move pixels to the bottom creating space on the top
 	{
@@ -885,6 +936,13 @@ void ShiftScreen(INT Direction) {
 			for (int x = 0; x < 500; x++)
 			{
 				ScreenSpaceIters[x][(489 - y) + 10] = ScreenSpaceIters[x][(489 - y)];
+			}
+		}
+		for (int x = 0; x < 500; x++)
+		{
+			for (int y = 0; y < 11; y++)
+			{
+				PlotPoint(x, y);
 			}
 		}
 	}
@@ -973,13 +1031,20 @@ void PlotPoint(INT x, INT y)
 
 	if (RealFractalType == 1) // Mandelbrot set
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		long double q = ((CPoint.real() - 0.25) * (CPoint.real() - 0.25)) + (CPoint.imag() * CPoint.imag());
+		if ((q * (q + (CPoint.real() - 0.25)) <= (0.25 * (CPoint.imag() * CPoint.imag()))) || (((CPoint.real() + 1) * (CPoint.real() + 1)) + (CPoint.imag() * CPoint.imag())) <= 0.0625)
 		{
-			zi = zr * zi * 2 + CPoint.imag();
-			zr = zrsqr - zisqr + CPoint.real();
-			zisqr = zi * zi;
-			zrsqr = zr * zr;
-			count++;
+			count = Iters;
+		}
+		else {
+			while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+			{
+				zi = zr * zi * 2 + CPoint.imag();
+				zr = zrsqr - zisqr + CPoint.real();
+				zisqr = zi * zi;
+				zrsqr = zr * zr;
+				count++;
+			}
 		}
 	}
 	if (RealFractalType == 2) // Burning ship
