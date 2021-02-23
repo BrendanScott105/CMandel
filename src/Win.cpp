@@ -212,7 +212,6 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 	case WM_CREATE: // when window is created
 		TitleBar(hWnd); // Call title bar function
 		InfoBar(hWnd);
-		SetWindowText(Top1, L" CMandel 0.6.1");
 		break;
 	case WM_PAINT:
 	{
