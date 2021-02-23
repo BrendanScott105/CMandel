@@ -553,13 +553,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				else { DestroyIncorrectNumberNotif(); IncorrectNumBox(hWnd); } // if incorrect open infobox
 				if ((Valid1 && Valid2 &&Valid3) == TRUE) { 
 					DestroyAll(hWnd);
-					for (int x = 0; x < 500; x++)
-					{
-						for (int y = 0; y < 500; y++)
-						{
-							PlotPoint(x, y);
-						}
-					}
+					SetZoomDensity(2);
 				}
 			}
 			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 320)))) { DestroyAll(hWnd); } // Close menu from cancel button
@@ -613,7 +607,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.6", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.6.1", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -901,6 +895,7 @@ void SetZoomDensity(INT InOut) // Set pixel density for determining distance bet
 {
 	if (InOut == 1) { NewZoom = NewZoom * 1.1; } // Zoom in and out
 	if (InOut == 0) { NewZoom = NewZoom / 1.1; }
+	if (InOut == 2) {}
 	PixelDif = (4 * (4 / NewZoom)) / 500; // Zoom logic, allows for non 2^n zoom levels
 	LPCWSTR temp4;
 	std::stringstream stream;
