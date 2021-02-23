@@ -7,9 +7,6 @@ Reworked Mandelbrot explorer
 - Color schemes and smooth coloring [hopefully]
 - Lightweight  
 
-# File Index  
-src/Win.cpp - Everything
-
 # Example zoom
 ![](gif2.gif)
 
