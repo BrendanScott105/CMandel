@@ -13,4 +13,4 @@ src/Win.cpp - Everything
 # Example zoom
 ![](gif2.gif)
 
-[Sped up and recorded with external software]
+[Output bmp's merged with ffmpeg]
