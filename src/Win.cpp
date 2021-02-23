@@ -49,6 +49,22 @@ void ShiftScreen(INT); // Declare
 
 void PlotPoint(INT, INT);
 
+void NaiveThread1(); // Declare thread
+void NaiveThread2(); // Declare thread
+void NaiveThread3(); // Declare thread
+void NaiveThread4(); // Declare thread
+
+void NaiveThread100();
+void NaiveThread101();
+void NaiveThread102();
+void NaiveThread103();
+void NaiveThread104();
+void NaiveThread105();
+void NaiveThread106();
+void NaiveThread107();
+void NaiveThread108();
+void NaiveThread109();
+
 std::complex<long double> TableToComplex(INT, INT); // X, Y
 
 HMENU hMenu; // define header menu
@@ -107,6 +123,8 @@ INT RealFractalType = 1;
 int ScreenSpaceIters[500][500];
 /*Fractal variables end*/
 
+INT SYSTEMTHREADS = std::thread::hardware_concurrency();
+
 /*##########
 WINDOW LOGIC
 ##########*/
@@ -128,12 +146,48 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	SubWin = CreateWindowW(L"static", NULL, WS_VISIBLE | WS_CHILD, 0, 20, 500, 500, RealWinMain, NULL, NULL, NULL);
 	sf::RenderWindow SFMLMain(SubWin);
 
-	for (int x = 0; x < 500; x++)
+	if (SYSTEMTHREADS < 4)
 	{
-		for (int y = 0; y < 500; y++)
+		for (int x = 0; x < 500; x++)
 		{
-			PlotPoint(x, y);
+			for (int y = 0; y < 500; y++)
+			{
+				PlotPoint(x, y);
+			}
 		}
+	}
+	if (SYSTEMTHREADS < 10)
+	{
+		std::thread T1(NaiveThread1);
+		std::thread T2(NaiveThread2);
+		std::thread T3(NaiveThread3);
+		std::thread T4(NaiveThread4);
+		T1.join();
+		T2.join();
+		T3.join();
+		T4.join();
+	}
+	else {
+		std::thread T0(NaiveThread100);
+		std::thread T1(NaiveThread101);
+		std::thread T2(NaiveThread102);
+		std::thread T3(NaiveThread103);
+		std::thread T4(NaiveThread104);
+		std::thread T5(NaiveThread105);
+		std::thread T6(NaiveThread106);
+		std::thread T7(NaiveThread107);
+		std::thread T8(NaiveThread108);
+		std::thread T9(NaiveThread109);
+		T0.join();
+		T1.join();
+		T2.join();
+		T3.join();
+		T4.join();
+		T5.join();
+		T6.join();
+		T7.join();
+		T8.join();
+		T9.join();
 	}
 	
 
@@ -203,12 +257,48 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			std::wstring Wtemp2 = to_wstring(Iters);
 			temp8 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp8);
-			for (int x = 0; x < 500; x++)
+			if (SYSTEMTHREADS < 4)
 			{
-				for (int y = 0; y < 500; y++)
+				for (int x = 0; x < 500; x++)
 				{
-					PlotPoint(x, y);
+					for (int y = 0; y < 500; y++)
+					{
+						PlotPoint(x, y);
+					}
 				}
+			}
+			if (SYSTEMTHREADS < 10)
+			{
+				std::thread T1(NaiveThread1);
+				std::thread T2(NaiveThread2);
+				std::thread T3(NaiveThread3);
+				std::thread T4(NaiveThread4);
+				T1.join();
+				T2.join();
+				T3.join();
+				T4.join();
+			}
+			else {
+				std::thread T0(NaiveThread100);
+				std::thread T1(NaiveThread101);
+				std::thread T2(NaiveThread102);
+				std::thread T3(NaiveThread103);
+				std::thread T4(NaiveThread104);
+				std::thread T5(NaiveThread105);
+				std::thread T6(NaiveThread106);
+				std::thread T7(NaiveThread107);
+				std::thread T8(NaiveThread108);
+				std::thread T9(NaiveThread109);
+				T0.join();
+				T1.join();
+				T2.join();
+				T3.join();
+				T4.join();
+				T5.join();
+				T6.join();
+				T7.join();
+				T8.join();
+				T9.join();
 			}
 		}
 		if (wp == VK_OEM_MINUS and Iters > 0) // when "-" is hit
@@ -230,12 +320,48 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			std::wstring Wtemp2 = to_wstring(Iters);
 			temp9 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp9);
-			for (int x = 0; x < 500; x++)
+			if (SYSTEMTHREADS < 4)
 			{
-				for (int y = 0; y < 500; y++)
+				for (int x = 0; x < 500; x++)
 				{
-					PlotPoint(x, y);
+					for (int y = 0; y < 500; y++)
+					{
+						PlotPoint(x, y);
+					}
 				}
+			}
+			if (SYSTEMTHREADS < 10)
+			{
+				std::thread T1(NaiveThread1);
+				std::thread T2(NaiveThread2);
+				std::thread T3(NaiveThread3);
+				std::thread T4(NaiveThread4);
+				T1.join();
+				T2.join();
+				T3.join();
+				T4.join();
+			}
+			else {
+				std::thread T0(NaiveThread100);
+				std::thread T1(NaiveThread101);
+				std::thread T2(NaiveThread102);
+				std::thread T3(NaiveThread103);
+				std::thread T4(NaiveThread104);
+				std::thread T5(NaiveThread105);
+				std::thread T6(NaiveThread106);
+				std::thread T7(NaiveThread107);
+				std::thread T8(NaiveThread108);
+				std::thread T9(NaiveThread109);
+				T0.join();
+				T1.join();
+				T2.join();
+				T3.join();
+				T4.join();
+				T5.join();
+				T6.join();
+				T7.join();
+				T8.join();
+				T9.join();
 			}
 		}
 		if (wp == VK_UP) { SetZoomDensity(1); PlotPoint(250, 250);} // Zoom in
@@ -783,12 +909,48 @@ void SetZoomDensity(INT InOut) // Set pixel density for determining distance bet
 	const std::wstring Wtemp5(string5.begin(), string5.end());
 	temp4 = (LPCWSTR)Wtemp5.c_str();
 	SetWindowTextW(Info5, temp4); // Set window text
-	for (int x = 0; x < 500; x++)
+	if (SYSTEMTHREADS < 4)
 	{
-		for (int y = 0; y < 500; y++)
+		for (int x = 0; x < 500; x++)
 		{
-			PlotPoint(x, y);
+			for (int y = 0; y < 500; y++)
+			{
+				PlotPoint(x, y);
+			}
 		}
+	}
+	if (SYSTEMTHREADS < 10)
+	{
+		std::thread T1(NaiveThread1);
+		std::thread T2(NaiveThread2);
+		std::thread T3(NaiveThread3);
+		std::thread T4(NaiveThread4);
+		T1.join();
+		T2.join();
+		T3.join();
+		T4.join();
+	}
+	else {
+		std::thread T0(NaiveThread100);
+		std::thread T1(NaiveThread101);
+		std::thread T2(NaiveThread102);
+		std::thread T3(NaiveThread103);
+		std::thread T4(NaiveThread104);
+		std::thread T5(NaiveThread105);
+		std::thread T6(NaiveThread106);
+		std::thread T7(NaiveThread107);
+		std::thread T8(NaiveThread108);
+		std::thread T9(NaiveThread109);
+		T0.join();
+		T1.join();
+		T2.join();
+		T3.join();
+		T4.join();
+		T5.join();
+		T6.join();
+		T7.join();
+		T8.join();
+		T9.join();
 	}
 }
 
@@ -1147,4 +1309,203 @@ void PlotPoint(INT x, INT y)
 		}
 	}
 	ScreenSpaceIters[x][y] = count;
+}
+
+/*###################
+END DRAW POINT FUNC
+#####################
+START 4 NAIVE MULTITD
+###################*/
+
+void NaiveThread1()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 4 == 0)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+
+void NaiveThread2()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 4 == 1)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+
+void NaiveThread3()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 4 == 2)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+
+void NaiveThread4()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 4 == 3)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+
+/*###################
+END 4 NAIVE MULTITHRD
+#####################
+START 10 NAIVE MLTTHR
+###################*/
+
+void NaiveThread100()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 0)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread101()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 1)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread102()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 2)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread103()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 3)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread104()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 4)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread105()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 5)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread106()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 6)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread107()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 7)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread108()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 8)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+}
+void NaiveThread109()
+{
+	for (int x = 0; x < 500; x++)
+	{
+		for (int y = 0; y < 500; y++)
+		{
+			if (x % 10 == 9)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
 }
