@@ -63,6 +63,8 @@ void NaiveThread107();
 void NaiveThread108();
 void NaiveThread109();
 
+int CaptureAnImage(HWND);
+
 std::complex<long double> TableToComplex(INT, INT); // X, Y
 
 HMENU hMenu; // define header menu
@@ -93,8 +95,6 @@ BOOL IncorrectNumberNotif;
 BOOL FractDrop = FALSE;
 BOOL ColorDrop = FALSE;
 BOOL SmoothColor = FALSE;
-
-sf::Text GlobalText;
 
 POINT Cursor;
 ULONG_PTR GdiToken;
@@ -209,6 +209,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 	case WM_CREATE: // when window is created
 		TitleBar(hWnd); // Call title bar function
 		InfoBar(hWnd);
+		SetWindowText(Top1, L" CMandel 0.6.1");
 		break;
 	case WM_PAINT:
 	{
@@ -355,8 +356,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		if (wp == 0x44) { SetLocation(3); ShiftScreen(0); }
 		if (wp == 0x45) { SetRotation(0); } // Rotate clockwise
 		if (wp == 0x51) { SetRotation(1); } // Rotate counterclockwise
-		if (wp == VK_F5) {} // For rerendering
-
+		if (wp == VK_F5) { CaptureAnImage(hWnd); }
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
 	{
 		RECT WinRect = { NULL };
@@ -672,7 +672,7 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 
 void HelpMenu(HWND hWnd) // Create help menu
 {
-	HelpMenu1 = CreateWindowW(L"static", L" About...        © 2021, Brendan Scott\n This is open source software :\n @ Github/BrendanScott105/CMandel\n 64 Bit | Detected threads :\n Controls : ------------------------------------------\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Rerender entire screen space\n Limitations : --------------------------------------\n - Iterations does not exceed 999999\n - Precision limited to long double\n - Resolution locked at 500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
+	HelpMenu1 = CreateWindowW(L"static", L" About...        © 2021, Brendan Scott\n This is open source software :\n @ Github/BrendanScott105/CMandel\n 64 Bit | Detected threads :\n Controls : ------------------------------------------\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Save render space to bmp\n Limitations : --------------------------------------\n - Iterations does not exceed 999999\n - Precision limited to long double\n - Resolution locked at 500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
 	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 19, 300, 1, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu4 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
@@ -1085,6 +1085,7 @@ START MAIN COLOR FUNC
 
 void SFML()
 {
+	sf::Event event;
 	sf::RenderWindow SFMLMain(SubWin);
 	sf::Image ImageMain;
 	sf::Texture TextureMain;
@@ -1494,4 +1495,62 @@ void NaiveThread109()
 			}
 		}
 	}
+}
+
+int CaptureAnImage(HWND hWnd)
+{
+	HDC hdcScreen;
+	HDC hdcWindow;
+	HDC hdcMemDC = NULL;
+	HBITMAP hbmScreen = NULL;
+	BITMAP bmpScreen;
+	DWORD dwBytesWritten = 0;
+	DWORD dwSizeofDIB = 0;
+	HANDLE hFile = NULL;
+	char* lpbitmap = NULL;
+	HANDLE hDIB = NULL;
+	DWORD dwBmpSize = 0;
+	hdcScreen = GetDC(NULL);
+	hdcWindow = GetDC(hWnd);
+	hdcMemDC = CreateCompatibleDC(hdcWindow);
+	RECT rcClient;
+	GetClientRect(hWnd, &rcClient);
+	SetStretchBltMode(hdcWindow, HALFTONE);
+	hbmScreen = CreateCompatibleBitmap(hdcWindow, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top - 75);
+	SelectObject(hdcMemDC, hbmScreen);
+	BitBlt(hdcMemDC, 0, -20, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, hdcWindow, 0, 0, SRCCOPY);
+	GetObject(hbmScreen, sizeof(BITMAP), &bmpScreen);
+	BITMAPFILEHEADER   bmfHeader;
+	BITMAPINFOHEADER   bi;
+	bi.biSize = sizeof(BITMAPINFOHEADER);
+	bi.biWidth = bmpScreen.bmWidth;
+	bi.biHeight = bmpScreen.bmHeight;
+	bi.biPlanes = 1;
+	bi.biBitCount = 32;
+	bi.biCompression = BI_RGB;
+	bi.biSizeImage = 0;
+	bi.biXPelsPerMeter = 0;
+	bi.biYPelsPerMeter = 0;
+	bi.biClrUsed = 0;
+	bi.biClrImportant = 0;
+	dwBmpSize = ((bmpScreen.bmWidth * bi.biBitCount + 31) / 32) * 4 * bmpScreen.bmHeight;
+	hDIB = GlobalAlloc(GHND, dwBmpSize);
+	lpbitmap = (char*)GlobalLock(hDIB);
+	GetDIBits(hdcWindow, hbmScreen, 0, (UINT)bmpScreen.bmHeight, lpbitmap, (BITMAPINFO*)&bi, DIB_RGB_COLORS);
+	hFile = CreateFile(L"Output.bmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	dwSizeofDIB = dwBmpSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	bmfHeader.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER);
+	bmfHeader.bfSize = dwSizeofDIB;
+	bmfHeader.bfType = 0x4D42;
+	WriteFile(hFile, (LPSTR)&bmfHeader, sizeof(BITMAPFILEHEADER), &dwBytesWritten, NULL);
+	WriteFile(hFile, (LPSTR)&bi, sizeof(BITMAPINFOHEADER), &dwBytesWritten, NULL);
+	WriteFile(hFile, (LPSTR)lpbitmap, dwBmpSize, &dwBytesWritten, NULL);
+	GlobalUnlock(hDIB);
+	GlobalFree(hDIB);
+	CloseHandle(hFile);
+	DeleteObject(hbmScreen);
+	DeleteObject(hdcMemDC);
+	ReleaseDC(NULL, hdcScreen);
+	ReleaseDC(hWnd, hdcWindow);
+	return 0;
 }
