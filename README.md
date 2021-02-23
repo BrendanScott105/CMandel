@@ -11,5 +11,5 @@ Reworked Mandelbrot explorer
 src/Win.cpp - Everything
 
 # Example zoom
-[Sped up and recorded with external software]
 ![](Example.gif)
+[Sped up and recorded with external software]
