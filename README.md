@@ -11,6 +11,6 @@ Reworked Mandelbrot explorer
 src/Win.cpp - Everything
 
 # Example zoom
-![](Example.gif)
+![](gif2.gif)
 
 [Sped up and recorded with external software]
