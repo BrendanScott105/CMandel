@@ -47,6 +47,8 @@ void ColorizePlot(INT, INT, INT); // Declare
 
 void ShiftScreen(INT); // Declare
 
+void PlotPoint(INT, INT);
+
 std::complex<long double> TableToComplex(INT, INT); // X, Y
 
 HMENU hMenu; // define header menu
@@ -91,7 +93,7 @@ PAINTSTRUCT ps;
 
 BOOL ScreenMirror = FALSE;
 BOOL JuliaMode = FALSE;
-INT FractalType = 1;
+INT FractalType = 2;
 INT ColorType = 0;
 /*Window variables end*/
 
@@ -130,9 +132,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	{
 		for (int y = 0; y < 500; y++)
 		{
-			ScreenSpaceIters[x][y] = x+y;
+			PlotPoint(x, y);
 		}
 	}
+	
 
 	MSG Message;
 	Message.message = ~WM_QUIT;
@@ -221,8 +224,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			temp9 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp9);
 		}
-		if (wp == VK_UP) { SetZoomDensity(1); } // Zoom in
-		if (wp == VK_DOWN) { SetZoomDensity(0); } // Zoom out
+		if (wp == VK_UP) { SetZoomDensity(1); PlotPoint(250, 250);} // Zoom in
+		if (wp == VK_DOWN) { SetZoomDensity(0); PlotPoint(250, 250);} // Zoom out
 		if (wp == 0x57) { SetLocation(0); ShiftScreen(3);} // Set new position
 		if (wp == 0x41) { SetLocation(1); ShiftScreen(2);}
 		if (wp == 0x53) { SetLocation(2); ShiftScreen(1);}
@@ -461,7 +464,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.4.2", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.4.3", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -509,6 +512,12 @@ void ColorMenu(HWND hWnd) // Create color menu
 	Color1 = CreateWindowW(L"static", L" Choose color preset...\n\n\n\n             Smooth coloring\n             [Will disable some\n             optimizations]", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 170, 200, 200, hWnd, NULL, NULL, NULL);
 	Color2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 150, 190, 200, 1, hWnd, NULL, NULL, NULL);
 	Color3 = CreateWindowW(L"static", L"Default colors", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 210, 141, 20, hWnd, NULL, NULL, NULL);
+	if (ColorType == 0) { SetWindowTextW(Color3, L"Default"); };
+	if (ColorType == 1) { SetWindowTextW(Color3, L"Legacy"); };
+	if (ColorType == 2) { SetWindowTextW(Color3, L"Warm colors"); };
+	if (ColorType == 3) { SetWindowTextW(Color3, L"Cool colors"); };
+	if (ColorType == 4) { SetWindowTextW(Color3, L"Deuteranopia"); };
+	if (ColorType == 5) { SetWindowTextW(Color3, L"Tritanopia"); };
 	Color4 = CreateWindowW(L"static", L"˅", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
 	if (SmoothColor == TRUE) { L01 = SS_BLACKRECT; }
 	else { L01 = SS_LEFT; }
@@ -861,13 +870,13 @@ void ShiftScreen(INT Direction) {
 	}
 	if (Direction == 2) // Move pixels to the right creating space on the left
 	{
-		for (int x = 0; x < 489; x++)
+	for (int x = 0; x < 489; x++)
+	{
+		for (int y = 0; y < 500; y++)
 		{
-			for (int y = 0; y < 500; y++)
-			{
-				ScreenSpaceIters[(489 - x)+10][y] = ScreenSpaceIters[(489-x)][y];
-			}
+			ScreenSpaceIters[(489 - x) + 10][y] = ScreenSpaceIters[(489 - x)][y];
 		}
+	}
 	}
 	if (Direction == 3) // Move pixels to the bottom creating space on the top
 	{
@@ -875,7 +884,7 @@ void ShiftScreen(INT Direction) {
 		{
 			for (int x = 0; x < 500; x++)
 			{
-				ScreenSpaceIters[x][(489-y)+10] = ScreenSpaceIters[x][(489-y)];
+				ScreenSpaceIters[x][(489 - y) + 10] = ScreenSpaceIters[x][(489 - y)];
 			}
 		}
 	}
@@ -892,21 +901,21 @@ void ColorizePlot(INT Iterations, INT X, INT Y)
 	if (SmoothColor == FALSE && (Filters[0] || Filters[1] || Filters[2] || Filters[3] || Filters[4]) == FALSE)
 	{
 		sf::Color BandedColor;
-		if (ColorType == 0) 
+		if (ColorType == 0)
 		{
 			sf::Color Type1[32] = { sf::Color(255, 25, 0), sf::Color(255, 70, 0), sf::Color(255, 116, 0), sf::Color(255, 162, 0), sf::Color(255, 209, 0), sf::Color(249, 249, 0),
-									sf::Color(209, 255, 0), sf::Color(162, 255, 0), sf::Color(116, 255, 0), sf::Color(70, 255, 0), sf::Color(25, 255, 0), sf::Color(0, 255, 29), 
-									sf::Color(0, 255, 74), sf::Color(0, 255, 120), sf::Color(0, 255, 167), sf::Color(0, 247, 251), sf::Color(0, 205, 255), sf::Color(0, 158, 255), 
-									sf::Color(0, 112, 255), sf::Color(0, 65, 255), sf::Color(0, 21, 255), sf::Color(33, 0, 255), sf::Color(78, 0, 255), sf::Color(124, 0, 255), 
+									sf::Color(209, 255, 0), sf::Color(162, 255, 0), sf::Color(116, 255, 0), sf::Color(70, 255, 0), sf::Color(25, 255, 0), sf::Color(0, 255, 29),
+									sf::Color(0, 255, 74), sf::Color(0, 255, 120), sf::Color(0, 255, 167), sf::Color(0, 247, 251), sf::Color(0, 205, 255), sf::Color(0, 158, 255),
+									sf::Color(0, 112, 255), sf::Color(0, 65, 255), sf::Color(0, 21, 255), sf::Color(33, 0, 255), sf::Color(78, 0, 255), sf::Color(124, 0, 255),
 									sf::Color(171, 0, 255), sf::Color(217, 0, 255), sf::Color(253, 0, 245), sf::Color(255, 0, 200), sf::Color(255, 0, 154), sf::Color(255, 0, 107),
-									sf::Color(255, 0, 61)}; // Color preset 1 to somewhat cycle through all RGB values
+									sf::Color(255, 0, 61) }; // Color preset 1 to somewhat cycle through all RGB values
 			BandedColor = Type1[Iterations % 31];
 		}
 		if (ColorType == 1)
 		{
 			sf::Color Type2[8] = { sf::Color(0, 0, 0), sf::Color(255, 0, 0), sf::Color(255, 165, 0), sf::Color(255, 255, 0),
 								   sf::Color(0, 128, 0), sf::Color(0, 0, 255), sf::Color(238, 130, 238), sf::Color(128, 128, 128) };
-								   // Color Preset 2 to cycle through all values from /PyFractalRenderer
+			// Color Preset 2 to cycle through all values from /PyFractalRenderer
 			BandedColor = Type2[Iterations % 7];
 		}
 		if (ColorType == 2)
@@ -921,7 +930,7 @@ void ColorizePlot(INT Iterations, INT X, INT Y)
 			sf::Color Type4[18] = { sf::Color(0, 255, 167), sf::Color(0, 247, 251), sf::Color(0, 205, 255), sf::Color(0, 158, 255), sf::Color(0, 112, 255), sf::Color(0, 65, 255),
 									sf::Color(0, 21, 255), sf::Color(33, 0, 255), sf::Color(78, 0, 255), sf::Color(124, 0, 255), sf::Color(78, 0, 255), sf::Color(33, 0, 255),
 									sf::Color(0, 21, 255), sf::Color(0, 65, 255), sf::Color(0, 112, 255), sf::Color(0, 158, 255), sf::Color(0, 205, 255), sf::Color(0, 247, 251) };
-									// Filter through all "cool" colors of preset 1
+			// Filter through all "cool" colors of preset 1
 			BandedColor = Type4[Iterations % 17];
 		}
 		if (ColorType == 4)
@@ -944,6 +953,133 @@ void ColorizePlot(INT Iterations, INT X, INT Y)
 									sf::Color(253, 43, 41) }; // Color preset 5 to simulate Tritanopia
 			BandedColor = Type6[Iterations % 31];
 		}
-	ImageMain.setPixel(X, Y, BandedColor);
+		if (ScreenSpaceIters[X][Y] == Iters) { BandedColor = sf::Color(0, 0, 0); }
+		ImageMain.setPixel(X, Y, BandedColor);
 	}
+}
+
+/*###################
+END MAIN COLOR FUNCTN
+#####################
+START DRAW POINT FUNC
+###################*/
+
+void PlotPoint(INT x, INT y)
+{
+	std::complex<long double> CPoint = TableToComplex(x, y);
+	std::complex<long double> IteratePoint(0, 0);
+	int count = 0;
+	long double zi = 0, zr = 0, zisqr = 0, zrsqr = 0;
+
+	if (RealFractalType == 1) // Mandelbrot set
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = zr * zi * 2 + CPoint.imag();
+			zr = zrsqr - zisqr + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 2) // Burning ship
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = abs(zr * zi) * 2 + CPoint.imag();
+			zr = zrsqr - zisqr + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 3) // Buffalo
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = abs(zr * zi) * 2 + CPoint.imag();
+			zr = abs(zrsqr - zisqr) + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 4) // Celtic
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = zr * zi * 2 + CPoint.imag();
+			zr = abs(zrsqr - zisqr) + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 5) // Mandelbar
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = zr * zi * -2 + CPoint.imag();
+			zr = zrsqr - zisqr + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 6) // Mandelbar celtic
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = zr * zi * -2 + CPoint.imag();
+			zr = abs(zrsqr - zisqr) + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 7) // Perp mandelbrot
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = abs(zr) * zi * -2 + CPoint.imag();
+			zr = zrsqr - zisqr + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 8) // Perpendicular burning
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = zr * abs(zi) * -2 + CPoint.imag();
+			zr = zrsqr - zisqr + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 9) // Perpendicular buffalo
+	{
+		while(((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = zr * abs(zi) * 2 + CPoint.imag();
+			zr = abs(zrsqr - zisqr) + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	if (RealFractalType == 10) // Perpendicular celtic
+	{
+		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		{
+			zi = abs(zr) * zi * -2 + CPoint.imag();
+			zr = abs(zrsqr - zisqr) + CPoint.real();
+			zisqr = zi * zi;
+			zrsqr = zr * zr;
+			count++;
+		}
+	}
+	ScreenSpaceIters[x][y] = count;
 }
