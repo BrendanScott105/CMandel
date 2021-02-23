@@ -65,6 +65,8 @@ void NaiveThread109();
 
 int CaptureAnImage(HWND);
 
+wstring s2ws(std::string);
+
 std::complex<long double> TableToComplex(INT, INT); // X, Y
 
 HMENU hMenu; // define header menu
@@ -105,6 +107,7 @@ BOOL ScreenMirror = FALSE;
 BOOL JuliaMode = FALSE;
 INT FractalType = 2;
 INT ColorType = 0;
+INT zoomin = 14;
 /*Window variables end*/
 
 /*Fractal variable definitions start*/
@@ -348,15 +351,25 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				T9.join();
 			}
 		}
-		if (wp == VK_UP) { SetZoomDensity(1); PlotPoint(250, 250); } // Zoom in
-		if (wp == VK_DOWN) { SetZoomDensity(0); PlotPoint(250, 250); } // Zoom out
-		if (wp == 0x57) { SetLocation(0); ShiftScreen(3); } // Set new position
-		if (wp == 0x41) { SetLocation(1); ShiftScreen(2); }
-		if (wp == 0x53) { SetLocation(2); ShiftScreen(1); }
-		if (wp == 0x44) { SetLocation(3); ShiftScreen(0); }
+		if (wp == VK_UP) { SetZoomDensity(1); SFML(); zoomin++; } // Zoom in
+		if (wp == VK_DOWN) { SetZoomDensity(0); SFML(); zoomin--; } // Zoom out
+		if (wp == 0x57) { SetLocation(0); SFML(); ShiftScreen(3); } // Set new position
+		if (wp == 0x41) { SetLocation(1); SFML(); ShiftScreen(2); }
+		if (wp == 0x53) { SetLocation(2); SFML(); ShiftScreen(1); }
+		if (wp == 0x44) { SetLocation(3); SFML(); ShiftScreen(0); }
 		if (wp == 0x45) { SetRotation(0); } // Rotate clockwise
 		if (wp == 0x51) { SetRotation(1); } // Rotate counterclockwise
 		if (wp == VK_F5) { CaptureAnImage(hWnd); }
+		if (wp == VK_F6)
+		{
+			while (NewZoom > 1)
+			{
+				SetZoomDensity(0);
+				SFML();
+				CaptureAnImage(hWnd);
+				zoomin--;
+			}
+		}
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
 	{
 		RECT WinRect = { NULL };
@@ -455,6 +468,49 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); } // if X button is hit
 			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 321) and (YWindowPosition < 350))) && FractDrop == FALSE) { // if Apply button is hit
 				RealFractalType = FractalType;
+				if (SYSTEMTHREADS < 4)
+				{
+					for (int x = 0; x < 500; x++)
+					{
+						for (int y = 0; y < 500; y++)
+						{
+							PlotPoint(x, y);
+						}
+					}
+				}
+				if (SYSTEMTHREADS < 10)
+				{
+					std::thread T1(NaiveThread1);
+					std::thread T2(NaiveThread2);
+					std::thread T3(NaiveThread3);
+					std::thread T4(NaiveThread4);
+					T1.join();
+					T2.join();
+					T3.join();
+					T4.join();
+				}
+				else {
+					std::thread T0(NaiveThread100);
+					std::thread T1(NaiveThread101);
+					std::thread T2(NaiveThread102);
+					std::thread T3(NaiveThread103);
+					std::thread T4(NaiveThread104);
+					std::thread T5(NaiveThread105);
+					std::thread T6(NaiveThread106);
+					std::thread T7(NaiveThread107);
+					std::thread T8(NaiveThread108);
+					std::thread T9(NaiveThread109);
+					T0.join();
+					T1.join();
+					T2.join();
+					T3.join();
+					T4.join();
+					T5.join();
+					T6.join();
+					T7.join();
+					T8.join();
+					T9.join();
+				}
 				DestroyAll(hWnd);
 			}
 			if (FractDrop == FALSE) { // If dropdown menu is not open
@@ -590,7 +646,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.6.1", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.6.2", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -672,7 +728,7 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 
 void HelpMenu(HWND hWnd) // Create help menu
 {
-	HelpMenu1 = CreateWindowW(L"static", L" About...        © 2021, Brendan Scott\n This is open source software :\n @ Github/BrendanScott105/CMandel\n 64 Bit | Detected threads :\n Controls : ------------------------------------------\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Save render space to bmp\n Limitations : --------------------------------------\n - Iterations does not exceed 999999\n - Precision limited to long double\n - Resolution locked at 500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
+	HelpMenu1 = CreateWindowW(L"static", L" About...        © 2021, Brendan Scott\n This is open source software :\n @ Github/BrendanScott105/CMandel\n 64 Bit | Detected threads :\n Controls : ------------------------------------------\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Save render space to bmp\n F6 : Store zoom out sequence\n Limitations : --------------------------------------\n - Iterations does not exceed 999999\n - Precision limited 2^64 bits\n - Resolution locked at 500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
 	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 19, 300, 1, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu4 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
@@ -1537,7 +1593,25 @@ int CaptureAnImage(HWND hWnd)
 	hDIB = GlobalAlloc(GHND, dwBmpSize);
 	lpbitmap = (char*)GlobalLock(hDIB);
 	GetDIBits(hdcWindow, hbmScreen, 0, (UINT)bmpScreen.bmHeight, lpbitmap, (BITMAPINFO*)&bi, DIB_RGB_COLORS);
-	hFile = CreateFile(L"Output.bmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	LPCWSTR filename;
+	std::string prefix = "IMG";
+	std::string padding = "";
+	std::string Zoomstr = to_string(zoomin);
+	if (Zoomstr.length() == 3) {}
+	else if (Zoomstr.length() == 2) { Zoomstr = "0" + Zoomstr; }
+	else { Zoomstr = "00" + Zoomstr; }
+	std::string ext = std::string(".bmp");
+	std::string Comb = prefix + Zoomstr + ext;
+	std::string s = Comb;
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+	std::wstring r(buf);
+	delete[] buf;
+	wstring stemp = r;
+	hFile = CreateFile(stemp.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	dwSizeofDIB = dwBmpSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 	bmfHeader.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER);
 	bmfHeader.bfSize = dwSizeofDIB;
