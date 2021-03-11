@@ -66,6 +66,8 @@ void NaiveThread109();
 int CaptureAnImage(HWND);
 void getCurrentValue();
 
+DWORD tickThreadProc(HANDLE);
+
 wstring s2ws(std::string);
 
 std::complex<long double> TableToComplex(INT, INT); // X, Y
@@ -101,7 +103,6 @@ BOOL SmoothColor = FALSE;
 
 POINT Cursor;
 ULONG_PTR GdiToken;
-HDC hdc;
 PAINTSTRUCT ps;
 
 BOOL ScreenMirror = FALSE;
@@ -128,9 +129,41 @@ int ScreenSpaceIters[500][500];
 
 INT SYSTEMTHREADS = std::thread::hardware_concurrency();
 
+/*FAST DRAW LOGIC*/
+
+struct pixel {
+	union {
+		struct {
+			/* 'a' unused, used for 32-bit alignment,
+			 * could also be used to store pixel alpha
+			 */
+			unsigned char b, g, r, a;
+		};
+		int val;
+	};
+
+	pixel() {
+		val = 0;
+	}
+};
+
+const int width = 500;
+const int height = 500;
+
+const int fps = 60;
+
+HBITMAP hbmp;
+HANDLE hTickThread;
+HDC hdcMem;
+
+pixel* pixels;
+
+HDC hdc = GetDC(RealWinMain);
+
 /*##########
 WINDOW LOGIC
 ##########*/
+
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) // Enter
 {
@@ -155,6 +188,25 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
 	memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
 	memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
+
+	BITMAPINFO bmi;
+	bmi.bmiHeader.biSize = sizeof(BITMAPINFO);
+	bmi.bmiHeader.biWidth = width;
+	bmi.bmiHeader.biHeight = -height; // Order pixels from top to bottom
+	bmi.bmiHeader.biPlanes = 1;
+	bmi.bmiHeader.biBitCount = 32; // last byte not used, 32 bit for alignment
+	bmi.bmiHeader.biCompression = BI_RGB;
+	bmi.bmiHeader.biSizeImage = 0;
+	bmi.bmiHeader.biXPelsPerMeter = 0;
+	bmi.bmiHeader.biYPelsPerMeter = 0;
+	bmi.bmiHeader.biClrUsed = 0;
+	bmi.bmiHeader.biClrImportant = 0;
+	bmi.bmiColors[0].rgbBlue = 0;
+	bmi.bmiColors[0].rgbGreen = 0;
+	bmi.bmiColors[0].rgbRed = 0;
+	bmi.bmiColors[0].rgbReserved = 0;
+
+	hbmp = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, (void**)&pixels, NULL, 0);
 
 	if (!RegisterClassW(&win)) // Register win class
 		return -1;
@@ -204,7 +256,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		T8.join();
 		T9.join();
 	}
-
+	hTickThread = CreateThread(NULL, NULL, &tickThreadProc, NULL, NULL, NULL);
 	MSG Message;
 	Message.message = ~WM_QUIT;
 	while (Message.message != WM_QUIT)
@@ -218,7 +270,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		else
 		{
 			FrameCount++;
-			SFML();
+			//SFML();
 			getCurrentValue();
 		}
 
@@ -236,9 +288,13 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		break;
 	case WM_PAINT:
 	{
-		hdc = BeginPaint(hWnd, &ps);
-		// Call main render function here
-		EndPaint(hWnd, &ps);
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(RealWinMain, &ps);
+
+		// Draw pixels to window when window needs repainting
+		BitBlt(hdc, 0, 0, width, height, hdcMem, 0, 0, SRCCOPY);
+
+		EndPaint(RealWinMain, &ps);
 		return 0;
 	}
 	case WM_DESTROY: // when close is hit
@@ -371,12 +427,12 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				T9.join();
 			}
 		}
-		if (wp == VK_UP) { SetZoomDensity(1); getCurrentValue(); SFML(); zoomin++; } // Zoom in
-		if (wp == VK_DOWN) { SetZoomDensity(0); getCurrentValue(); SFML(); zoomin--; } // Zoom out
-		if (wp == 0x57) { SetLocation(0); getCurrentValue(); SFML(); ShiftScreen(3); } // Set new position
-		if (wp == 0x41) { SetLocation(1); getCurrentValue(); SFML(); ShiftScreen(2); }
-		if (wp == 0x53) { SetLocation(2); getCurrentValue(); SFML(); ShiftScreen(1); }
-		if (wp == 0x44) { SetLocation(3); getCurrentValue(); SFML(); ShiftScreen(0); }
+		if (wp == VK_UP) { SetZoomDensity(1); getCurrentValue(); zoomin++; } // Zoom in
+		if (wp == VK_DOWN) { SetZoomDensity(0); getCurrentValue(); zoomin--; } // Zoom out
+		if (wp == 0x57) { SetLocation(0); getCurrentValue(); ShiftScreen(3); } // Set new position
+		if (wp == 0x41) { SetLocation(1); getCurrentValue(); ShiftScreen(2); }
+		if (wp == 0x53) { SetLocation(2); getCurrentValue(); ShiftScreen(1); }
+		if (wp == 0x44) { SetLocation(3); getCurrentValue(); ShiftScreen(0); }
 		if (wp == 0x45) { SetRotation(0); } // Rotate clockwise
 		if (wp == 0x51) { SetRotation(1); } // Rotate counterclockwise
 		if (wp == VK_F5) { CaptureAnImage(hWnd); }
@@ -406,7 +462,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			}
 		}
 		if (FiltersDrop == TRUE) { // When filters menu is open
-			if (((XWindowPosition > 150) and (XWindowPosition < 166)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); break; } // Destroy filters dropdown
+			if (((XWindowPosition > 150) and (XWindowPosition < 166)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); ResumeThread(hTickThread); break;} // Destroy filters dropdown
 			if (((XWindowPosition > 5) and (XWindowPosition < 16)) and ((YWindowPosition > 3) and (YWindowPosition < 14))) { // If decolorize option is selected
 				if (Filters[0] == FALSE) { // if decolorize is false
 					Filters[0] = TRUE; // make true
@@ -454,18 +510,17 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			}
 		}
 		if (FiltersDrop == FALSE) {
-
-			if (((XWindowPosition > 150) and (XWindowPosition < 166)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyAll(hWnd);  DestroyConfigDrop(hWnd); FilterDrop(hWnd); break; } // Trigger open filter dropdown
+			if (((XWindowPosition > 150) and (XWindowPosition < 166)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { SuspendThread(hTickThread); DestroyAll(hWnd);  DestroyConfigDrop(hWnd); FilterDrop(hWnd); break; } // Trigger open filter dropdown
 		}
 		if (ConfigureDrop == TRUE) { // When configure menu is open
-			if (((XWindowPosition > 81) and (XWindowPosition < 96)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyConfigDrop(hWnd); break; } // Destroy configure dropdown menu
+			if (((XWindowPosition > 81) and (XWindowPosition < 96)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyConfigDrop(hWnd); ResumeThread(hTickThread); break; } // Destroy configure dropdown menu
 			if (((XWindowPosition > 0) and (XWindowPosition < 99)) and ((YWindowPosition > -1) and (YWindowPosition < 19))) { DestroyAll(hWnd); FormulaMenu(hWnd); } // Destroy other menus and open formula menu
 			if (((XWindowPosition > 0) and (XWindowPosition < 99)) and ((YWindowPosition > 19) and (YWindowPosition < 38))) { DestroyAll(hWnd); ColorMenu(hWnd); } // Destroy other menus and open color menu
 			if (((XWindowPosition > 0) and (XWindowPosition < 99)) and ((YWindowPosition > 38) and (YWindowPosition < 55))) { DestroyAll(hWnd); LocationMenu(hWnd); } // Destroy other menus and open location menu
 			if (((XWindowPosition > 0) and (XWindowPosition < 99)) and ((YWindowPosition > 57) and (YWindowPosition < 75))) { DestroyAll(hWnd); exit(0); } // Destroy other menus and exit
 		}
 		if (ConfigureDrop == FALSE) {
-			if (((XWindowPosition > 81) and (XWindowPosition < 96)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyAll(hWnd); DestroyFiltersDrop(hWnd); ConfigDrop(hWnd); break; } // Trigger open configure dropdown
+			if (((XWindowPosition > 81) and (XWindowPosition < 96)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { SuspendThread(hTickThread); DestroyAll(hWnd); DestroyFiltersDrop(hWnd); ConfigDrop(hWnd); break; } // Trigger open configure dropdown
 		}
 		if (FormulaOpen == TRUE) { // While formula menu open
 			if ((((XWindowPosition > 181) and (XWindowPosition < 190)) and ((YWindowPosition > 237) and (YWindowPosition < 246))) && FractDrop == FALSE) {
@@ -484,8 +539,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				}
 				else { JuliaMode = FALSE; DestroyAll(hWnd); FormulaMenu(hWnd); } // if true, make false, and rerender
 			}
-			if ((((XWindowPosition > 261) and (XWindowPosition < 340)) and ((YWindowPosition > 321) and (YWindowPosition < 350))) && FractDrop == FALSE) { DestroyAll(hWnd); } // if Cancel button is hit
-			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); } // if X button is hit
+			if ((((XWindowPosition > 261) and (XWindowPosition < 340)) and ((YWindowPosition > 321) and (YWindowPosition < 350))) && FractDrop == FALSE) { DestroyAll(hWnd); ResumeThread(hTickThread); } // if Cancel button is hit
+			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // if X button is hit
 			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 321) and (YWindowPosition < 350))) && FractDrop == FALSE) { // if Apply button is hit
 				RealFractalType = FractalType;
 				if (SYSTEMTHREADS < 4)
@@ -532,6 +587,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 					T9.join();
 				}
 				DestroyAll(hWnd);
+				ResumeThread(hTickThread);
 			}
 			if (FractDrop == FALSE) { // If dropdown menu is not open
 				if (((XWindowPosition > 311) and (XWindowPosition < 330)) and ((YWindowPosition > 191) and (YWindowPosition < 210))) { FractDropdown(hWnd); break; }
@@ -561,6 +617,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			}
 			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 316) and (YWindowPosition < 340))) && ColorDrop == FALSE) { // if Apply button is hit
 				DestroyAll(hWnd);
+				ResumeThread(hTickThread);
 			}
 			if (ColorDrop == FALSE) { // If dropdown menu is not open
 				if (((XWindowPosition > 311) and (XWindowPosition < 330)) and ((YWindowPosition > 191) and (YWindowPosition < 210))) { ColorDropdown(hWnd); break; }
@@ -574,8 +631,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 286) and (YWindowPosition < 305))) { ColorType = 4; SetWindowTextW(Color3, L"Deuteranopia"); DestroyColorDropdown(hWnd); }
 				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 305) and (YWindowPosition < 324))) { ColorType = 5; SetWindowTextW(Color3, L"Tritanopia"); DestroyColorDropdown(hWnd); }
 			}
-			if ((((XWindowPosition > 261) and (XWindowPosition < 340)) and ((YWindowPosition > 316) and (YWindowPosition < 340))) && ColorDrop == FALSE) { DestroyAll(hWnd); } // if Cancel button is hit
-			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); } // if X button is hit
+			if ((((XWindowPosition > 261) and (XWindowPosition < 340)) and ((YWindowPosition > 316) and (YWindowPosition < 340))) && ColorDrop == FALSE) { DestroyAll(hWnd); ResumeThread(hTickThread); } // if Cancel button is hit
+			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // if X button is hit
 		}
 		if (LocationOpen == TRUE) {  // While location menu is open
 			BOOL Valid1 = FALSE;
@@ -613,15 +670,16 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				if ((Valid1 && Valid2 && Valid3) == TRUE) {
 					DestroyAll(hWnd);
 					SetZoomDensity(2);
+					ResumeThread(hTickThread);
 				}
 			}
-			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 320)))) { DestroyAll(hWnd); } // Close menu from cancel button
-			if (((XWindowPosition > 332) and (XWindowPosition < 348) and ((YWindowPosition > 178) and (YWindowPosition < 194)))) { DestroyAll(hWnd); } // Close menu from X button
+			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 320)))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // Close menu from cancel button
+			if (((XWindowPosition > 332) and (XWindowPosition < 348) and ((YWindowPosition > 178) and (YWindowPosition < 194)))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // Close menu from X button
 		}
 		if (HelpOpen == TRUE) { // While help menu open
 			if (((XWindowPosition > 347) and (XWindowPosition < 366) and ((YWindowPosition > 104) and (YWindowPosition < 121)))) { ShellExecute(NULL, NULL, L"https://github.com/BrendanScott105/CMandel", NULL, NULL, SW_SHOWNORMAL); LinkBox(hWnd); } // Open URL in browser
-			if (((XWindowPosition > 317) and (XWindowPosition < 397) and ((YWindowPosition > 396) and (YWindowPosition < 416)))) { DestroyAll(hWnd); } // Destroy help menu from OK
-			if (((XWindowPosition > 382) and (XWindowPosition < 399) and ((YWindowPosition > 82) and (YWindowPosition < 99)))) { DestroyAll(hWnd); } // Destroy help menu from X
+			if (((XWindowPosition > 317) and (XWindowPosition < 397) and ((YWindowPosition > 396) and (YWindowPosition < 416)))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // Destroy help menu from OK
+			if (((XWindowPosition > 382) and (XWindowPosition < 399) and ((YWindowPosition > 82) and (YWindowPosition < 99)))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // Destroy help menu from X
 		}
 		if (LinkNotif == TRUE) { // Link notif close
 			if (((XWindowPosition > 148) and (XWindowPosition < 166) and ((YWindowPosition > 458) and (YWindowPosition < 472)))) { DestroyLinkNotif(); }
@@ -635,6 +693,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		{
 			DestroyAll(hWnd);
 			HelpMenu(hWnd); // Call help menu
+			SuspendThread(hTickThread);
 		}
 	}
 	default: // default case for all others
@@ -1680,4 +1739,58 @@ void getCurrentValue() {
 	temp11 = (LPCWSTR)Wtemp11.c_str();
 
 	SetWindowTextW(Info6, temp11);
+}
+
+void onFrame(pixel* pixels) {
+	// This is where all the drawing takes place
+
+	pixel* p;
+
+	// +0.005 each frame
+	static float frameOffset = 0;
+
+	float px; // % of the way across the bitmap
+	float py; // % of the way down the bitmap
+
+	for (int x = 0; x < width; ++x) {
+		for (int y = 0; y < height; ++y) {
+			p = &pixels[y * width + x];
+
+			px = float(x) / float(width);
+			py = float(y) / float(height);
+
+			p->r = unsigned char(((cos(px + frameOffset * 10) / sin(py + frameOffset)) * cos(frameOffset * 3) * 10) * 127 + 127);
+			p->g = ~p->r;
+			p->b = 255;
+		}
+	}
+
+	frameOffset += 0.005f;
+}
+
+DWORD WINAPI tickThreadProc(HANDLE handle) {
+	// Give plenty of time for main thread to finish setting up
+	Sleep(50);
+	ShowWindow(RealWinMain, SW_SHOW);
+
+	// Retrieve the window's DC
+	HDC hdc = GetDC(RealWinMain);
+
+	// Create DC with shared pixels to variable 'pixels'
+	hdcMem = CreateCompatibleDC(hdc);
+	HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbmp);
+
+	// Milliseconds to wait each frame
+	int delay = 1000 / fps;
+
+	for (;; ) {
+		// Do stuff with pixels
+		onFrame(pixels);
+
+		// Draw pixels to window
+		BitBlt(hdc, 0, 20, width, height, hdcMem, 0, 0, SRCCOPY);
+	}
+
+	SelectObject(hdcMem, hbmOld);
+	DeleteDC(hdc);
 }
