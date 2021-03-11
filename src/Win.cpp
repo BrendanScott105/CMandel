@@ -64,6 +64,7 @@ void NaiveThread108();
 void NaiveThread109();
 
 int CaptureAnImage(HWND);
+void getCurrentValue();
 
 wstring s2ws(std::string);
 
@@ -108,6 +109,10 @@ BOOL JuliaMode = FALSE;
 INT FractalType = 2;
 INT ColorType = 0;
 INT zoomin = 14;
+
+static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
+static int numProcessors;
+static HANDLE self;
 /*Window variables end*/
 
 /*Fractal variable definitions start*/
@@ -135,6 +140,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	win.hInstance = hInst;
 	win.lpszClassName = L"MainWin"; // define window class name
 	win.lpfnWndProc = Proc; // Set procedure name
+
+	SYSTEM_INFO sysInfo;
+	FILETIME ftime, fsys, fuser;
+
+	GetSystemInfo(&sysInfo);
+	numProcessors = sysInfo.dwNumberOfProcessors;
+
+	GetSystemTimeAsFileTime(&ftime);
+	memcpy(&lastCPU, &ftime, sizeof(FILETIME));
+
+	self = GetCurrentProcess();
+	GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+	memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
+	memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
 
 	if (!RegisterClassW(&win)) // Register win class
 		return -1;
@@ -185,7 +204,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		T9.join();
 	}
 
-
 	MSG Message;
 	Message.message = ~WM_QUIT;
 	while (Message.message != WM_QUIT)
@@ -196,9 +214,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 			TranslateMessage(&Message);
 			DispatchMessage(&Message);
 		}
-		else 
+		else
 		{
 			SFML();
+			getCurrentValue();
 		}
 
 	}
@@ -350,12 +369,12 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				T9.join();
 			}
 		}
-		if (wp == VK_UP) { SetZoomDensity(1); SFML(); zoomin++; } // Zoom in
-		if (wp == VK_DOWN) { SetZoomDensity(0); SFML(); zoomin--; } // Zoom out
-		if (wp == 0x57) { SetLocation(0); SFML(); ShiftScreen(3); } // Set new position
-		if (wp == 0x41) { SetLocation(1); SFML(); ShiftScreen(2); }
-		if (wp == 0x53) { SetLocation(2); SFML(); ShiftScreen(1); }
-		if (wp == 0x44) { SetLocation(3); SFML(); ShiftScreen(0); }
+		if (wp == VK_UP) { SetZoomDensity(1); getCurrentValue(); SFML(); zoomin++; } // Zoom in
+		if (wp == VK_DOWN) { SetZoomDensity(0); getCurrentValue(); SFML(); zoomin--; } // Zoom out
+		if (wp == 0x57) { SetLocation(0); getCurrentValue(); SFML(); ShiftScreen(3); } // Set new position
+		if (wp == 0x41) { SetLocation(1); getCurrentValue(); SFML(); ShiftScreen(2); }
+		if (wp == 0x53) { SetLocation(2); getCurrentValue(); SFML(); ShiftScreen(1); }
+		if (wp == 0x44) { SetLocation(3); getCurrentValue(); SFML(); ShiftScreen(0); }
 		if (wp == 0x45) { SetRotation(0); } // Rotate clockwise
 		if (wp == 0x51) { SetRotation(1); } // Rotate counterclockwise
 		if (wp == VK_F5) { CaptureAnImage(hWnd); }
@@ -638,14 +657,14 @@ void InfoBar(HWND hWnd) // add current view information bar
 	Info4a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 0, 558, 1, 19, hWnd, NULL, NULL, NULL);
 	Info5a = CreateWindowW(L"static", L"Zoom : ", WS_VISIBLE | WS_CHILD, 2, 558, 229, 19, hWnd, NULL, NULL, NULL);
 	Info5 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_CHILD, 58, 558, 333, 16, hWnd, NULL, NULL, NULL);
-	Info6a = CreateWindowW(L"static", L"Rotation :", WS_VISIBLE | WS_BORDER | WS_CHILD, 391, 557, 109, 19, hWnd, NULL, NULL, NULL);
-	Info6 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 471, 558, 28, 17, hWnd, NULL, NULL, NULL);
+	Info6a = CreateWindowW(L"static", L"CPU [%] :", WS_VISIBLE | WS_BORDER | WS_CHILD, 391, 557, 109, 19, hWnd, NULL, NULL, NULL);
+	Info6 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 455, 558, 40, 17, hWnd, NULL, NULL, NULL);
 	Info0a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 520, 500, 1, hWnd, NULL, NULL, NULL);
 }
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.6.2", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.7.0", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -1626,4 +1645,30 @@ int CaptureAnImage(HWND hWnd)
 	ReleaseDC(NULL, hdcScreen);
 	ReleaseDC(hWnd, hdcWindow);
 	return 0;
+}
+
+void getCurrentValue() {
+	FILETIME ftime, fsys, fuser;
+	ULARGE_INTEGER now, sys, user;
+	double percent;
+
+	GetSystemTimeAsFileTime(&ftime);
+	memcpy(&now, &ftime, sizeof(FILETIME));
+
+	GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+	memcpy(&sys, &fsys, sizeof(FILETIME));
+	memcpy(&user, &fuser, sizeof(FILETIME));
+	percent = (sys.QuadPart - lastSysCPU.QuadPart) +
+		(user.QuadPart - lastUserCPU.QuadPart);
+	percent /= (now.QuadPart - lastCPU.QuadPart);
+	percent /= numProcessors;
+	lastCPU = now;
+	lastUserCPU = user;
+	lastSysCPU = sys;
+
+	LPCWSTR temp11;
+	std::wstring Wtemp11 = to_wstring(percent * 100);
+	temp11 = (LPCWSTR)Wtemp11.c_str();
+
+	SetWindowTextW(Info6, temp11);
 }
