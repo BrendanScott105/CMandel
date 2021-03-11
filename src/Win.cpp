@@ -109,6 +109,7 @@ BOOL JuliaMode = FALSE;
 INT FractalType = 2;
 INT ColorType = 0;
 INT zoomin = 14;
+INT FrameCount;
 
 static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
 static int numProcessors;
@@ -118,7 +119,7 @@ static HANDLE self;
 /*Fractal variable definitions start*/
 int Iters = 200; // define iterations
 long double PixelDif = 0.008;
-BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect, Inverse edge, Grayscale, Inverse Grayscale
+BOOL Filters[5] = { FALSE,FALSE,FALSE,FALSE,FALSE }; // Decolorize, Edge detect, Color Cycle, Grayscale, Inverse Grayscale
 long double NewReal = 0; long double NewImag = 0; long double NewZoom = 4; int Rotation = 0;
 INT RealFractalType = 1;
 
@@ -216,6 +217,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		}
 		else
 		{
+			FrameCount++;
 			SFML();
 			getCurrentValue();
 		}
@@ -664,7 +666,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.7.0", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.7.1", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -792,7 +794,7 @@ void FilterDrop(HWND hWnd) // Create filter dropdown and handle element filling
 	Top2b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 18, 174, 96, hWnd, NULL, NULL, NULL);
 	Top3b = CreateWindowW(L"static", L"     Decolorize", WS_VISIBLE | WS_CHILD, 0, 18, 185, 20, hWnd, NULL, NULL, NULL);
 	Top4b = CreateWindowW(L"static", L"     Edge detection", WS_VISIBLE | WS_CHILD, 0, 37, 185, 20, hWnd, NULL, NULL, NULL);
-	Top5b = CreateWindowW(L"static", L"     Inverse edge", WS_VISIBLE | WS_CHILD, 0, 56, 185, 20, hWnd, NULL, NULL, NULL);
+	Top5b = CreateWindowW(L"static", L"     Color cycling", WS_VISIBLE | WS_CHILD, 0, 56, 185, 20, hWnd, NULL, NULL, NULL);
 	Top6b = CreateWindowW(L"static", L"     Grayscale", WS_VISIBLE | WS_CHILD, 0, 75, 185, 20, hWnd, NULL, NULL, NULL);
 	Top7b = CreateWindowW(L"static", L"     Inverse Grayscale", WS_VISIBLE | WS_CHILD, 0, 94, 185, 20, hWnd, NULL, NULL, NULL);
 	if (Filters[4] == TRUE) { L05 = SS_BLACKRECT; }
@@ -1163,6 +1165,13 @@ void SFML()
 	sf::RenderWindow SFMLMain(SubWin);
 	sf::Image ImageMain;
 	sf::Texture TextureMain;
+	int Cycle;
+	if (Filters[2] == TRUE) {
+		Cycle = FrameCount;
+	}
+	else {
+		Cycle = 0;
+	}
 	if (!(FormulaOpen || ColorOpen || LocationOpen || HelpOpen || LinkNotif || ConfigureDrop || FiltersDrop || IncorrectNumberNotif || FractDrop || ColorDrop || SmoothColor) == TRUE)
 	{
 		ImageMain.create(500, 500);
@@ -1171,7 +1180,7 @@ void SFML()
 		{
 			for (int Y = 0; Y < 500; Y++)
 			{
-				if (SmoothColor == FALSE && (Filters[0] || Filters[1] || Filters[2] || Filters[3] || Filters[4]) == FALSE)
+				if (SmoothColor == FALSE && (Filters[0] || Filters[1] || Filters[3] || Filters[4]) == FALSE)
 				{
 					sf::Color BandedColor;
 					if (ColorType == 0)
@@ -1182,21 +1191,21 @@ void SFML()
 												sf::Color(0, 112, 255), sf::Color(0, 65, 255), sf::Color(0, 21, 255), sf::Color(33, 0, 255), sf::Color(78, 0, 255), sf::Color(124, 0, 255),
 												sf::Color(171, 0, 255), sf::Color(217, 0, 255), sf::Color(253, 0, 245), sf::Color(255, 0, 200), sf::Color(255, 0, 154), sf::Color(255, 0, 107),
 												sf::Color(255, 0, 61) }; // Color preset 1 to somewhat cycle through all RGB values
-						BandedColor = Type1[ScreenSpaceIters[X][Y] % 31];
+						BandedColor = Type1[(ScreenSpaceIters[X][Y] + Cycle) % 31];
 					}
 					if (ColorType == 1)
 					{
 						sf::Color Type2[8] = { sf::Color(0, 0, 0), sf::Color(255, 0, 0), sf::Color(255, 165, 0), sf::Color(255, 255, 0),
 											   sf::Color(0, 128, 0), sf::Color(0, 0, 255), sf::Color(238, 130, 238), sf::Color(128, 128, 128) };
 						// Color Preset 2 to cycle through all values from /PyFractalRenderer
-						BandedColor = Type2[ScreenSpaceIters[X][Y] % 7];
+						BandedColor = Type2[(ScreenSpaceIters[X][Y] + Cycle) % 7];
 					}
 					if (ColorType == 2)
 					{
 						sf::Color Type3[16] = { sf::Color(255, 25, 0), sf::Color(255, 70, 0), sf::Color(255, 116, 0), sf::Color(255, 162, 0), sf::Color(255, 209, 0), sf::Color(249, 249, 0),
 												sf::Color(209, 255, 0), sf::Color(162, 255, 0), sf::Color(116, 255, 0), sf::Color(162, 255, 0), sf::Color(209, 255, 0), sf::Color(249, 249, 0),
 												sf::Color(255, 209, 0), sf::Color(255, 162, 0), sf::Color(255, 116, 0), sf::Color(255, 70, 0) }; // Filter through all "warm" colors of preset 1
-						BandedColor = Type3[ScreenSpaceIters[X][Y] % 15];
+						BandedColor = Type3[(ScreenSpaceIters[X][Y] + Cycle) % 15];
 					}
 					if (ColorType == 3)
 					{
@@ -1204,7 +1213,7 @@ void SFML()
 												sf::Color(0, 21, 255), sf::Color(33, 0, 255), sf::Color(78, 0, 255), sf::Color(124, 0, 255), sf::Color(78, 0, 255), sf::Color(33, 0, 255),
 												sf::Color(0, 21, 255), sf::Color(0, 65, 255), sf::Color(0, 112, 255), sf::Color(0, 158, 255), sf::Color(0, 205, 255), sf::Color(0, 247, 251) };
 						// Filter through all "cool" colors of preset 1
-						BandedColor = Type4[ScreenSpaceIters[X][Y] % 17];
+						BandedColor = Type4[(ScreenSpaceIters[X][Y] + Cycle) % 17];
 					}
 					if (ColorType == 4)
 					{
@@ -1214,7 +1223,7 @@ void SFML()
 												sf::Color(81, 153, 253), sf::Color(0, 112, 210), sf::Color(0, 96, 160), sf::Color(0, 81, 135), sf::Color(0, 81, 134), sf::Color(0, 87, 146),
 												sf::Color(0, 99, 167), sf::Color(0, 115, 197), sf::Color(26, 133, 232), sf::Color(94, 144, 230), sf::Color(126, 137, 188), sf::Color(144, 131, 143),
 												sf::Color(155, 126, 96) }; // Color preset 5 to simulate Deuteranopia
-						BandedColor = Type5[ScreenSpaceIters[X][Y] % 31];
+						BandedColor = Type5[(ScreenSpaceIters[X][Y] + Cycle) % 31];
 					}
 					if (ColorType == 5)
 					{
@@ -1224,7 +1233,7 @@ void SFML()
 												sf::Color(0, 169, 181), sf::Color(0, 132, 140), sf::Color(0, 103, 108), sf::Color(0, 87, 91), sf::Color(0, 87, 91), sf::Color(0, 94, 100),
 												sf::Color(81, 99, 107), sf::Color(144, 100, 107), sf::Color(198, 100, 107), sf::Color(238, 96, 102), sf::Color(246, 79, 83), sf::Color(250, 61, 63),
 												sf::Color(253, 43, 41) }; // Color preset 5 to simulate Tritanopia
-						BandedColor = Type6[ScreenSpaceIters[X][Y] % 31];
+						BandedColor = Type6[(ScreenSpaceIters[X][Y] + Cycle) % 31];
 					}
 					if (ScreenSpaceIters[X][Y] == Iters) { BandedColor = sf::Color(0, 0, 0); }
 					ImageMain.setPixel(X, Y, BandedColor);
