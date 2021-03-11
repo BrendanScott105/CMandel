@@ -1,4 +1,3 @@
-#include <SFML/Graphics.hpp>
 #include <windows.h> // Include
 #include <cmath>
 #include <string>
@@ -441,7 +440,6 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			while (NewZoom > 1)
 			{
 				SetZoomDensity(0);
-				SFML();
 				CaptureAnImage(hWnd);
 				zoomin--;
 			}
@@ -1217,7 +1215,7 @@ END SHIFT ITERTABLE
 #####################
 START MAIN COLOR FUNC
 ###################*/
-
+/*
 void SFML()
 {
 	sf::Event event;
@@ -1306,7 +1304,7 @@ void SFML()
 		SFMLMain.display();
 	}
 }
-
+*/
 /*###################
 END MAIN COLOR FUNCTN
 #####################
@@ -1759,9 +1757,9 @@ void onFrame(pixel* pixels) {
 			px = float(x) / float(width);
 			py = float(y) / float(height);
 
-			p->r = unsigned char(((cos(px + frameOffset * 10) / sin(py + frameOffset)) * cos(frameOffset * 3) * 10) * 127 + 127);
-			p->g = ~p->r;
-			p->b = 255;
+			p->r = ScreenSpaceIters[x][y] % 255;
+			p->g = ScreenSpaceIters[x][y] % 255;
+			p->b = ScreenSpaceIters[x][y] % 255;
 		}
 	}
 
