@@ -111,6 +111,11 @@ INT ColorType = 0;
 INT zoomin = 14;
 INT FrameCount;
 
+int RColor;
+int GColor;
+int BColor;
+int Cycle;
+
 static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
 static int numProcessors;
 static HANDLE self;
@@ -269,7 +274,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		else
 		{
 			FrameCount++;
-			//SFML();
+			if (Filters[2] == TRUE) {
+				Sleep(34);
+			}
 			getCurrentValue();
 		}
 
@@ -1130,12 +1137,6 @@ std::complex<long double> TableToComplex(INT TableX, INT TableY) // Input screen
 /*#####################
 END ITER TABLE TO CMPLX
 #######################
-START PULL FROM ITERTBL
-#####################*/
-
-/*###################
-END PULL FROM ITERTBL
-#####################
 START SHIFT ITERTABLE
 ###################*/
 
@@ -1212,101 +1213,6 @@ void ShiftScreen(INT Direction) {
 
 /*###################
 END SHIFT ITERTABLE
-#####################
-START MAIN COLOR FUNC
-###################*/
-/*
-void SFML()
-{
-	sf::Event event;
-	sf::RenderWindow SFMLMain(SubWin);
-	sf::Image ImageMain;
-	sf::Texture TextureMain;
-	int Cycle;
-	if (Filters[2] == TRUE) {
-		Cycle = FrameCount;
-	}
-	else {
-		Cycle = 0;
-	}
-	if (!(FormulaOpen || ColorOpen || LocationOpen || HelpOpen || LinkNotif || ConfigureDrop || FiltersDrop || IncorrectNumberNotif || FractDrop || ColorDrop || SmoothColor) == TRUE)
-	{
-		ImageMain.create(500, 500);
-
-		for (int X = 0; X < 500; X++)
-		{
-			for (int Y = 0; Y < 500; Y++)
-			{
-				if (SmoothColor == FALSE && (Filters[0] || Filters[1] || Filters[3] || Filters[4]) == FALSE)
-				{
-					sf::Color BandedColor;
-					if (ColorType == 0)
-					{
-						sf::Color Type1[32] = { sf::Color(255, 25, 0), sf::Color(255, 70, 0), sf::Color(255, 116, 0), sf::Color(255, 162, 0), sf::Color(255, 209, 0), sf::Color(249, 249, 0),
-												sf::Color(209, 255, 0), sf::Color(162, 255, 0), sf::Color(116, 255, 0), sf::Color(70, 255, 0), sf::Color(25, 255, 0), sf::Color(0, 255, 29),
-												sf::Color(0, 255, 74), sf::Color(0, 255, 120), sf::Color(0, 255, 167), sf::Color(0, 247, 251), sf::Color(0, 205, 255), sf::Color(0, 158, 255),
-												sf::Color(0, 112, 255), sf::Color(0, 65, 255), sf::Color(0, 21, 255), sf::Color(33, 0, 255), sf::Color(78, 0, 255), sf::Color(124, 0, 255),
-												sf::Color(171, 0, 255), sf::Color(217, 0, 255), sf::Color(253, 0, 245), sf::Color(255, 0, 200), sf::Color(255, 0, 154), sf::Color(255, 0, 107),
-												sf::Color(255, 0, 61) }; // Color preset 1 to somewhat cycle through all RGB values
-						BandedColor = Type1[(ScreenSpaceIters[X][Y] + Cycle) % 31];
-					}
-					if (ColorType == 1)
-					{
-						sf::Color Type2[8] = { sf::Color(0, 0, 0), sf::Color(255, 0, 0), sf::Color(255, 165, 0), sf::Color(255, 255, 0),
-											   sf::Color(0, 128, 0), sf::Color(0, 0, 255), sf::Color(238, 130, 238), sf::Color(128, 128, 128) };
-						// Color Preset 2 to cycle through all values from /PyFractalRenderer
-						BandedColor = Type2[(ScreenSpaceIters[X][Y] + Cycle) % 7];
-					}
-					if (ColorType == 2)
-					{
-						sf::Color Type3[16] = { sf::Color(255, 25, 0), sf::Color(255, 70, 0), sf::Color(255, 116, 0), sf::Color(255, 162, 0), sf::Color(255, 209, 0), sf::Color(249, 249, 0),
-												sf::Color(209, 255, 0), sf::Color(162, 255, 0), sf::Color(116, 255, 0), sf::Color(162, 255, 0), sf::Color(209, 255, 0), sf::Color(249, 249, 0),
-												sf::Color(255, 209, 0), sf::Color(255, 162, 0), sf::Color(255, 116, 0), sf::Color(255, 70, 0) }; // Filter through all "warm" colors of preset 1
-						BandedColor = Type3[(ScreenSpaceIters[X][Y] + Cycle) % 15];
-					}
-					if (ColorType == 3)
-					{
-						sf::Color Type4[18] = { sf::Color(0, 255, 167), sf::Color(0, 247, 251), sf::Color(0, 205, 255), sf::Color(0, 158, 255), sf::Color(0, 112, 255), sf::Color(0, 65, 255),
-												sf::Color(0, 21, 255), sf::Color(33, 0, 255), sf::Color(78, 0, 255), sf::Color(124, 0, 255), sf::Color(78, 0, 255), sf::Color(33, 0, 255),
-												sf::Color(0, 21, 255), sf::Color(0, 65, 255), sf::Color(0, 112, 255), sf::Color(0, 158, 255), sf::Color(0, 205, 255), sf::Color(0, 247, 251) };
-						// Filter through all "cool" colors of preset 1
-						BandedColor = Type4[(ScreenSpaceIters[X][Y] + Cycle) % 17];
-					}
-					if (ColorType == 4)
-					{
-						sf::Color Type5[32] = { sf::Color(164, 123, 0), sf::Color(175, 132, 0), sf::Color(199, 149, 0), sf::Color(232, 174, 0), sf::Color(255, 206, 124), sf::Color(255, 239, 219),
-												sf::Color(255, 234, 207), sf::Color(255, 224, 183), sf::Color(255, 217, 163), sf::Color(255, 213, 150), sf::Color(255, 211, 144), sf::Color(255, 211, 144),
-												sf::Color(255, 211, 149), sf::Color(255, 212, 161), sf::Color(255, 214, 182), sf::Color(247, 217, 222), sf::Color(224, 216, 254), sf::Color(165, 185, 255),
-												sf::Color(81, 153, 253), sf::Color(0, 112, 210), sf::Color(0, 96, 160), sf::Color(0, 81, 135), sf::Color(0, 81, 134), sf::Color(0, 87, 146),
-												sf::Color(0, 99, 167), sf::Color(0, 115, 197), sf::Color(26, 133, 232), sf::Color(94, 144, 230), sf::Color(126, 137, 188), sf::Color(144, 131, 143),
-												sf::Color(155, 126, 96) }; // Color preset 5 to simulate Deuteranopia
-						BandedColor = Type5[(ScreenSpaceIters[X][Y] + Cycle) % 31];
-					}
-					if (ColorType == 5)
-					{
-						sf::Color Type6[32] = { sf::Color(254, 29, 17), sf::Color(255, 66, 69), sf::Color(255, 110, 117), sf::Color(255, 155, 164), sf::Color(255, 199, 210), sf::Color(255, 236, 247),
-												sf::Color(230, 237, 255), sf::Color(191, 237, 255), sf::Color(156, 237, 255), sf::Color(129, 236, 255), sf::Color(115, 236, 255), sf::Color(114, 236, 255),
-												sf::Color(116, 237, 255), sf::Color(122, 238, 255), sf::Color(131, 239, 255), sf::Color(143, 241, 255), sf::Color(124, 239, 254), sf::Color(0, 208, 225),
-												sf::Color(0, 169, 181), sf::Color(0, 132, 140), sf::Color(0, 103, 108), sf::Color(0, 87, 91), sf::Color(0, 87, 91), sf::Color(0, 94, 100),
-												sf::Color(81, 99, 107), sf::Color(144, 100, 107), sf::Color(198, 100, 107), sf::Color(238, 96, 102), sf::Color(246, 79, 83), sf::Color(250, 61, 63),
-												sf::Color(253, 43, 41) }; // Color preset 5 to simulate Tritanopia
-						BandedColor = Type6[(ScreenSpaceIters[X][Y] + Cycle) % 31];
-					}
-					if (ScreenSpaceIters[X][Y] == Iters) { BandedColor = sf::Color(0, 0, 0); }
-					ImageMain.setPixel(X, Y, BandedColor);
-				}
-			}
-		}
-
-		TextureMain.loadFromImage(ImageMain);
-		sf::Sprite SpriteMain(TextureMain);
-		SFMLMain.draw(SpriteMain);
-		SFMLMain.display();
-	}
-}
-*/
-/*###################
-END MAIN COLOR FUNCTN
 #####################
 START DRAW POINT FUNC
 ###################*/
@@ -1741,7 +1647,6 @@ void getCurrentValue() {
 
 void onFrame(pixel* pixels) {
 	// This is where all the drawing takes place
-
 	pixel* p;
 
 	// +0.005 each frame
@@ -1757,9 +1662,81 @@ void onFrame(pixel* pixels) {
 			px = float(x) / float(width);
 			py = float(y) / float(height);
 
-			p->r = ScreenSpaceIters[x][y] % 255;
-			p->g = ScreenSpaceIters[x][y] % 255;
-			p->b = ScreenSpaceIters[x][y] % 255;
+			int Type1[31][3] = {{255, 25, 0}, {255, 70, 0}, {255, 116, 0}, {255, 162, 0}, {255, 209, 0}, {249, 249, 0},
+								{209, 255, 0}, {162, 255, 0}, {116, 255, 0}, {70, 255, 0}, {25, 255, 0}, {0, 255, 29},
+								{0, 255, 74}, {0, 255, 120}, {0, 255, 167}, {0, 247, 251}, {0, 205, 255}, {0, 158, 255},
+								{0, 112, 255}, {0, 65, 255}, {0, 21, 255}, {33, 0, 255}, {78, 0, 255}, {124, 0, 255},
+								{171, 0, 255}, {217, 0, 255}, {253, 0, 245}, {255, 0, 200}, {255, 0, 154}, {255, 0, 107},
+								{255, 0, 61}}; // Color preset 1 to somewhat cycle through all RGB values
+			int Type2[8][3] = { {0, 0, 0}, {255, 0, 0}, {255, 165, 0}, {255, 255, 0},
+								{0, 128, 0}, {0, 0, 255}, {238, 130, 238}, {128, 128, 128} };
+			
+			int Type3[16][3] = {{255, 25, 0}, {255, 70, 0}, {255, 116, 0}, {255, 162, 0}, {255, 209, 0}, {249, 249, 0},
+								{209, 255, 0}, {162, 255, 0}, {116, 255, 0}, {162, 255, 0}, {209, 255, 0}, {249, 249, 0},
+								{255, 209, 0}, {255, 162, 0}, {255, 116, 0}, {255, 70, 0} }; // Filter through all "warm" colors of preset 1
+			
+			int Type4[18][3] = {{0, 255, 167}, {0, 247, 251}, {0, 205, 255}, {0, 158, 255}, {0, 112, 255}, {0, 65, 255},
+								{0, 21, 255}, {33, 0, 255}, {78, 0, 255}, {124, 0, 255}, {78, 0, 255}, {33, 0, 255},
+								{0, 21, 255}, {0, 65, 255}, {0, 112, 255}, {0, 158, 255}, {0, 205, 255}, {0, 247, 251} };
+			
+			int Type5[31][3] = {{164, 123, 0}, {175, 132, 0}, {199, 149, 0}, {232, 174, 0}, {255, 206, 124}, {255, 239, 219 },
+								{255, 234, 207}, {255, 224, 183}, {255, 217, 163}, {255, 213, 150}, {255, 211, 144}, {255, 211, 144},
+								{255, 211, 149}, {255, 212, 161}, {255, 214, 182}, {247, 217, 222}, {224, 216, 254}, {165, 185, 255},
+								{81, 153, 253}, {0, 112, 210}, {0, 96, 160}, {0, 81, 135}, {0, 81, 134}, {0, 87, 146},
+								{0, 99, 167}, {0, 115, 197}, {26, 133, 232}, {94, 144, 230}, {126, 137, 188}, {144, 131, 143},
+								{155, 126, 96} }; // Color preset 5 to simulate Deuteranopia
+
+			int Type6[31][3] = {{254, 29, 17}, {255, 66, 69}, {255, 110, 117}, {255, 155, 164}, {255, 199, 210}, {255, 236, 247},
+								{230, 237, 255}, {191, 237, 255}, {156, 237, 255}, {129, 236, 255}, {115, 236, 255}, {114, 236, 255},
+								{116, 237, 255}, {122, 238, 255}, {131, 239, 255}, {143, 241, 255}, {124, 239, 254}, {0, 208, 225},
+								{0, 169, 181}, {0, 132, 140}, {0, 103, 108}, {0, 87, 91}, {0, 87, 91}, {0, 94, 100},
+								{81, 99, 107}, {144, 100, 107}, {198, 100, 107}, {238, 96, 102}, {246, 79, 83}, {250, 61, 63},
+								{253, 43, 41} }; // Color preset 5 to simulate Tritanopia
+
+			if (Filters[2] == TRUE) {
+				Cycle = FrameCount;
+			}
+			else {
+				Cycle = 0;
+			}
+			if (ColorType == 0) {
+				RColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
+				GColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
+				BColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
+			}
+			if (ColorType == 1) {
+				RColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][0];
+				GColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][1];
+				BColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][2];
+			}
+			if (ColorType == 2) {
+				RColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][0];
+				GColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][1];
+				BColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][2];
+			}
+			if (ColorType == 3) {
+				RColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][0];
+				GColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][1];
+				BColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][2];
+			}
+			if (ColorType == 4) {
+				RColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
+				GColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
+				BColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
+			}
+			if (ColorType == 5) {
+				RColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
+				GColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
+				BColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
+			}
+			if (ScreenSpaceIters[x][y] == Iters) {
+				RColor = 0;
+				GColor = 0;
+				BColor = 0;
+			}
+			p->r = RColor;
+			p->g = GColor;
+			p->b = BColor;
 		}
 	}
 
