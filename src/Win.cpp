@@ -278,7 +278,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		else
 		{
 			
-			if (Filters[2] == TRUE) {
+			if (Filters[2] == TRUE || Filters[4] == TRUE) {
 				FrameCount++;
 			}
 			Sleep(34);
@@ -871,7 +871,7 @@ void FilterDrop(HWND hWnd) // Create filter dropdown and handle element filling
 	Top4b = CreateWindowW(L"static", L"     Edge detection", WS_VISIBLE | WS_CHILD, 0, 37, 185, 20, hWnd, NULL, NULL, NULL);
 	Top5b = CreateWindowW(L"static", L"     Color cycling", WS_VISIBLE | WS_CHILD, 0, 56, 185, 20, hWnd, NULL, NULL, NULL);
 	Top6b = CreateWindowW(L"static", L"     Grayscale", WS_VISIBLE | WS_CHILD, 0, 75, 185, 20, hWnd, NULL, NULL, NULL);
-	Top7b = CreateWindowW(L"static", L"     Inverse Grayscale", WS_VISIBLE | WS_CHILD, 0, 94, 185, 20, hWnd, NULL, NULL, NULL);
+	Top7b = CreateWindowW(L"static", L"     Interior color cycling", WS_VISIBLE | WS_CHILD, 0, 94, 185, 20, hWnd, NULL, NULL, NULL);
 	if (Filters[4] == TRUE) { L05 = SS_BLACKRECT; }
 	else { L05 = SS_LEFT; }
 	Top8b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | L05, 4, 98, 12, 12, hWnd, NULL, NULL, NULL);
@@ -1776,10 +1776,41 @@ void onFrame(pixel* pixels) {
 				RColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
 				GColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
 				BColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
+			}
+			if (Filters[4] == TRUE) {
 				if (ScreenSpaceIters[x][y] == Iters) {
-					RColor = 255;
-					GColor = 255;
-					BColor = 255;
+					if (ScreenSpaceIters[x][y] == Iters) {
+						if (ColorType == 0) {
+							RColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
+							GColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
+							BColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
+						}
+						if (ColorType == 1) {
+							RColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][0];
+							GColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][1];
+							BColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][2];
+						}
+						if (ColorType == 2) {
+							RColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][0];
+							GColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][1];
+							BColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][2];
+						}
+						if (ColorType == 3) {
+							RColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][0];
+							GColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][1];
+							BColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][2];
+						}
+						if (ColorType == 4) {
+							RColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
+							GColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
+							BColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
+						}
+						if (ColorType == 5) {
+							RColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
+							GColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
+							BColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
+						}
+					}
 				}
 			}
 			p->r = RColor;
