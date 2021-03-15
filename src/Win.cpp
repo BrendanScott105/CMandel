@@ -34,7 +34,9 @@ void DestroyIncorrectNumberNotif(); //Declare existence
 void DestroyFiltersDrop(HWND); //Declare existence
 void DestroyFractDropdown(HWND); // Declare existence
 void DestroyColorDropdown(HWND); // Declare existence
+void DestroyFFNotif();
 void DestroyAll(HWND); //Declare existence
+void FFMPEGBox(HWND);
 
 void SetZoomDensity(INT); // Declare
 void SetLocation(INT); // Declare
@@ -85,6 +87,7 @@ HWND Link1, Link2, Link3; // Declare link notif elements globally
 HWND IN1, IN2, IN3; // Declare Incorrect Number notif elements globally
 HWND FDdrop1, FDdrop2, FDdrop3, FDdrop4, FDdrop5, FDdrop6, FDdrop7, FDdrop8, FDdrop9, FDdropA, FDdropB, FDdropC; // Declare fractal dropdown elements globally
 HWND CDdrop1, CDdrop2, CDdrop3, CDdrop4, CDdrop5, CDdrop6, CDdrop7, CDdrop8; // Declare color dropdown elements globally
+HWND FF1, FF2, FF3;
 HWND RealWinMain; // Declare main window
 HWND SubWin;
 
@@ -96,6 +99,7 @@ BOOL LinkNotif;
 BOOL ConfigureDrop;
 BOOL FiltersDrop;
 BOOL IncorrectNumberNotif;
+BOOL FFMPEGBoxNotif;
 BOOL FractDrop = FALSE;
 BOOL ColorDrop = FALSE;
 BOOL SmoothColor = FALSE;
@@ -273,8 +277,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		}
 		else
 		{
-			FrameCount++;
+			
 			if (Filters[2] == TRUE) {
+				FrameCount++;
 				Sleep(34);
 			}
 			getCurrentValue();
@@ -447,9 +452,12 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			while (NewZoom > 1)
 			{
 				SetZoomDensity(0);
+				Sleep(100);
 				CaptureAnImage(hWnd);
 				zoomin--;
 			}
+			SuspendThread(hTickThread);
+			FFMPEGBox(hWnd);
 		}
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
 	{
@@ -692,6 +700,9 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		if (IncorrectNumberNotif == TRUE) { // Incorrect number notif close
 			if (((XWindowPosition > 123) and (XWindowPosition < 138) and ((YWindowPosition > 363) and (YWindowPosition < 378)))) { DestroyIncorrectNumberNotif(); }
 		}
+		if (FFMPEGBoxNotif == TRUE) { // Incorrect number notif close
+			if (((XWindowPosition > 67) and (XWindowPosition < 83) and ((YWindowPosition > 466) and (YWindowPosition < 482)))) { DestroyFFNotif(); ResumeThread(hTickThread); }
+		}
 		if (((XWindowPosition > 483) and (XWindowPosition < 500)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { exit(0); } // Close application button
 		if (((XWindowPosition > 466) and (XWindowPosition < 483)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { ShowWindow(hWnd, SW_MINIMIZE); } // Minimize window button
 		if (((XWindowPosition > 449) and (XWindowPosition < 467)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) // Help button
@@ -730,7 +741,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.7.2", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.7.3", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -922,6 +933,14 @@ void ColorDropdown(HWND hWnd) // Create Fractal dropdown menu
 	ColorDrop = TRUE;
 }
 
+void FFMPEGBox(HWND hWnd) // Create link notif box
+{
+	FF1 = CreateWindowW(L"static", L"Merge in FFMPEG with 'ffmpeg - i img%3d.bmp *.mp4'", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_RIGHT, 65, 480, 370, 20, hWnd, NULL, NULL, NULL);
+	FF2 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 67, 482, 16, 16, hWnd, NULL, NULL, NULL);
+	FF3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 84, 480, 1, 20, hWnd, NULL, NULL, NULL);
+	FFMPEGBoxNotif = TRUE;
+}
+
 /*############
 END WINDOW DEF
 ##############
@@ -999,6 +1018,11 @@ void DestroyColorDropdown(HWND hWnd) { // Destroy fract dropdown
 	DestroyWindow(CDdrop1); DestroyWindow(CDdrop2); DestroyWindow(CDdrop3); DestroyWindow(CDdrop4);
 	DestroyWindow(CDdrop5); DestroyWindow(CDdrop6); DestroyWindow(CDdrop7); DestroyWindow(CDdrop8);
 	ColorDrop = FALSE;
+}
+
+void DestroyFFNotif()
+{
+	DestroyWindow(FF1); DestroyWindow(FF2); DestroyWindow(FF3);
 }
 
 void DestroyAll(HWND hWnd) // Destroy all menus
@@ -1728,6 +1752,21 @@ void onFrame(pixel* pixels) {
 				RColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
 				GColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
 				BColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
+			}
+			if (Filters[0] == TRUE) {
+				RColor = 255;
+				BColor = 255;
+				GColor = 255;
+			}
+			if (Filters[1] == TRUE) {
+				RColor = 0;
+				BColor = 0;
+				GColor = 0;
+				if (ScreenSpaceIters[x][y] != ScreenSpaceIters[x + 1 % 500][y] || ScreenSpaceIters[x][y] != ScreenSpaceIters[x][y - 1 % 500]) {
+					RColor = 255;
+					BColor = 255;
+					GColor = 255;
+				}
 			}
 			if (ScreenSpaceIters[x][y] == Iters) {
 				RColor = 0;
