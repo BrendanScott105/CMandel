@@ -280,8 +280,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 			
 			if (Filters[2] == TRUE) {
 				FrameCount++;
-				Sleep(34);
 			}
+			Sleep(34);
 			getCurrentValue();
 		}
 
@@ -728,9 +728,9 @@ void InfoBar(HWND hWnd) // add current view information bar
 	Info1a = CreateWindowW(L"static", L"Iterations : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 350, 539, 150, 19, hWnd, NULL, NULL, NULL); // Display initially
 	Info1 = CreateWindowW(L"static", L"200", WS_VISIBLE | WS_CHILD, 440, 540, 57, 17, hWnd, NULL, NULL, NULL);
 	Info2a = CreateWindowW(L"static", L"Re : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 521, 500, 19, hWnd, NULL, NULL, NULL);
-	Info2 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 35, 522, 464, 17, hWnd, NULL, NULL, NULL);
+	Info2 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 31, 522, 464, 17, hWnd, NULL, NULL, NULL);
 	Info3a = CreateWindowW(L"static", L"Im : ", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 539, 351, 19, hWnd, NULL, NULL, NULL);
-	Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 32, 540, 318, 17, hWnd, NULL, NULL, NULL);
+	Info3 = CreateWindowW(L"static", L"0", WS_VISIBLE | WS_CHILD, 29, 540, 318, 17, hWnd, NULL, NULL, NULL);
 	Info4a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_BLACKRECT, 0, 558, 1, 19, hWnd, NULL, NULL, NULL);
 	Info5a = CreateWindowW(L"static", L"Zoom : ", WS_VISIBLE | WS_CHILD, 2, 558, 229, 19, hWnd, NULL, NULL, NULL);
 	Info5 = CreateWindowW(L"static", L"4", WS_VISIBLE | WS_CHILD, 58, 558, 333, 16, hWnd, NULL, NULL, NULL);
@@ -741,7 +741,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.7.3", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.7.4", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -1104,7 +1104,7 @@ void SetLocation(INT ULDR) // Set new position on keypress
 	if (ULDR == 3) { NewReal += PixelDif * 10; }
 	LPCWSTR temp5;
 	std::stringstream stream;
-	stream << std::fixed << std::setprecision(49) << NewReal; // Set precision of window number
+	stream << std::fixed << std::setprecision(56) << NewReal; // Set precision of window number
 	const std::string string5 = stream.str(); // Convert
 	const std::wstring Wtemp5(string5.begin(), string5.end());
 	temp5 = (LPCWSTR)Wtemp5.c_str();
@@ -1607,7 +1607,6 @@ int CaptureAnImage(HWND hWnd)
 	hDIB = GlobalAlloc(GHND, dwBmpSize);
 	lpbitmap = (char*)GlobalLock(hDIB);
 	GetDIBits(hdcWindow, hbmScreen, 0, (UINT)bmpScreen.bmHeight, lpbitmap, (BITMAPINFO*)&bi, DIB_RGB_COLORS);
-	LPCWSTR filename;
 	std::string prefix = "IMG";
 	std::string padding = "";
 	std::string Zoomstr = to_string(zoomin);
@@ -1654,19 +1653,19 @@ void getCurrentValue() {
 	GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
 	memcpy(&sys, &fsys, sizeof(FILETIME));
 	memcpy(&user, &fuser, sizeof(FILETIME));
-	percent = (sys.QuadPart - lastSysCPU.QuadPart) +
-		(user.QuadPart - lastUserCPU.QuadPart);
-	percent /= (now.QuadPart - lastCPU.QuadPart);
-	percent /= numProcessors;
+	percent = ((double)sys.QuadPart - (double)lastSysCPU.QuadPart) + ((double)user.QuadPart - (double)lastUserCPU.QuadPart);
+	percent /= ((double)now.QuadPart - (double)lastCPU.QuadPart);
+	percent /= (double)numProcessors;
 	lastCPU = now;
 	lastUserCPU = user;
 	lastSysCPU = sys;
 
-	LPCWSTR temp11;
-	std::wstring Wtemp11 = to_wstring(percent * 100);
-	temp11 = (LPCWSTR)Wtemp11.c_str();
-
-	SetWindowTextW(Info6, temp11);
+	if (isnan(percent) == FALSE) {
+		LPCWSTR temp11;
+		std::wstring Wtemp11 = to_wstring(percent * 100);
+		temp11 = (LPCWSTR)Wtemp11.c_str();
+		SetWindowTextW(Info6, temp11);
+	}
 }
 
 void onFrame(pixel* pixels) {
@@ -1772,6 +1771,16 @@ void onFrame(pixel* pixels) {
 				RColor = 0;
 				GColor = 0;
 				BColor = 0;
+			}
+			if (Filters[3] == TRUE) {
+				RColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
+				GColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
+				BColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
+				if (ScreenSpaceIters[x][y] == Iters) {
+					RColor = 255;
+					GColor = 255;
+					BColor = 255;
+				}
 			}
 			p->r = RColor;
 			p->g = GColor;
