@@ -42,8 +42,6 @@ void SetZoomDensity(INT); // Declare
 void SetLocation(INT); // Declare
 void SetRotation(INT); // Declare
 
-void SFML(); // Declare
-
 void ShiftScreen(INT); // Declare
 
 void PlotPoint(INT, INT);
@@ -66,6 +64,8 @@ void NaiveThread109();
 
 int CaptureAnImage(HWND);
 void getCurrentValue();
+
+void DrawTwenty(INT, INT);
 
 DWORD tickThreadProc(HANDLE);
 
@@ -221,6 +221,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
 	RealWinMain = CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME) & ~WS_MAXIMIZEBOX & ~WS_CAPTION | WS_VISIBLE | WS_BORDER | WS_POPUP, 500, 200, 502, 577, NULL, NULL, NULL, NULL); // Create window with basic params
 	SubWin = CreateWindowW(L"static", NULL, WS_VISIBLE | WS_CHILD, 0, 20, 500, 500, RealWinMain, NULL, NULL, NULL);
+
 	if (SYSTEMTHREADS < 4)
 	{
 		for (int x = 0; x < 500; x++)
@@ -264,6 +265,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		T8.join();
 		T9.join();
 	}
+
 	hTickThread = CreateThread(NULL, NULL, &tickThreadProc, NULL, NULL, NULL);
 	MSG Message;
 	Message.message = ~WM_QUIT;
@@ -277,16 +279,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 		}
 		else
 		{
-			
 			if (Filters[2] == TRUE || Filters[4] == TRUE) {
 				FrameCount++;
 			}
 			Sleep(34);
 			getCurrentValue();
 		}
-
 	}
-
 }
 
 LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window procedure code
@@ -459,6 +458,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			SuspendThread(hTickThread);
 			FFMPEGBox(hWnd);
 		}
+		if (wp == VK_F7) { SuspendThread(hTickThread); }
+		if (wp == VK_F8) { ResumeThread(hTickThread); }
 	case WM_LBUTTONDOWN: // Left mouse button is clicked
 	{
 		RECT WinRect = { NULL };
@@ -741,7 +742,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.7.4", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.8.0", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -823,7 +824,7 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 
 void HelpMenu(HWND hWnd) // Create help menu
 {
-	HelpMenu1 = CreateWindowW(L"static", L" About...        © 2021, Brendan Scott\n This is open source software :\n @ Github/BrendanScott105/CMandel\n 64 Bit | Detected threads :\n Controls : ------------------------------------------\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Save render space to bmp\n F6 : Store zoom out sequence\n Limitations : --------------------------------------\n - Iterations does not exceed 999999\n - Precision limited 2^64 bits\n - Resolution locked at 500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
+	HelpMenu1 = CreateWindowW(L"static", L" About...        © 2021, Brendan Scott\n This is open source software :\n @ Github/BrendanScott105/CMandel\n 64 Bit | Detected threads :\n Controls : ------------------------------------------\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Save render space to bmp\n F6 : Store zoom out sequence\n F7 / F8 - Suspend / Resume drawing\nLimitations : --------------------------------------\n - Iterations does not exceed 999999\n - Precision limited 2^64 bits\n - Resolution locked at 500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
 	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 19, 300, 1, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu4 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
@@ -1376,13 +1377,10 @@ START 4 NAIVE MULTITD
 
 void NaiveThread1()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 4 == 0)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 4 == 0) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
@@ -1390,13 +1388,10 @@ void NaiveThread1()
 
 void NaiveThread2()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 4 == 1)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 4 == 1) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
@@ -1404,13 +1399,10 @@ void NaiveThread2()
 
 void NaiveThread3()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 4 == 2)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 4 == 2) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
@@ -1418,13 +1410,10 @@ void NaiveThread3()
 
 void NaiveThread4()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 4 == 3)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 4 == 3) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
@@ -1438,130 +1427,100 @@ START 10 NAIVE MLTTHR
 
 void NaiveThread100()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 0)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 0) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread101()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 1)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 1) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread102()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 2)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 2) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread103()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 3)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 3) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread104()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 4)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 4) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread105()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 5)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 5) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread106()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 6)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 6) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread107()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 7)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 7) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread108()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 8)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 8) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
 }
 void NaiveThread109()
 {
-	for (int x = 0; x < 500; x++)
-	{
-		for (int y = 0; y < 500; y++)
-		{
-			if (x % 10 == 9)
-			{
-				PlotPoint(x, y);
+	for (int x = 0; x < 20; x++) {
+		for (int y = 0; y < 20; y++) {
+			if (x % 10 == 9) {
+				DrawTwenty(x, y);
 			}
 		}
 	}
@@ -1847,4 +1806,63 @@ DWORD WINAPI tickThreadProc(HANDLE handle) {
 
 	SelectObject(hdcMem, hbmOld);
 	DeleteDC(hdc);
+}
+
+void DrawTwenty(INT x, INT y)
+{
+	bool isContinuous = TRUE;
+	for (int x1 = x * 25; x1 < (x * 25) + 24; x1++)
+	{
+		PlotPoint(x1, y * 25);
+		if (ScreenSpaceIters[x1][y * 25] != ScreenSpaceIters[x1 - 1 % 500][y * 25]) {
+			if (x1 != x * 25) {
+				isContinuous = FALSE;
+			}
+		}
+	}
+	for (int x1 = x * 25; x1 < (x * 25) + 24; x1++)
+	{
+		PlotPoint(x1, y * 25 + 24);
+		if (ScreenSpaceIters[x1][y * 25 + 24 % 500] != ScreenSpaceIters[x1 - 1 % 500][y * 25 + 24 % 500]) {
+			if (x1 != x * 25) {
+				isContinuous = FALSE;
+			}
+		}
+	}
+	for (int y1 = y * 25; y1 < (y * 25) + 24; y1++)
+	{
+		PlotPoint(x * 25, y1);
+		if (ScreenSpaceIters[x * 25][y1] != ScreenSpaceIters[x * 25][y1 - 1 % 500]) {
+			if (y1 != y * 25) {
+				isContinuous = FALSE;
+			}
+		}
+	}
+	for (int y1 = y * 25; y1 < (y * 25) + 24; y1++)
+	{
+		PlotPoint(x * 25 + 24, y1);
+		if (ScreenSpaceIters[x * 25 + 24 % 500][y1] != ScreenSpaceIters[x * 25 + 24 % 500][y1 - 1 % 500]) {
+			if (y1 != y * 25) {
+				isContinuous = FALSE;
+			}
+		}
+	}
+	if (isContinuous == TRUE) {
+		for (int x1 = x * 25; x1 < (x * 25) + 25; x1++)
+		{
+			for (int y1 = y * 25; y1 < (y * 25) + 25; y1++)
+			{
+				ScreenSpaceIters[x1][y1] = ScreenSpaceIters[x * 25][y * 25];
+			}
+		}
+	}
+	if (isContinuous == FALSE){
+		for (int x1 = x * 25; x1 < (x * 25) + 25; x1++)
+		{
+			for (int y1 = y * 25; y1 < (y * 25) + 25; y1++)
+			{
+				PlotPoint(x1, y1);
+			}
+		}
+	}
 }
