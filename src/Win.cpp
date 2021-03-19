@@ -117,6 +117,7 @@ INT ColorType = 0;
 INT zoomin = 14;
 INT FrameCount;
 INT Bailout = 4;
+FLOAT ZoomOutSize = 1.1;
 
 int RColor;
 int GColor;
@@ -316,8 +317,8 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			SetWindowTextW(Info1, temp9);
 			RenderThreads();
 		}
-		if (wp == VK_UP) { SetZoomDensity(1); getCurrentValue(); zoomin++; } // Zoom in
-		if (wp == VK_DOWN) { SetZoomDensity(0); getCurrentValue(); zoomin--; } // Zoom out
+		if (wp == VK_UP) { SetZoomDensity(1); getCurrentValue(); zoomin+=2; } // Zoom in
+		if (wp == VK_DOWN) { SetZoomDensity(0); getCurrentValue(); zoomin-=2; } // Zoom out
 		if (wp == 0x57) { SetLocation(0); getCurrentValue(); ShiftScreen(3); } // Set new position
 		if (wp == 0x41) { SetLocation(1); getCurrentValue(); ShiftScreen(2); }
 		if (wp == 0x53) { SetLocation(2); getCurrentValue(); ShiftScreen(1); }
@@ -327,15 +328,17 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 		if (wp == VK_F5) { CaptureAnImage(hWnd); }
 		if (wp == VK_F6)
 		{
+			ZoomOutSize = 1.05;
 			while (NewZoom > 1)
 			{
 				SetZoomDensity(0);
-				Sleep(100);
+				Sleep(1000);
 				CaptureAnImage(hWnd);
 				zoomin--;
 			}
 			SuspendThread(hTickThread);
 			FFMPEGBox(hWnd);
+			ZoomOutSize = 1.1;
 		}
 		if (wp == VK_F7) { SuspendThread(hTickThread); }
 		if (wp == VK_F8) { ResumeThread(hTickThread); }
@@ -582,7 +585,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.8.1", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.8.2", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -776,7 +779,7 @@ void ColorDropdown(HWND hWnd) // Create Fractal dropdown menu
 
 void FFMPEGBox(HWND hWnd) // Create link notif box
 {
-	FF1 = CreateWindowW(L"static", L"Merge in FFMPEG with 'ffmpeg - i img%3d.bmp *.mp4'", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_RIGHT, 65, 480, 370, 20, hWnd, NULL, NULL, NULL);
+	FF1 = CreateWindowW(L"static", L"Merge in FFMPEG with 'ffmpeg -i img%4d.bmp *.mp4'", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_RIGHT, 65, 480, 370, 20, hWnd, NULL, NULL, NULL);
 	FF2 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 67, 482, 16, 16, hWnd, NULL, NULL, NULL);
 	FF3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 84, 480, 1, 20, hWnd, NULL, NULL, NULL);
 	FFMPEGBoxNotif = TRUE;
@@ -881,8 +884,8 @@ START LOCATION MODIFICATION
 
 void SetZoomDensity(INT InOut) // Set pixel density for determining distance between points
 {
-	if (InOut == 1) { NewZoom = NewZoom * 1.1; } // Zoom in and out
-	if (InOut == 0) { NewZoom = NewZoom / 1.1; }
+	if (InOut == 1) { NewZoom = NewZoom * ZoomOutSize; } // Zoom in and out
+	if (InOut == 0) { NewZoom = NewZoom / ZoomOutSize; }
 	if (InOut == 2) {}
 	PixelDif = (4 * (4 / NewZoom)) / 500; // Zoom logic, allows for non 2^n zoom levels
 	LPCWSTR temp4;
@@ -1550,9 +1553,10 @@ int CaptureAnImage(HWND hWnd)
 	std::string prefix = "IMG";
 	std::string padding = "";
 	std::string Zoomstr = to_string(zoomin);
-	if (Zoomstr.length() == 3) {}
-	else if (Zoomstr.length() == 2) { Zoomstr = "0" + Zoomstr; }
-	else { Zoomstr = "00" + Zoomstr; }
+	if (Zoomstr.length() == 4) {}
+	else if (Zoomstr.length() == 3) { Zoomstr = "0" + Zoomstr; }
+	else if (Zoomstr.length() == 2) { Zoomstr = "00" + Zoomstr; }
+	else { Zoomstr = "000" + Zoomstr; }
 	std::string ext = std::string(".bmp");
 	std::string Comb = prefix + Zoomstr + ext;
 	std::string s = Comb;
