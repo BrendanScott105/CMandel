@@ -3,7 +3,7 @@ Reworked Mandelbrot explorer
 - Full custom GUI 
 - Realtime exploring
 - Updated filters and expanded fractal types
-- Color schemes and smooth coloring [hopefully]
+- Color schemes and smooth coloring
 - Lightweight  
 
 # Example zoom
