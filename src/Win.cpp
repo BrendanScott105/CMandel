@@ -67,6 +67,8 @@ void getCurrentValue();
 
 void DrawTwenty(INT, INT);
 
+void RenderThreads();
+
 DWORD tickThreadProc(HANDLE);
 
 wstring s2ws(std::string);
@@ -114,6 +116,7 @@ INT FractalType = 2;
 INT ColorType = 0;
 INT zoomin = 14;
 INT FrameCount;
+INT Bailout = 4;
 
 int RColor;
 int GColor;
@@ -133,6 +136,7 @@ long double NewReal = 0; long double NewImag = 0; long double NewZoom = 4; int R
 INT RealFractalType = 1;
 
 int ScreenSpaceIters[500][500];
+float Smooth[500][500];
 /*Fractal variables end*/
 
 INT SYSTEMTHREADS = std::thread::hardware_concurrency();
@@ -222,49 +226,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 	RealWinMain = CreateWindowW(L"MainWin", L"CMandel", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME) & ~WS_MAXIMIZEBOX & ~WS_CAPTION | WS_VISIBLE | WS_BORDER | WS_POPUP, 500, 200, 502, 577, NULL, NULL, NULL, NULL); // Create window with basic params
 	SubWin = CreateWindowW(L"static", NULL, WS_VISIBLE | WS_CHILD, 0, 20, 500, 500, RealWinMain, NULL, NULL, NULL);
 
-	if (SYSTEMTHREADS < 4)
-	{
-		for (int x = 0; x < 500; x++)
-		{
-			for (int y = 0; y < 500; y++)
-			{
-				PlotPoint(x, y);
-			}
-		}
-	}
-	if (SYSTEMTHREADS < 10)
-	{
-		std::thread T1(NaiveThread1);
-		std::thread T2(NaiveThread2);
-		std::thread T3(NaiveThread3);
-		std::thread T4(NaiveThread4);
-		T1.join();
-		T2.join();
-		T3.join();
-		T4.join();
-	}
-	else {
-		std::thread T0(NaiveThread100);
-		std::thread T1(NaiveThread101);
-		std::thread T2(NaiveThread102);
-		std::thread T3(NaiveThread103);
-		std::thread T4(NaiveThread104);
-		std::thread T5(NaiveThread105);
-		std::thread T6(NaiveThread106);
-		std::thread T7(NaiveThread107);
-		std::thread T8(NaiveThread108);
-		std::thread T9(NaiveThread109);
-		T0.join();
-		T1.join();
-		T2.join();
-		T3.join();
-		T4.join();
-		T5.join();
-		T6.join();
-		T7.join();
-		T8.join();
-		T9.join();
-	}
+	RenderThreads();
 
 	hTickThread = CreateThread(NULL, NULL, &tickThreadProc, NULL, NULL, NULL);
 	MSG Message;
@@ -330,49 +292,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			std::wstring Wtemp2 = to_wstring(Iters);
 			temp8 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp8);
-			if (SYSTEMTHREADS < 4)
-			{
-				for (int x = 0; x < 500; x++)
-				{
-					for (int y = 0; y < 500; y++)
-					{
-						PlotPoint(x, y);
-					}
-				}
-			}
-			if (SYSTEMTHREADS < 10)
-			{
-				std::thread T1(NaiveThread1);
-				std::thread T2(NaiveThread2);
-				std::thread T3(NaiveThread3);
-				std::thread T4(NaiveThread4);
-				T1.join();
-				T2.join();
-				T3.join();
-				T4.join();
-			}
-			else {
-				std::thread T0(NaiveThread100);
-				std::thread T1(NaiveThread101);
-				std::thread T2(NaiveThread102);
-				std::thread T3(NaiveThread103);
-				std::thread T4(NaiveThread104);
-				std::thread T5(NaiveThread105);
-				std::thread T6(NaiveThread106);
-				std::thread T7(NaiveThread107);
-				std::thread T8(NaiveThread108);
-				std::thread T9(NaiveThread109);
-				T0.join();
-				T1.join();
-				T2.join();
-				T3.join();
-				T4.join();
-				T5.join();
-				T6.join();
-				T7.join();
-				T8.join();
-				T9.join();
-			}
+			RenderThreads();
 		}
 		if (wp == VK_OEM_MINUS and Iters > 0) // when "-" is hit
 		{
@@ -393,49 +313,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			std::wstring Wtemp2 = to_wstring(Iters);
 			temp9 = (LPCWSTR)Wtemp2.c_str();
 			SetWindowTextW(Info1, temp9);
-			if (SYSTEMTHREADS < 4)
-			{
-				for (int x = 0; x < 500; x++)
-				{
-					for (int y = 0; y < 500; y++)
-					{
-						PlotPoint(x, y);
-					}
-				}
-			}
-			if (SYSTEMTHREADS < 10)
-			{
-				std::thread T1(NaiveThread1);
-				std::thread T2(NaiveThread2);
-				std::thread T3(NaiveThread3);
-				std::thread T4(NaiveThread4);
-				T1.join();
-				T2.join();
-				T3.join();
-				T4.join();
-			}
-			else {
-				std::thread T0(NaiveThread100);
-				std::thread T1(NaiveThread101);
-				std::thread T2(NaiveThread102);
-				std::thread T3(NaiveThread103);
-				std::thread T4(NaiveThread104);
-				std::thread T5(NaiveThread105);
-				std::thread T6(NaiveThread106);
-				std::thread T7(NaiveThread107);
-				std::thread T8(NaiveThread108);
-				std::thread T9(NaiveThread109);
-				T0.join();
-				T1.join();
-				T2.join();
-				T3.join();
-				T4.join();
-				T5.join();
-				T6.join();
-				T7.join();
-				T8.join();
-				T9.join();
-			}
+			RenderThreads();
 		}
 		if (wp == VK_UP) { SetZoomDensity(1); getCurrentValue(); zoomin++; } // Zoom in
 		if (wp == VK_DOWN) { SetZoomDensity(0); getCurrentValue(); zoomin--; } // Zoom out
@@ -476,7 +354,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 			}
 		}
 		if (FiltersDrop == TRUE) { // When filters menu is open
-			if (((XWindowPosition > 150) and (XWindowPosition < 166)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); ResumeThread(hTickThread); break;} // Destroy filters dropdown
+			if (((XWindowPosition > 150) and (XWindowPosition < 166)) and ((YWindowPosition > -19) and (YWindowPosition < -4))) { DestroyFiltersDrop(hWnd); ResumeThread(hTickThread); break; } // Destroy filters dropdown
 			if (((XWindowPosition > 5) and (XWindowPosition < 16)) and ((YWindowPosition > 3) and (YWindowPosition < 14))) { // If decolorize option is selected
 				if (Filters[0] == FALSE) { // if decolorize is false
 					Filters[0] = TRUE; // make true
@@ -554,52 +432,10 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				else { JuliaMode = FALSE; DestroyAll(hWnd); FormulaMenu(hWnd); } // if true, make false, and rerender
 			}
 			if ((((XWindowPosition > 261) and (XWindowPosition < 340)) and ((YWindowPosition > 321) and (YWindowPosition < 350))) && FractDrop == FALSE) { DestroyAll(hWnd); ResumeThread(hTickThread); } // if Cancel button is hit
-			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // if X button is hit
+			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); ResumeThread(hTickThread); } // if X button is hit
 			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 321) and (YWindowPosition < 350))) && FractDrop == FALSE) { // if Apply button is hit
 				RealFractalType = FractalType;
-				if (SYSTEMTHREADS < 4)
-				{
-					for (int x = 0; x < 500; x++)
-					{
-						for (int y = 0; y < 500; y++)
-						{
-							PlotPoint(x, y);
-						}
-					}
-				}
-				if (SYSTEMTHREADS < 10)
-				{
-					std::thread T1(NaiveThread1);
-					std::thread T2(NaiveThread2);
-					std::thread T3(NaiveThread3);
-					std::thread T4(NaiveThread4);
-					T1.join();
-					T2.join();
-					T3.join();
-					T4.join();
-				}
-				else {
-					std::thread T0(NaiveThread100);
-					std::thread T1(NaiveThread101);
-					std::thread T2(NaiveThread102);
-					std::thread T3(NaiveThread103);
-					std::thread T4(NaiveThread104);
-					std::thread T5(NaiveThread105);
-					std::thread T6(NaiveThread106);
-					std::thread T7(NaiveThread107);
-					std::thread T8(NaiveThread108);
-					std::thread T9(NaiveThread109);
-					T0.join();
-					T1.join();
-					T2.join();
-					T3.join();
-					T4.join();
-					T5.join();
-					T6.join();
-					T7.join();
-					T8.join();
-					T9.join();
-				}
+				RenderThreads();
 				DestroyAll(hWnd);
 				ResumeThread(hTickThread);
 			}
@@ -626,11 +462,13 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 					SmoothColor = TRUE;
 					DestroyAll(hWnd);
 					ColorMenu(hWnd);
+					Bailout = 65536;
 				}
-				else { SmoothColor = FALSE; DestroyAll(hWnd); ColorMenu(hWnd); } // if true, make false, and rerender
+				else { Bailout = 4; SmoothColor = FALSE; DestroyAll(hWnd); ColorMenu(hWnd); } // if true, make false, and rerender
 			}
 			if ((((XWindowPosition > 161) and (XWindowPosition < 240)) and ((YWindowPosition > 316) and (YWindowPosition < 340))) && ColorDrop == FALSE) { // if Apply button is hit
 				DestroyAll(hWnd);
+				RenderThreads();
 				ResumeThread(hTickThread);
 			}
 			if (ColorDrop == FALSE) { // If dropdown menu is not open
@@ -646,7 +484,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 				if (((XWindowPosition > 171) and (XWindowPosition < 311)) and ((YWindowPosition > 305) and (YWindowPosition < 324))) { ColorType = 5; SetWindowTextW(Color3, L"Tritanopia"); DestroyColorDropdown(hWnd); }
 			}
 			if ((((XWindowPosition > 261) and (XWindowPosition < 340)) and ((YWindowPosition > 316) and (YWindowPosition < 340))) && ColorDrop == FALSE) { DestroyAll(hWnd); ResumeThread(hTickThread); } // if Cancel button is hit
-			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // if X button is hit
+			if (((XWindowPosition > 332) and (XWindowPosition < 348)) and ((YWindowPosition > 153) and (YWindowPosition < 169))) { DestroyAll(hWnd); ResumeThread(hTickThread); } // if X button is hit
 		}
 		if (LocationOpen == TRUE) {  // While location menu is open
 			BOOL Valid1 = FALSE;
@@ -687,13 +525,13 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 					ResumeThread(hTickThread);
 				}
 			}
-			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 320)))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // Close menu from cancel button
-			if (((XWindowPosition > 332) and (XWindowPosition < 348) and ((YWindowPosition > 178) and (YWindowPosition < 194)))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // Close menu from X button
+			if (((XWindowPosition > 261) and (XWindowPosition < 340) and ((YWindowPosition > 296) and (YWindowPosition < 320)))) { DestroyAll(hWnd); ResumeThread(hTickThread); } // Close menu from cancel button
+			if (((XWindowPosition > 332) and (XWindowPosition < 348) and ((YWindowPosition > 178) and (YWindowPosition < 194)))) { DestroyAll(hWnd); ResumeThread(hTickThread); } // Close menu from X button
 		}
 		if (HelpOpen == TRUE) { // While help menu open
 			if (((XWindowPosition > 347) and (XWindowPosition < 366) and ((YWindowPosition > 104) and (YWindowPosition < 121)))) { ShellExecute(NULL, NULL, L"https://github.com/BrendanScott105/CMandel", NULL, NULL, SW_SHOWNORMAL); LinkBox(hWnd); } // Open URL in browser
-			if (((XWindowPosition > 317) and (XWindowPosition < 397) and ((YWindowPosition > 396) and (YWindowPosition < 416)))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // Destroy help menu from OK
-			if (((XWindowPosition > 382) and (XWindowPosition < 399) and ((YWindowPosition > 82) and (YWindowPosition < 99)))) { DestroyAll(hWnd); ResumeThread(hTickThread);} // Destroy help menu from X
+			if (((XWindowPosition > 317) and (XWindowPosition < 397) and ((YWindowPosition > 396) and (YWindowPosition < 416)))) { DestroyAll(hWnd); ResumeThread(hTickThread); } // Destroy help menu from OK
+			if (((XWindowPosition > 382) and (XWindowPosition < 399) and ((YWindowPosition > 82) and (YWindowPosition < 99)))) { DestroyAll(hWnd); ResumeThread(hTickThread); } // Destroy help menu from X
 		}
 		if (LinkNotif == TRUE) { // Link notif close
 			if (((XWindowPosition > 148) and (XWindowPosition < 166) and ((YWindowPosition > 458) and (YWindowPosition < 472)))) { DestroyLinkNotif(); }
@@ -742,7 +580,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.8.0", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.8.1", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
@@ -1052,49 +890,7 @@ void SetZoomDensity(INT InOut) // Set pixel density for determining distance bet
 	const std::wstring Wtemp5(string5.begin(), string5.end());
 	temp4 = (LPCWSTR)Wtemp5.c_str();
 	SetWindowTextW(Info5, temp4); // Set window text
-	if (SYSTEMTHREADS < 4)
-	{
-		for (int x = 0; x < 500; x++)
-		{
-			for (int y = 0; y < 500; y++)
-			{
-				PlotPoint(x, y);
-			}
-		}
-	}
-	if (SYSTEMTHREADS < 10)
-	{
-		std::thread T1(NaiveThread1);
-		std::thread T2(NaiveThread2);
-		std::thread T3(NaiveThread3);
-		std::thread T4(NaiveThread4);
-		T1.join();
-		T2.join();
-		T3.join();
-		T4.join();
-	}
-	else {
-		std::thread T0(NaiveThread100);
-		std::thread T1(NaiveThread101);
-		std::thread T2(NaiveThread102);
-		std::thread T3(NaiveThread103);
-		std::thread T4(NaiveThread104);
-		std::thread T5(NaiveThread105);
-		std::thread T6(NaiveThread106);
-		std::thread T7(NaiveThread107);
-		std::thread T8(NaiveThread108);
-		std::thread T9(NaiveThread109);
-		T0.join();
-		T1.join();
-		T2.join();
-		T3.join();
-		T4.join();
-		T5.join();
-		T6.join();
-		T7.join();
-		T8.join();
-		T9.join();
-	}
+	RenderThreads();
 }
 
 void SetLocation(INT ULDR) // Set new position on keypress
@@ -1234,6 +1030,7 @@ void ShiftScreen(INT Direction) {
 			}
 		}
 	}
+	RenderThreads();
 }
 
 /*###################
@@ -1248,7 +1045,6 @@ void PlotPoint(INT x, INT y)
 	std::complex<long double> IteratePoint(0, 0);
 	int count = 0;
 	long double zi = 0, zr = 0, zisqr = 0, zrsqr = 0;
-
 	if (RealFractalType == 1) // Mandelbrot set
 	{
 		long double q = ((CPoint.real() - 0.25) * (CPoint.real() - 0.25)) + (CPoint.imag() * CPoint.imag());
@@ -1257,7 +1053,7 @@ void PlotPoint(INT x, INT y)
 			count = Iters;
 		}
 		else {
-			while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+			while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 			{
 				zi = zr * zi * 2 + CPoint.imag();
 				zr = zrsqr - zisqr + CPoint.real();
@@ -1269,7 +1065,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 2) // Burning ship
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = abs(zr * zi) * 2 + CPoint.imag();
 			zr = zrsqr - zisqr + CPoint.real();
@@ -1280,7 +1076,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 3) // Buffalo
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = abs(zr * zi) * 2 + CPoint.imag();
 			zr = abs(zrsqr - zisqr) + CPoint.real();
@@ -1291,7 +1087,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 4) // Celtic
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = zr * zi * 2 + CPoint.imag();
 			zr = abs(zrsqr - zisqr) + CPoint.real();
@@ -1302,7 +1098,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 5) // Mandelbar
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = zr * zi * -2 + CPoint.imag();
 			zr = zrsqr - zisqr + CPoint.real();
@@ -1313,7 +1109,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 6) // Mandelbar celtic
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = zr * zi * -2 + CPoint.imag();
 			zr = abs(zrsqr - zisqr) + CPoint.real();
@@ -1324,7 +1120,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 7) // Perp mandelbrot
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = abs(zr) * zi * -2 + CPoint.imag();
 			zr = zrsqr - zisqr + CPoint.real();
@@ -1335,7 +1131,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 8) // Perpendicular burning
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = zr * abs(zi) * -2 + CPoint.imag();
 			zr = zrsqr - zisqr + CPoint.real();
@@ -1346,7 +1142,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 9) // Perpendicular buffalo
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = zr * abs(zi) * 2 + CPoint.imag();
 			zr = abs(zrsqr - zisqr) + CPoint.real();
@@ -1357,7 +1153,7 @@ void PlotPoint(INT x, INT y)
 	}
 	if (RealFractalType == 10) // Perpendicular celtic
 	{
-		while (((zi * zi) + (zr * zr) < 4) && count < Iters)
+		while (((zi * zi) + (zr * zr) < Bailout) && count < Iters)
 		{
 			zi = abs(zr) * zi * -2 + CPoint.imag();
 			zr = abs(zrsqr - zisqr) + CPoint.real();
@@ -1367,6 +1163,7 @@ void PlotPoint(INT x, INT y)
 		}
 	}
 	ScreenSpaceIters[x][y] = count;
+	Smooth[x][y] = count + 1 - (log((log(zr*zr + zi*zi) / 2) / log(2)) / log(2));
 }
 
 /*###################
@@ -1377,10 +1174,23 @@ START 4 NAIVE MULTITD
 
 void NaiveThread1()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 4 == 0) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 4 == 0) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 4 == 0) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
@@ -1388,10 +1198,23 @@ void NaiveThread1()
 
 void NaiveThread2()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 4 == 1) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 4 == 1) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 4 == 1) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
@@ -1399,10 +1222,23 @@ void NaiveThread2()
 
 void NaiveThread3()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 4 == 2) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 4 == 2) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 4 == 2) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
@@ -1410,10 +1246,23 @@ void NaiveThread3()
 
 void NaiveThread4()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 4 == 3) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 4 == 3) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 4 == 3) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
@@ -1427,100 +1276,230 @@ START 10 NAIVE MLTTHR
 
 void NaiveThread100()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 0) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 0) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 0) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread101()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 1) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 1) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 1) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread102()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 2) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 2) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 2) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread103()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 3) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 3) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 3) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread104()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 4) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 4) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 4) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread105()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 5) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 5) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 5) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread106()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 6) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 6) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 6) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread107()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 7) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 7) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 7) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread108()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 8) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 8) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 8) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
 }
 void NaiveThread109()
 {
-	for (int x = 0; x < 20; x++) {
-		for (int y = 0; y < 20; y++) {
-			if (x % 10 == 9) {
-				DrawTwenty(x, y);
+	if (SmoothColor == FALSE)
+	{
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				if (x % 10 == 9) {
+					DrawTwenty(x, y);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < 500; x++) {
+			for (int y = 0; y < 500; y++) {
+				if (x % 10 == 9) {
+					PlotPoint(x, y);
+				}
 			}
 		}
 	}
@@ -1644,132 +1623,179 @@ void onFrame(pixel* pixels) {
 			px = float(x) / float(width);
 			py = float(y) / float(height);
 
-			int Type1[31][3] = {{255, 25, 0}, {255, 70, 0}, {255, 116, 0}, {255, 162, 0}, {255, 209, 0}, {249, 249, 0},
+			int Type1[31][3] = { {255, 25, 0}, {255, 70, 0}, {255, 116, 0}, {255, 162, 0}, {255, 209, 0}, {249, 249, 0},
 								{209, 255, 0}, {162, 255, 0}, {116, 255, 0}, {70, 255, 0}, {25, 255, 0}, {0, 255, 29},
 								{0, 255, 74}, {0, 255, 120}, {0, 255, 167}, {0, 247, 251}, {0, 205, 255}, {0, 158, 255},
 								{0, 112, 255}, {0, 65, 255}, {0, 21, 255}, {33, 0, 255}, {78, 0, 255}, {124, 0, 255},
 								{171, 0, 255}, {217, 0, 255}, {253, 0, 245}, {255, 0, 200}, {255, 0, 154}, {255, 0, 107},
-								{255, 0, 61}}; // Color preset 1 to somewhat cycle through all RGB values
+								{255, 0, 61} }; // Color preset 1 to somewhat cycle through all RGB values
 			int Type2[8][3] = { {0, 0, 0}, {255, 0, 0}, {255, 165, 0}, {255, 255, 0},
 								{0, 128, 0}, {0, 0, 255}, {238, 130, 238}, {128, 128, 128} };
-			
-			int Type3[16][3] = {{255, 25, 0}, {255, 70, 0}, {255, 116, 0}, {255, 162, 0}, {255, 209, 0}, {249, 249, 0},
+
+			int Type3[16][3] = { {255, 25, 0}, {255, 70, 0}, {255, 116, 0}, {255, 162, 0}, {255, 209, 0}, {249, 249, 0},
 								{209, 255, 0}, {162, 255, 0}, {116, 255, 0}, {162, 255, 0}, {209, 255, 0}, {249, 249, 0},
 								{255, 209, 0}, {255, 162, 0}, {255, 116, 0}, {255, 70, 0} }; // Filter through all "warm" colors of preset 1
-			
-			int Type4[18][3] = {{0, 255, 167}, {0, 247, 251}, {0, 205, 255}, {0, 158, 255}, {0, 112, 255}, {0, 65, 255},
+
+			int Type4[18][3] = { {0, 255, 167}, {0, 247, 251}, {0, 205, 255}, {0, 158, 255}, {0, 112, 255}, {0, 65, 255},
 								{0, 21, 255}, {33, 0, 255}, {78, 0, 255}, {124, 0, 255}, {78, 0, 255}, {33, 0, 255},
 								{0, 21, 255}, {0, 65, 255}, {0, 112, 255}, {0, 158, 255}, {0, 205, 255}, {0, 247, 251} };
-			
-			int Type5[31][3] = {{164, 123, 0}, {175, 132, 0}, {199, 149, 0}, {232, 174, 0}, {255, 206, 124}, {255, 239, 219 },
+
+			int Type5[31][3] = { {164, 123, 0}, {175, 132, 0}, {199, 149, 0}, {232, 174, 0}, {255, 206, 124}, {255, 239, 219 },
 								{255, 234, 207}, {255, 224, 183}, {255, 217, 163}, {255, 213, 150}, {255, 211, 144}, {255, 211, 144},
 								{255, 211, 149}, {255, 212, 161}, {255, 214, 182}, {247, 217, 222}, {224, 216, 254}, {165, 185, 255},
 								{81, 153, 253}, {0, 112, 210}, {0, 96, 160}, {0, 81, 135}, {0, 81, 134}, {0, 87, 146},
 								{0, 99, 167}, {0, 115, 197}, {26, 133, 232}, {94, 144, 230}, {126, 137, 188}, {144, 131, 143},
 								{155, 126, 96} }; // Color preset 5 to simulate Deuteranopia
 
-			int Type6[31][3] = {{254, 29, 17}, {255, 66, 69}, {255, 110, 117}, {255, 155, 164}, {255, 199, 210}, {255, 236, 247},
+			int Type6[31][3] = { {254, 29, 17}, {255, 66, 69}, {255, 110, 117}, {255, 155, 164}, {255, 199, 210}, {255, 236, 247},
 								{230, 237, 255}, {191, 237, 255}, {156, 237, 255}, {129, 236, 255}, {115, 236, 255}, {114, 236, 255},
 								{116, 237, 255}, {122, 238, 255}, {131, 239, 255}, {143, 241, 255}, {124, 239, 254}, {0, 208, 225},
 								{0, 169, 181}, {0, 132, 140}, {0, 103, 108}, {0, 87, 91}, {0, 87, 91}, {0, 94, 100},
 								{81, 99, 107}, {144, 100, 107}, {198, 100, 107}, {238, 96, 102}, {246, 79, 83}, {250, 61, 63},
 								{253, 43, 41} }; // Color preset 5 to simulate Tritanopia
 
-			if (Filters[2] == TRUE) {
-				Cycle = FrameCount;
-			}
-			else {
-				Cycle = 0;
-			}
-			if (ColorType == 0) {
-				RColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
-				GColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
-				BColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
-			}
-			if (ColorType == 1) {
-				RColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][0];
-				GColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][1];
-				BColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][2];
-			}
-			if (ColorType == 2) {
-				RColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][0];
-				GColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][1];
-				BColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][2];
-			}
-			if (ColorType == 3) {
-				RColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][0];
-				GColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][1];
-				BColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][2];
-			}
-			if (ColorType == 4) {
-				RColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
-				GColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
-				BColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
-			}
-			if (ColorType == 5) {
-				RColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
-				GColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
-				BColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
-			}
-			if (Filters[0] == TRUE) {
-				RColor = 255;
-				BColor = 255;
-				GColor = 255;
-			}
-			if (Filters[1] == TRUE) {
-				RColor = 0;
-				BColor = 0;
-				GColor = 0;
-				if (ScreenSpaceIters[x][y] != ScreenSpaceIters[x + 1 % 500][y] || ScreenSpaceIters[x][y] != ScreenSpaceIters[x][y - 1 % 500]) {
+			if (SmoothColor == FALSE) {
+				if (Filters[2] == TRUE) {
+					Cycle = FrameCount;
+				}
+				else {
+					Cycle = 0;
+				}
+				if (ColorType == 0) {
+					RColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
+					GColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
+					BColor = Type1[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
+				}
+				if (ColorType == 1) {
+					RColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][0];
+					GColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][1];
+					BColor = Type2[(ScreenSpaceIters[x][y] + Cycle) % 8][2];
+				}
+				if (ColorType == 2) {
+					RColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][0];
+					GColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][1];
+					BColor = Type3[(ScreenSpaceIters[x][y] + Cycle) % 16][2];
+				}
+				if (ColorType == 3) {
+					RColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][0];
+					GColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][1];
+					BColor = Type4[(ScreenSpaceIters[x][y] + Cycle) % 18][2];
+				}
+				if (ColorType == 4) {
+					RColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
+					GColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
+					BColor = Type5[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
+				}
+				if (ColorType == 5) {
+					RColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][0];
+					GColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][1];
+					BColor = Type6[(ScreenSpaceIters[x][y] + Cycle) % 31][2];
+				}
+				if (Filters[0] == TRUE) {
 					RColor = 255;
 					BColor = 255;
 					GColor = 255;
 				}
-			}
-			if (ScreenSpaceIters[x][y] == Iters) {
-				RColor = 0;
-				GColor = 0;
-				BColor = 0;
-			}
-			if (Filters[3] == TRUE) {
-				RColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
-				GColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
-				BColor = ScreenSpaceIters[x][y] * 255 / (Iters+1);
-			}
-			if (Filters[4] == TRUE) {
+				if (Filters[1] == TRUE) {
+					RColor = 0;
+					BColor = 0;
+					GColor = 0;
+					if (ScreenSpaceIters[x][y] != ScreenSpaceIters[x + 1 % 500][y] || ScreenSpaceIters[x][y] != ScreenSpaceIters[x][y - 1 % 500]) {
+						RColor = 255;
+						BColor = 255;
+						GColor = 255;
+					}
+				}
 				if (ScreenSpaceIters[x][y] == Iters) {
+					RColor = 0;
+					GColor = 0;
+					BColor = 0;
+				}
+				if (Filters[3] == TRUE) {
+					RColor = ScreenSpaceIters[x][y] * 255 / (Iters + 1);
+					GColor = ScreenSpaceIters[x][y] * 255 / (Iters + 1);
+					BColor = ScreenSpaceIters[x][y] * 255 / (Iters + 1);
+				}
+				if (Filters[4] == TRUE) {
 					if (ScreenSpaceIters[x][y] == Iters) {
-						if (ColorType == 0) {
-							RColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
-							GColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
-							BColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
-						}
-						if (ColorType == 1) {
-							RColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][0];
-							GColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][1];
-							BColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][2];
-						}
-						if (ColorType == 2) {
-							RColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][0];
-							GColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][1];
-							BColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][2];
-						}
-						if (ColorType == 3) {
-							RColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][0];
-							GColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][1];
-							BColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][2];
-						}
-						if (ColorType == 4) {
-							RColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
-							GColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
-							BColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
-						}
-						if (ColorType == 5) {
-							RColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
-							GColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
-							BColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
+						if (ScreenSpaceIters[x][y] == Iters) {
+							if (ColorType == 0) {
+								RColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
+								GColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
+								BColor = Type1[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
+							}
+							if (ColorType == 1) {
+								RColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][0];
+								GColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][1];
+								BColor = Type2[(ScreenSpaceIters[x][y] + FrameCount) % 8][2];
+							}
+							if (ColorType == 2) {
+								RColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][0];
+								GColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][1];
+								BColor = Type3[(ScreenSpaceIters[x][y] + FrameCount) % 16][2];
+							}
+							if (ColorType == 3) {
+								RColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][0];
+								GColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][1];
+								BColor = Type4[(ScreenSpaceIters[x][y] + FrameCount) % 18][2];
+							}
+							if (ColorType == 4) {
+								RColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
+								GColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
+								BColor = Type5[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
+							}
+							if (ColorType == 5) {
+								RColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][0];
+								GColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][1];
+								BColor = Type6[(ScreenSpaceIters[x][y] + FrameCount) % 31][2];
+							}
 						}
 					}
+				}
+			}
+			if (SmoothColor == TRUE)
+			{
+				double intPart;
+				if (ColorType == 0)
+				{
+					RColor = Type1[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type1[(int)floor((int)Smooth[x][y] % 31)][0]));
+					GColor = Type1[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type1[(int)floor((int)Smooth[x][y] % 31)][1]));
+					BColor = Type1[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type1[(int)floor((int)Smooth[x][y] % 31)][2]));
+				}
+				if (ColorType == 1)
+				{
+					RColor = Type2[(int)floor((int)Smooth[x][y] % 8)][0] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][0] - Type2[(int)floor((int)Smooth[x][y] % 8)][0]));
+					GColor = Type2[(int)floor((int)Smooth[x][y] % 8)][1] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][1] - Type2[(int)floor((int)Smooth[x][y] % 8)][1]));
+					BColor = Type2[(int)floor((int)Smooth[x][y] % 8)][2] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][2] - Type2[(int)floor((int)Smooth[x][y] % 8)][2]));
+				}
+				if (ColorType == 2)
+				{
+					RColor = Type3[(int)floor((int)Smooth[x][y] % 16)][0] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][0] - Type3[(int)floor((int)Smooth[x][y] % 16)][0]));
+					GColor = Type3[(int)floor((int)Smooth[x][y] % 16)][1] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][1] - Type3[(int)floor((int)Smooth[x][y] % 16)][1]));
+					BColor = Type3[(int)floor((int)Smooth[x][y] % 16)][2] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][2] - Type3[(int)floor((int)Smooth[x][y] % 16)][2]));
+				}
+				if (ColorType == 3)
+				{
+					RColor = Type4[(int)floor((int)Smooth[x][y] % 18)][0] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][0] - Type4[(int)floor((int)Smooth[x][y] % 18)][0]));
+					GColor = Type4[(int)floor((int)Smooth[x][y] % 18)][1] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][1] - Type4[(int)floor((int)Smooth[x][y] % 18)][1]));
+					BColor = Type4[(int)floor((int)Smooth[x][y] % 18)][2] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][2] - Type4[(int)floor((int)Smooth[x][y] % 18)][2]));
+				}
+				if (ColorType == 4)
+				{
+					RColor = Type5[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type5[(int)floor((int)Smooth[x][y] % 31)][0]));
+					GColor = Type5[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type5[(int)floor((int)Smooth[x][y] % 31)][1]));
+					BColor = Type5[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type5[(int)floor((int)Smooth[x][y] % 31)][2]));
+				}
+				if (ColorType == 5)
+				{
+					RColor = Type6[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type6[(int)floor((int)Smooth[x][y] % 31)][0]));
+					GColor = Type6[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type6[(int)floor((int)Smooth[x][y] % 31)][1]));
+					BColor = Type6[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type6[(int)floor((int)Smooth[x][y] % 31)][2]));
+				}
+				if (ScreenSpaceIters[x][y] == Iters) {
+					RColor = 0;
+					GColor = 0;
+					BColor = 0;
 				}
 			}
 			p->r = RColor;
@@ -1856,7 +1882,7 @@ void DrawTwenty(INT x, INT y)
 			}
 		}
 	}
-	if (isContinuous == FALSE){
+	if (isContinuous == FALSE) {
 		for (int x1 = x * 25; x1 < (x * 25) + 25; x1++)
 		{
 			for (int y1 = y * 25; y1 < (y * 25) + 25; y1++)
@@ -1864,5 +1890,52 @@ void DrawTwenty(INT x, INT y)
 				PlotPoint(x1, y1);
 			}
 		}
+	}
+}
+
+void RenderThreads()
+{
+	if (SYSTEMTHREADS < 4)
+	{
+		for (int x = 0; x < 500; x++)
+		{
+			for (int y = 0; y < 500; y++)
+			{
+				PlotPoint(x, y);
+			}
+		}
+	}
+	if (SYSTEMTHREADS < 10)
+	{
+		std::thread T1(NaiveThread1);
+		std::thread T2(NaiveThread2);
+		std::thread T3(NaiveThread3);
+		std::thread T4(NaiveThread4);
+		T1.join();
+		T2.join();
+		T3.join();
+		T4.join();
+	}
+	else {
+		std::thread T0(NaiveThread100);
+		std::thread T1(NaiveThread101);
+		std::thread T2(NaiveThread102);
+		std::thread T3(NaiveThread103);
+		std::thread T4(NaiveThread104);
+		std::thread T5(NaiveThread105);
+		std::thread T6(NaiveThread106);
+		std::thread T7(NaiveThread107);
+		std::thread T8(NaiveThread108);
+		std::thread T9(NaiveThread109);
+		T0.join();
+		T1.join();
+		T2.join();
+		T3.join();
+		T4.join();
+		T5.join();
+		T6.join();
+		T7.join();
+		T8.join();
+		T9.join();
 	}
 }
