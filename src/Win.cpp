@@ -248,6 +248,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 			getCurrentValue();
 		}
 	}
+	return 0;
 }
 
 LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window procedure code
@@ -554,6 +555,7 @@ LRESULT CALLBACK Proc(HWND hWnd, UINT defmsg, WPARAM wp, LPARAM lp) // window pr
 	default: // default case for all others
 		return DefWindowProcW(hWnd, defmsg, wp, lp); // return
 	}
+	return 0;
 }
 
 /*##############
@@ -1163,7 +1165,7 @@ void PlotPoint(INT x, INT y)
 		}
 	}
 	ScreenSpaceIters[x][y] = count;
-	Smooth[x][y] = count + 1 - (log((log(zr*zr + zi*zi) / 2) / log(2)) / log(2));
+	Smooth[x][y] = (float)(count + 1 - (log((log(zr*zr + zi*zi) / 2) / log(2)) / log(2)));
 }
 
 /*###################
@@ -1758,39 +1760,39 @@ void onFrame(pixel* pixels) {
 				double intPart;
 				if (ColorType == 0)
 				{
-					RColor = Type1[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type1[(int)floor((int)Smooth[x][y] % 31)][0]));
-					GColor = Type1[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type1[(int)floor((int)Smooth[x][y] % 31)][1]));
-					BColor = Type1[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type1[(int)floor((int)Smooth[x][y] % 31)][2]));
+					RColor = (int)(Type1[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type1[(int)floor((int)Smooth[x][y] % 31)][0])));
+					GColor = (int)(Type1[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type1[(int)floor((int)Smooth[x][y] % 31)][1])));
+					BColor = (int)(Type1[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type1[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type1[(int)floor((int)Smooth[x][y] % 31)][2])));
 				}
 				if (ColorType == 1)
 				{
-					RColor = Type2[(int)floor((int)Smooth[x][y] % 8)][0] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][0] - Type2[(int)floor((int)Smooth[x][y] % 8)][0]));
-					GColor = Type2[(int)floor((int)Smooth[x][y] % 8)][1] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][1] - Type2[(int)floor((int)Smooth[x][y] % 8)][1]));
-					BColor = Type2[(int)floor((int)Smooth[x][y] % 8)][2] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][2] - Type2[(int)floor((int)Smooth[x][y] % 8)][2]));
+					RColor = (int)(Type2[(int)floor((int)Smooth[x][y] % 8)][0] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][0] - Type2[(int)floor((int)Smooth[x][y] % 8)][0])));
+					GColor = (int)(Type2[(int)floor((int)Smooth[x][y] % 8)][1] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][1] - Type2[(int)floor((int)Smooth[x][y] % 8)][1])));
+					BColor = (int)(Type2[(int)floor((int)Smooth[x][y] % 8)][2] + ((modf(Smooth[x][y], &intPart)) * (Type2[(int)floor((int)Smooth[x][y] + 1) % 8][2] - Type2[(int)floor((int)Smooth[x][y] % 8)][2])));
 				}
 				if (ColorType == 2)
 				{
-					RColor = Type3[(int)floor((int)Smooth[x][y] % 16)][0] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][0] - Type3[(int)floor((int)Smooth[x][y] % 16)][0]));
-					GColor = Type3[(int)floor((int)Smooth[x][y] % 16)][1] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][1] - Type3[(int)floor((int)Smooth[x][y] % 16)][1]));
-					BColor = Type3[(int)floor((int)Smooth[x][y] % 16)][2] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][2] - Type3[(int)floor((int)Smooth[x][y] % 16)][2]));
+					RColor = (int)(Type3[(int)floor((int)Smooth[x][y] % 16)][0] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][0] - Type3[(int)floor((int)Smooth[x][y] % 16)][0])));
+					GColor = (int)(Type3[(int)floor((int)Smooth[x][y] % 16)][1] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][1] - Type3[(int)floor((int)Smooth[x][y] % 16)][1])));
+					BColor = (int)(Type3[(int)floor((int)Smooth[x][y] % 16)][2] + ((modf(Smooth[x][y], &intPart)) * (Type3[(int)floor((int)Smooth[x][y] + 1) % 16][2] - Type3[(int)floor((int)Smooth[x][y] % 16)][2])));
 				}
 				if (ColorType == 3)
 				{
-					RColor = Type4[(int)floor((int)Smooth[x][y] % 18)][0] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][0] - Type4[(int)floor((int)Smooth[x][y] % 18)][0]));
-					GColor = Type4[(int)floor((int)Smooth[x][y] % 18)][1] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][1] - Type4[(int)floor((int)Smooth[x][y] % 18)][1]));
-					BColor = Type4[(int)floor((int)Smooth[x][y] % 18)][2] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][2] - Type4[(int)floor((int)Smooth[x][y] % 18)][2]));
+					RColor = (int)(Type4[(int)floor((int)Smooth[x][y] % 18)][0] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][0] - Type4[(int)floor((int)Smooth[x][y] % 18)][0])));
+					GColor = (int)(Type4[(int)floor((int)Smooth[x][y] % 18)][1] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][1] - Type4[(int)floor((int)Smooth[x][y] % 18)][1])));
+					BColor = (int)(Type4[(int)floor((int)Smooth[x][y] % 18)][2] + ((modf(Smooth[x][y], &intPart)) * (Type4[(int)floor((int)Smooth[x][y] + 1) % 18][2] - Type4[(int)floor((int)Smooth[x][y] % 18)][2])));
 				}
 				if (ColorType == 4)
 				{
-					RColor = Type5[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type5[(int)floor((int)Smooth[x][y] % 31)][0]));
-					GColor = Type5[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type5[(int)floor((int)Smooth[x][y] % 31)][1]));
-					BColor = Type5[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type5[(int)floor((int)Smooth[x][y] % 31)][2]));
+					RColor = (int)(Type5[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type5[(int)floor((int)Smooth[x][y] % 31)][0])));
+					GColor = (int)(Type5[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type5[(int)floor((int)Smooth[x][y] % 31)][1])));
+					BColor = (int)(Type5[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type5[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type5[(int)floor((int)Smooth[x][y] % 31)][2])));
 				}
 				if (ColorType == 5)
 				{
-					RColor = Type6[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type6[(int)floor((int)Smooth[x][y] % 31)][0]));
-					GColor = Type6[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type6[(int)floor((int)Smooth[x][y] % 31)][1]));
-					BColor = Type6[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type6[(int)floor((int)Smooth[x][y] % 31)][2]));
+					RColor = (int)(Type6[(int)floor((int)Smooth[x][y] % 31)][0] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][0] - Type6[(int)floor((int)Smooth[x][y] % 31)][0])));
+					GColor = (int)(Type6[(int)floor((int)Smooth[x][y] % 31)][1] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][1] - Type6[(int)floor((int)Smooth[x][y] % 31)][1])));
+					BColor = (int)(Type6[(int)floor((int)Smooth[x][y] % 31)][2] + ((modf(Smooth[x][y], &intPart)) * (Type6[(int)floor((int)Smooth[x][y] + 1) % 31][2] - Type6[(int)floor((int)Smooth[x][y] % 31)][2])));
 				}
 				if (ScreenSpaceIters[x][y] == Iters) {
 					RColor = 0;
