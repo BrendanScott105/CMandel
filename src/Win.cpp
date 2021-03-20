@@ -414,12 +414,12 @@ void TitleBar(HWND hWnd) // Create title bar
 {
 	Top1 = CreateWindowW(L"static", L" CMandel 0.8.2", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L"Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -2, 99, 21, hWnd, NULL, NULL, NULL);
-	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L"Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 97, -2, 70, 21, hWnd, NULL, NULL, NULL);
-	Top5 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 149, 1, 16, 16, hWnd, NULL, NULL, NULL);
-	Top6 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 483, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top5 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 149, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top6 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 483, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top7 = CreateWindowW(L"static", L"⎽⎽", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 466, 1, 16, 16, hWnd, NULL, NULL, NULL);
-	Top8 = CreateWindowW(L"static", L"ˀ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 449, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top8 = CreateWindowW(L"static", L"?", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 449, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top9 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 470, 12, 8, 2, hWnd, NULL, NULL, NULL);
 	Top0 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 447, -1, 1, 20, hWnd, NULL, NULL, NULL);
 	TopA = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 0, 19, 500, 1, hWnd, NULL, NULL, NULL);
@@ -441,7 +441,7 @@ void FormulaMenu(HWND hWnd) // Create formula menu
 	if (RealFractalType == 8) { SetWindowTextW(Formula3, L"Perp. Burning Ship"); }
 	if (RealFractalType == 9) { SetWindowTextW(Formula3, L"Perp. Buffalo"); }
 	if (RealFractalType == 10) { SetWindowTextW(Formula3, L"Perp. Celtic"); }
-	Formula4 = CreateWindowW(L"static", L"˅", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
+	Formula4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
 	if (ScreenMirror == TRUE) { L01 = SS_BLACKRECT; }
 	else { L01 = SS_LEFT; }
 	Formula5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER | L01, 180, 256, 10, 10, hWnd, NULL, NULL, NULL);
@@ -450,7 +450,7 @@ void FormulaMenu(HWND hWnd) // Create formula menu
 	Formula6 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER | L02, 180, 295, 10, 10, hWnd, NULL, NULL, NULL);
 	Formula7 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 345, 80, 25, hWnd, NULL, NULL, NULL);
 	Formula8 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 345, 80, 25, hWnd, NULL, NULL, NULL);
-	Formula9 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 172, 17, 17, hWnd, NULL, NULL, NULL);
+	Formula9 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 172, 17, 17, hWnd, NULL, NULL, NULL);
 	FormulaOpen = TRUE;
 }
 
@@ -466,13 +466,13 @@ void ColorMenu(HWND hWnd) // Create color menu
 	if (ColorType == 3) { SetWindowTextW(Color3, L"Cool colors"); };
 	if (ColorType == 4) { SetWindowTextW(Color3, L"Deuteranopia"); };
 	if (ColorType == 5) { SetWindowTextW(Color3, L"Tritanopia"); };
-	Color4 = CreateWindowW(L"static", L"˅", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
+	Color4 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
 	if (SmoothColor == TRUE) { L01 = SS_BLACKRECT; }
 	else { L01 = SS_LEFT; }
 	Color5 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER | L01, 180, 256, 10, 10, hWnd, NULL, NULL, NULL);
 	Color6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 335, 80, 25, hWnd, NULL, NULL, NULL);
 	Color7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 335, 80, 25, hWnd, NULL, NULL, NULL);
-	Color8 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 172, 17, 17, hWnd, NULL, NULL, NULL);
+	Color8 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 172, 17, 17, hWnd, NULL, NULL, NULL);
 	ColorOpen = TRUE;
 }
 
@@ -488,7 +488,7 @@ void LocationMenu(HWND hWnd) // Create location menu and create textboxes
 	SendMessage(Location5, EM_SETLIMITTEXT, 22, NULL);
 	Location6 = CreateWindowW(L"static", L"Apply", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 160, 315, 80, 25, hWnd, NULL, NULL, NULL);
 	Location7 = CreateWindowW(L"static", L"Cancel", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 260, 315, 80, 25, hWnd, NULL, NULL, NULL);
-	Location8 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 197, 17, 17, hWnd, NULL, NULL, NULL);
+	Location8 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 331, 197, 17, 17, hWnd, NULL, NULL, NULL);
 	LocationOpen = TRUE;
 }
 
@@ -497,9 +497,9 @@ void HelpMenu(HWND hWnd) // Create help menu
 	HelpMenu1 = CreateWindowW(L"static", L" About...        © 2021, Brendan Scott\n This is open source software :\n @ Github/BrendanScott105/CMandel\n 64 Bit | Detected threads :\n Controls : ------------------------------------------\n W / A / S / D : Up / Left / Down / Right\n Q / E : CCW / CW rotate\n 🠕 : Zoom in\n 🠗 : Zoom out\n - / + : Increase / Decrease iterations\n [Tab - 10 | Shift - 100 | Control - 1000]\n F5 : Save render space to bmp\n F6 : Store zoom out sequence\n F7 / F8 - Suspend / Resume drawing\nLimitations : --------------------------------------\n - Iterations does not exceed 999999\n - Precision limited 2^64 bits\n - Resolution locked at 500", WS_VISIBLE | WS_BORDER | WS_CHILD, 100, 100, 300, 340, hWnd, NULL, NULL, NULL);
 	HelpMenu2 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 19, 300, 1, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, 278, 0, 1, 20, HelpMenu1, NULL, NULL, NULL);
-	HelpMenu4 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
+	HelpMenu4 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 280, 1, 17, 17, HelpMenu1, NULL, NULL, NULL);
 	HelpMenu5 = CreateWindowW(L"static", L"Ok", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 215, 315, 80, 20, HelpMenu1, NULL, NULL, NULL);
-	HelpMenu6 = CreateWindowW(L"static", L"⌃", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 246, 23, 17, 17, HelpMenu1, NULL, NULL, NULL);
+	HelpMenu6 = CreateWindowW(L"static", L"🡥", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 246, 23, 17, 17, HelpMenu1, NULL, NULL, NULL);
 	int Concurrent = std::thread::hardware_concurrency();
 	LPCWSTR temp3;
 	std::wstring Wtemp3 = to_wstring(std::thread::hardware_concurrency());
@@ -511,7 +511,7 @@ void HelpMenu(HWND hWnd) // Create help menu
 void LinkBox(HWND hWnd) // Create link notif box
 {
 	Link1 = CreateWindowW(L"static", L"Link opened in browser ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_RIGHT, 148, 470, 210, 20, hWnd, NULL, NULL, NULL);
-	Link2 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 150, 472, 16, 16, hWnd, NULL, NULL, NULL);
+	Link2 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 150, 472, 16, 16, hWnd, NULL, NULL, NULL);
 	Link3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 167, 470, 1, 20, hWnd, NULL, NULL, NULL);
 	LinkNotif = TRUE;
 }
@@ -519,7 +519,7 @@ void LinkBox(HWND hWnd) // Create link notif box
 void ConfigDrop(HWND hWnd) // Create configure dropdown
 {
 	DestroyWindow(Top3);
-	Top1a = CreateWindowW(L"static", L"▴", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top1a = CreateWindowW(L"static", L"▲", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top2a = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 18, 99, 77, hWnd, NULL, NULL, NULL);
 	Top3a = CreateWindowW(L"static", L" Formula", WS_VISIBLE | WS_CHILD, -1, 19, 98, 20, hWnd, NULL, NULL, NULL);
 	Top4a = CreateWindowW(L"static", L" Colors", WS_VISIBLE | WS_CHILD, -1, 38, 98, 20, hWnd, NULL, NULL, NULL);
@@ -536,7 +536,7 @@ void FilterDrop(HWND hWnd) // Create filter dropdown and handle element filling
 {
 	long L01, L02, L03, L04, L05;
 	DestroyWindow(Top5);
-	Top1b = CreateWindowW(L"static", L"▴", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 149, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top1b = CreateWindowW(L"static", L"▲", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 149, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top2b = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, 18, 174, 96, hWnd, NULL, NULL, NULL);
 	Top3b = CreateWindowW(L"static", L"     Decolorize", WS_VISIBLE | WS_CHILD, 0, 18, 185, 20, hWnd, NULL, NULL, NULL);
 	Top4b = CreateWindowW(L"static", L"     Edge detection", WS_VISIBLE | WS_CHILD, 0, 37, 185, 20, hWnd, NULL, NULL, NULL);
@@ -569,14 +569,14 @@ void FilterDrop(HWND hWnd) // Create filter dropdown and handle element filling
 void IncorrectNumBox(HWND hWnd) // Create link notif box
 {
 	IN1 = CreateWindowW(L"static", L"Some values are not numbers", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_RIGHT, 120, 380, 260, 20, hWnd, NULL, NULL, NULL);
-	IN2 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 122, 382, 16, 16, hWnd, NULL, NULL, NULL);
+	IN2 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 122, 382, 16, 16, hWnd, NULL, NULL, NULL);
 	IN3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 139, 380, 1, 20, hWnd, NULL, NULL, NULL);
 	IncorrectNumberNotif = TRUE;
 }
 
 void FractDropdown(HWND hWnd) // Create Fractal dropdown menu
 {
-	FDdrop1 = CreateWindowW(L"static", L"˄", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
+	FDdrop1 = CreateWindowW(L"static", L"▲", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
 	FDdrop2 = CreateWindowW(L"static", L"Mandelbrot set", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 229, 141, 20, hWnd, NULL, NULL, NULL);
 	FDdrop3 = CreateWindowW(L"static", L"Burning ship", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 248, 141, 20, hWnd, NULL, NULL, NULL);
 	FDdrop4 = CreateWindowW(L"static", L"Buffalo", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 267, 141, 20, hWnd, NULL, NULL, NULL);
@@ -593,7 +593,7 @@ void FractDropdown(HWND hWnd) // Create Fractal dropdown menu
 
 void ColorDropdown(HWND hWnd) // Create Fractal dropdown menu
 {
-	CDdrop1 = CreateWindowW(L"static", L"˄", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
+	CDdrop1 = CreateWindowW(L"static", L"▲", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 310, 210, 20, 20, hWnd, NULL, NULL, NULL);
 	CDdrop2 = CreateWindowW(L"static", L"Default", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 229, 141, 20, hWnd, NULL, NULL, NULL);
 	CDdrop3 = CreateWindowW(L"static", L"Legacy", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 248, 141, 20, hWnd, NULL, NULL, NULL);
 	CDdrop4 = CreateWindowW(L"static", L"Warm colors", WS_VISIBLE | WS_BORDER | WS_CHILD, 170, 267, 141, 20, hWnd, NULL, NULL, NULL);
@@ -607,7 +607,7 @@ void ColorDropdown(HWND hWnd) // Create Fractal dropdown menu
 void FFMPEGBox(HWND hWnd) // Create link notif box
 {
 	FF1 = CreateWindowW(L"static", L"Merge in FFMPEG with 'ffmpeg -i img%4d.bmp *.mp4'", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_RIGHT, 65, 480, 370, 20, hWnd, NULL, NULL, NULL);
-	FF2 = CreateWindowW(L"static", L"ˣ", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 67, 482, 16, 16, hWnd, NULL, NULL, NULL);
+	FF2 = CreateWindowW(L"static", L"✕", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 67, 482, 16, 16, hWnd, NULL, NULL, NULL);
 	FF3 = CreateWindowW(L"static", L"", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 84, 480, 1, 20, hWnd, NULL, NULL, NULL);
 	FFMPEGBoxNotif = TRUE;
 }
@@ -656,7 +656,7 @@ void DestroyConfigDrop(HWND hWnd) // Destroy configuration dropdown menu
 	DestroyWindow(Top1a); DestroyWindow(Top2a); DestroyWindow(Top3a); DestroyWindow(Top4a);
 	DestroyWindow(Top5a); DestroyWindow(Top6a); DestroyWindow(Top7a); DestroyWindow(Top8a);
 	DestroyWindow(Top9a); DestroyWindow(Top0a);
-	Top3 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 80, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	ConfigureDrop = FALSE;
 }
 
@@ -667,7 +667,7 @@ void DestroyFiltersDrop(HWND hWnd) // Destroy filters dropdown menu
 	DestroyWindow(Top9b); DestroyWindow(Top0b); DestroyWindow(TopAb); DestroyWindow(TopBb);
 	DestroyWindow(TopCb); DestroyWindow(TopDb); DestroyWindow(TopEb); DestroyWindow(TopFb);
 	DestroyWindow(TopGb);
-	Top5 = CreateWindowW(L"static", L"▾", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 149, 1, 16, 16, hWnd, NULL, NULL, NULL);
+	Top5 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 149, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	FiltersDrop = FALSE;
 }
 
