@@ -113,7 +113,7 @@ PAINTSTRUCT ps;
 
 BOOL ScreenMirror = FALSE;
 BOOL JuliaMode = FALSE;
-INT FractalType = 2;
+INT FractalType = 1;
 INT ColorType = 0;
 INT zoomin = 14;
 INT FrameCount;
