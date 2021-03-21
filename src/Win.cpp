@@ -757,6 +757,7 @@ void SetRotation(INT CwCCw) // Set new rotation position
 	std::wstring Wtemp9 = to_wstring(Rotation);
 	temp9 = (LPCWSTR)Wtemp9.c_str();
 	SetWindowTextW(Info6, temp9);
+	RenderThreads();
 }
 
 /*#######################
@@ -801,6 +802,7 @@ void ShiftScreen(INT Direction) {
 			for (int y = 0; y < 500; y++)
 			{
 				ScreenSpaceIters[x][y] = ScreenSpaceIters[x + 10][y];
+				Smooth[x][y] = Smooth[x + 10][y];
 			}
 		}
 		for (int x = 489; x < 500; x++)
@@ -818,6 +820,7 @@ void ShiftScreen(INT Direction) {
 			for (int x = 0; x < 500; x++)
 			{
 				ScreenSpaceIters[x][y] = ScreenSpaceIters[x][y + 10];
+				Smooth[x][y] = Smooth[x][y + 10];
 			}
 		}
 		for (int x = 0; x < 500; x++)
@@ -835,6 +838,7 @@ void ShiftScreen(INT Direction) {
 			for (int y = 0; y < 500; y++)
 			{
 				ScreenSpaceIters[(489 - x) + 10][y] = ScreenSpaceIters[(489 - x)][y];
+				Smooth[(489 - x) + 10][y] = Smooth[(489 - x)][y];
 			}
 		}
 		for (int x = 0; x < 11; x++)
@@ -852,6 +856,7 @@ void ShiftScreen(INT Direction) {
 			for (int x = 0; x < 500; x++)
 			{
 				ScreenSpaceIters[x][(489 - y) + 10] = ScreenSpaceIters[x][(489 - y)];
+				Smooth[x][(489 - y) + 10] = Smooth[x][(489 - y)];
 			}
 		}
 		for (int x = 0; x < 500; x++)
@@ -862,7 +867,6 @@ void ShiftScreen(INT Direction) {
 			}
 		}
 	}
-	RenderThreads();
 }
 
 /*###################
@@ -1115,8 +1119,8 @@ void onFrame(pixel* pixels) {
 	float px; // % of the way across the bitmap
 	float py; // % of the way down the bitmap
 
-	for (int x = 0; x < width; ++x) {
-		for (int y = 0; y < height; ++y) {
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			p = &pixels[y * width + x];
 
 			px = float(x) / float(width);
