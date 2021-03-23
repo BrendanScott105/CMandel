@@ -176,7 +176,7 @@ HDC hdc = GetDC(RealWinMain);
 
 void NaiveThread1()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -200,7 +200,7 @@ void NaiveThread1()
 
 void NaiveThread2()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -224,7 +224,7 @@ void NaiveThread2()
 
 void NaiveThread3()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -248,7 +248,7 @@ void NaiveThread3()
 
 void NaiveThread4()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -272,7 +272,7 @@ void NaiveThread4()
 
 void NaiveThread100()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -295,7 +295,7 @@ void NaiveThread100()
 }
 void NaiveThread101()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -318,7 +318,7 @@ void NaiveThread101()
 }
 void NaiveThread102()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -341,7 +341,7 @@ void NaiveThread102()
 }
 void NaiveThread103()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -364,7 +364,7 @@ void NaiveThread103()
 }
 void NaiveThread104()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -387,7 +387,7 @@ void NaiveThread104()
 }
 void NaiveThread105()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -410,7 +410,7 @@ void NaiveThread105()
 }
 void NaiveThread106()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -433,7 +433,7 @@ void NaiveThread106()
 }
 void NaiveThread107()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -456,7 +456,7 @@ void NaiveThread107()
 }
 void NaiveThread108()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -479,7 +479,7 @@ void NaiveThread108()
 }
 void NaiveThread109()
 {
-	if (SmoothColor == FALSE)
+	if (SmoothColor == FALSE && ScreenMirror == FALSE)
 	{
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
