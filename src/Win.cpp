@@ -412,7 +412,7 @@ void InfoBar(HWND hWnd) // add current view information bar
 
 void TitleBar(HWND hWnd) // Create title bar
 {
-	Top1 = CreateWindowW(L"static", L" CMandel 0.8.3", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
+	Top1 = CreateWindowW(L"static", L" CMandel 0.8.4", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, -1, -1, 502, 20, hWnd, NULL, NULL, NULL); // Display initially
 	Top2 = CreateWindowW(L"static", L" Configure", WS_VISIBLE | WS_BORDER | WS_CHILD, -1, -1, 89, 20, hWnd, NULL, NULL, NULL);
 	Top3 = CreateWindowW(L"static", L"▼", WS_VISIBLE | WS_BORDER | WS_CHILD | SS_CENTER, 70, 1, 16, 16, hWnd, NULL, NULL, NULL);
 	Top4 = CreateWindowW(L"static", L" Filters", WS_VISIBLE | WS_BORDER | WS_CHILD, 87, -1, 67, 20, hWnd, NULL, NULL, NULL);
@@ -867,6 +867,9 @@ void ShiftScreen(INT Direction) {
 			}
 		}
 	}
+	if (ScreenMirror == TRUE) {
+		RenderThreads();
+	}
 }
 
 /*###################
@@ -877,6 +880,9 @@ START DRAW POINT FUNC
 
 void PlotPoint(INT x, INT y)
 {
+	if (ScreenMirror == TRUE && y > 250) {
+		return;
+	}
 	std::complex<long double> CPoint = TableToComplex(x, y);
 	std::complex<long double> IteratePoint(0, 0);
 	int count = 0;
@@ -997,6 +1003,10 @@ void PlotPoint(INT x, INT y)
 			zrsqr = zr * zr;
 			count++;
 		}
+	}
+	if (ScreenMirror == TRUE){
+		ScreenSpaceIters[x][250+(250 - y)] = count;
+		Smooth[x][250 + (250 - y)] = (float)(count + 1 - (log((log(zr * zr + zi * zi) / 2) / log(2)) / log(2)));
 	}
 	ScreenSpaceIters[x][y] = count;
 	Smooth[x][y] = (float)(count + 1 - (log((log(zr*zr + zi*zi) / 2) / log(2)) / log(2)));
